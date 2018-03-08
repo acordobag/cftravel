@@ -1,0 +1,84 @@
+<br>
+<div class="container">
+
+  <div class="row">
+    <div class=" col-sm-12">
+      <h2>Contact us</h2>
+    </div>
+    <form #form="ngForm" action="" class="form col-sm-12 col-md-6">
+
+      <div class="row">
+
+
+        <div class="col-sm-12 col-xl-6">
+          <div class="form-group">
+            <label for="name">Name:</label>
+            <input type="text" class="form-control" [class.is-invalid]="name.invalid && (name.dirty || name.touched)" id="name" minlength="4"
+              [(ngModel)]="message.name" #name="ngModel" name="name" required>
+            <div *ngIf="name.invalid && (name.dirty || name.touched)" class="invalid-feedback">You must enter your name</div>
+          </div>
+        </div>
+
+        <div class="col-sm-12 col-xl-6">
+          <div class="form-group">
+            <label for="phone">Phone:</label>
+            <input type="text" class="form-control" [class.is-invalid]="phone.invalid && (phone.dirty || phone.touched)" [(ngModel)]="message.phone"
+              name="phone" #phone="ngModel" id="phone" required>
+            <div *ngIf="phone.invalid && (phone.dirty || phone.touched)" class="invalid-feedback">You must enter a phone number</div>
+          </div>
+        </div>
+
+        <div class="col-sm-12">
+          <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" class="form-control" [class.is-invalid]="email.invalid && (email.dirty || email.touched)" [(ngModel)]="message.email"
+              email name="mail" #email="ngModel" id="email" required>
+            <div *ngIf="!email.errors?.required && email.errors?.email && (email.dirty || email.touched)" class="invalid-feedback">You must enter a valid email</div>
+            <div *ngIf="email.errors?.required && (email.dirty || email.touched)" class="invalid-feedback">You must enter a email</div>
+          </div>
+        </div>
+
+        <div class="col-sm-12">
+          <div class="form-group">
+            <label for="comment">Comment:</label>
+            <textarea class="form-control" rows="3" [class.is-invalid]="comment.invalid && (comment.dirty || comment.touched)" [(ngModel)]="message.comment"
+              name="comment" #comment="ngModel" id="comment" required>
+          </textarea>
+            <div *ngIf="comment.invalid&& (comment.dirty || comment.touched)" class="invalid-feedback">You must enter a comment</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="">
+        <button type="submit" [disabled]="form.invalid" class="btn btn-success" >Send</button>
+      </div>
+      <br>
+    </form>
+
+    <div class="col-sm-12 col-md-6">
+      <div class="card border-green mb-3">
+        <div class="card-header text-white bg-green">Contact info</div>
+        <div class="card-body">
+          <h4 class="card-title">Hours</h4>
+          <p class="card-text">Customer Service:
+            <br> Monday thru Friday: 8:00 am - 6:00 pm
+            <br> Saturday: 8:00 am – 1:00 pm
+            <br> Sunday: Closed.
+          </p>
+          <p>
+            <i class="fa fa-phone text-green right-10"></i>CR +({{company.phones[0].code}}) {{company.phones[0].number}}
+            <br>
+            <i class="fa fa-phone text-green right-10"></i>CR +({{company.phones[1].code}}) {{company.phones[1].number}}
+          </p>
+          <p>
+            <i class="fa fa-envelope text-green right-10"></i>{{company.mail}}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<div class="col-sm-12">
+  <br>
+</div>

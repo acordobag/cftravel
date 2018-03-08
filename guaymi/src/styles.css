@@ -1,0 +1,103 @@
+/* You can add global styles to this file, and also import other style files */
+
+@import url('https://fonts.googleapis.com/css?family=Roboto');
+
+*{
+    font-family: 'Roboto', sans-serif ; 
+}
+
+select{
+    margin-top: 0px !important;
+}
+.body{
+    min-height: 100%;
+}
+.navbar{
+    min-height: 80px;
+    font-size: 1.2rem !important;
+}
+.navbar-brand{
+    font-size: 1.7rem !important;
+}
+.btn-success{
+    background-color: #34ad00 !important; 
+}
+.bg-green{
+    background-color: #34ad00 !important;
+    color: white !important; 
+}
+.bs-datepicker-head{
+    background-color: #34ad00 !important;  
+}
+.border-green{
+    border-color: #34ad00;
+}
+.text-green{
+    color: #34ad00 !important;
+}
+.fa-2{
+    font-size: 2em !important;
+}
+.right-10{
+    margin-right: 10px !important;
+}
+.invalid-feedback{
+    display: block !important;
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: 80%;
+    color: #F04124;
+}
+
+.img-responsive,
+.thumbnail > img,
+.thumbnail a > img,
+.carousel-inner > .item > img,
+.carousel-inner > .item > a > img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+.img-rounded {
+  border-radius: 6px;
+}
+.img-thumbnail {
+  display: inline-block;
+  max-width: 100%;
+  height: auto;
+  padding: 4px;
+  line-height: 1.42857143;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  -webkit-transition: all .2s ease-in-out;
+       -o-transition: all .2s ease-in-out;
+          transition: all .2s ease-in-out;
+}
+
+.thumbnail {
+    display: block;
+    padding: 4px;
+    margin-bottom: 20px;
+    line-height: 1.42857143;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    -webkit-transition: border .2s ease-in-out;
+         -o-transition: border .2s ease-in-out;
+            transition: border .2s ease-in-out;
+  }
+  .thumbnail > img,
+  .thumbnail a > img {
+    margin-right: auto;
+    margin-left: auto;
+  }
+  a.thumbnail:hover,
+  a.thumbnail:focus,
+  a.thumbnail.active {
+    border-color: #34ad00;
+  }
+  .thumbnail .caption {
+    padding: 9px;
+    color: #333;
+  }

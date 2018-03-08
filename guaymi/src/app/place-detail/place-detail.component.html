@@ -1,0 +1,16 @@
+<div class="container">
+  <div class="row">
+    <div class="col-md-6 col-xs-12"></div>
+    <div class="col-md-6 col-xs-12">
+      <carousel>
+        <slide *ngFor="let img of place.images">
+          <img [src]="img.src" style="display: block; width: 100%;">
+        </slide>
+      </carousel>
+    </div>
+  </div>
+  <div class="row">
+    <h4>{{place.name}}</h4>
+    <p>{{place.description}} </p>
+  </div>
+</div>

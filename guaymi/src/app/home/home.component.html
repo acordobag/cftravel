@@ -1,0 +1,30 @@
+<carousel>
+	<slide *ngFor="let img of images">
+		<img [src]="img.src" style="display: block; width: 100%;">
+	</slide>
+</carousel>
+<br>
+<app-shuttle [type]="0"></app-shuttle>
+<div class="container">
+
+	<div class="row">
+
+		<div class="col-lg-12">
+			<h2 class="page-header">Costa Rica Destinations</h2>
+		</div>
+
+		<div class="col-md-4 col-xs-6 thumb" *ngFor="let destination of destinations">
+			<a class="thumbnail">
+				<img class="img-responsive" [src]="destination.images[0].src" [alt]="destination.name">
+				<div class="caption">
+					<h3>{{destination.name}}</h3>
+					<p>{{destination.description.substring(1,150)}}...</p>
+					<p>
+						<a class="btn btn-block bg-green">Read more</a>
+					</p>
+				</div>
+			</a>
+		</div>
+
+	</div>
+	<div class="clearfix"></div>

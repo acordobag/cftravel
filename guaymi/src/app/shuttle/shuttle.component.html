@@ -1,0 +1,82 @@
+<div class="container">
+
+  <div class="row">
+    <div class=" col-sm-12">
+      <h2 *ngIf="type == 0">Book your shuttle online</h2>
+      <h2 *ngIf="type == 1"> Shuttle # {{number}} </h2>
+    </div>
+    <form action="" #shuttleForm="ngForm" class="form col-sm-12">
+
+      <div class="row">
+
+        <div class="col-sm-6 col-md-6">
+          <div class="form-group">
+            <label for="initPlace">Departing from:</label>
+            <ng4geo-autocomplete class="formcontrol" name="departing" [(ngModel)]="shuttle.departing.name" (componentCallback)="autoCompleteCallback($event,1)"
+              [userSettings]="userSettings"></ng4geo-autocomplete>
+          </div>
+        </div>
+
+        <div class="col-sm-6 col-md-6">
+          <div class="form-group">
+            <label for="destination">Going to:</label>
+            <ng4geo-autocomplete class="formcontrol" name="destination" [(ngModel)]="shuttle.destination.name" (componentCallback)="autoCompleteCallback($event,2)"
+              [userSettings]="userSettings"></ng4geo-autocomplete>
+          </div>
+        </div>
+
+
+        <div class="col-sm-6 col-md-6">
+          <div class="form-group">
+            <label for="persons">Persons:</label>
+            <input type="number" [(ngModel)]="shuttle.persons" name="persons" class="form-control" id="persons" #persons="ngModel" [class.is-invalid]="persons.invalid && (persons.dirty || persons.touched)"
+              required>
+          </div>
+        </div>
+
+        <div class="col-sm-6 col-md-4 col-xl-4">
+          <div class="form-group">
+            <label for="persons">Date:</label>
+            <div class="input-group">
+              <input type="text" #date="ngModel" name="date" [(ngModel)]="shuttle.date" class="form-control" bsDatepicker #dp="bsDatepicker"
+                [bsConfig]="bsConfig" [minDate]="minDate" #date="ngModel" [class.is-invalid]="date.invalid && (date.dirty || date.touched)"
+                required>
+              <div class="input-group-append">
+                <span class="input-group-text bg-green" (click)="dp.show()">
+                  <i class="fa fa-calendar" aria-hidden="true"></i>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-sm-12 col-md-2 col-xl-2 hour">
+          <timepicker class="col-sm-4" [(ngModel)]="shuttle.date" name="hour" [showMeridian]="ismeridian"></timepicker>
+        </div>
+
+      </div>
+
+    </form>
+    <div class="container" *ngIf="type == 0">
+
+      <div class="row">
+        <div class="col-sm-12">
+          <button class="btn btn-success pull-right" (click)="goToReservation()">Search</button>
+        </div>
+      </div>
+
+    </div>
+    <div class="container" *ngIf="type == 1">
+      <div class="row">
+        <div class="col-sm-12">
+            <h3>${{shuttle.rate}}</h3>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+<div *ngIf="type == 0" class="col-sm-12">
+  <br>
+</div>

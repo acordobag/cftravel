@@ -1,0 +1,21 @@
+.hour{
+    margin-top: -13px;
+}
+
+@media only screen and (min-width: 480px) and (max-width: 768px ){
+    .hour{
+        left:-18px !important
+    }
+}
+
+@media(min-width: 768px){
+    .hour{
+        left:20px
+    }
+}
+
+@media(min-width: 1200px){
+    .hour{
+        left:50px !important
+    }
+}

@@ -1,0 +1,87 @@
+<br>
+<app-shuttle *ngIf="renderShuttle" #firstShuttle [type]="1" [number]="1"></app-shuttle>
+<template #container>
+
+</template>
+<div class="container" *ngIf="renderShuttle">
+    <div class="row">
+        <div *ngIf="shuttles[0].shuttle.persons>5" class="col-sm-12 alert alert-dismissible alert-warning">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <p class="mb-0">If you bla bla bla bla</p>
+        </div>
+        <div class="col-sm-12 button-container">
+            <button class="btn btn-success pull-right" (click)="addShuttle()">Add</button>
+        </div>
+        <div class="col-sm-12">
+            <br>
+        </div>
+    </div>
+
+    <div class="">
+
+            <h2 >Personal info</h2>
+
+        <form action="form col-sm-12" #reservationForm="ngForm">
+
+            <div class="row">
+                <div class="col-sm-12 col-xl-3">
+                    <div class="form-group">
+                        <label for="name">Name:</label>
+                        <input type="text" class="form-control" [class.is-invalid]="name.invalid && (name.dirty || name.touched)" id="name"
+                            [(ngModel)]="reservation.user.name" #name="ngModel" name="name" required>
+                        <div *ngIf="name.invalid && (name.dirty || name.touched)" class="invalid-feedback">You must enter your name</div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-xl-3">
+                    <div class="form-group">
+                        <label for="lastName">Last name:</label>
+                        <input type="text" class="form-control" [class.is-invalid]="name.invalid && (name.dirty || name.touched)" id="lastName" 
+                            [(ngModel)]="reservation.user.lastName" #lastName="ngModel" name="name" required>
+                        <div *ngIf="lastName.invalid && (lastName.dirty || lastName.touched)" class="invalid-feedback">You must enter your last name</div>
+                    </div>
+                </div>
+
+                <div class="col-sm-12 col-xl-6">
+                    <div class="form-group">
+                        <label for="phone">Phone:</label>
+                        <input type="text" class="form-control" [class.is-invalid]="phone.invalid && (phone.dirty || phone.touched)" [(ngModel)]="reservation.user.phone"
+                            name="phone" #phone="ngModel" id="phone" required>
+                        <div *ngIf="phone.invalid && (phone.dirty || phone.touched)" class="invalid-feedback">You must enter a phone number</div>
+                    </div>
+                </div>
+
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <input type="email" class="form-control" [class.is-invalid]="email.invalid && (email.dirty || email.touched)" [(ngModel)]="reservation.user.email"
+                            email name="mail" #email="ngModel" id="email" required>
+                        <div *ngIf="!email.errors?.required && email.errors?.email && (email.dirty || email.touched)" class="invalid-feedback">You must enter a valid email</div>
+                        <div *ngIf="email.errors?.required && (email.dirty || email.touched)" class="invalid-feedback">You must enter a email</div>
+                    </div>
+                </div>
+
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <label for="comment">Comment:</label>
+                        <textarea class="form-control" rows="3" [class.is-invalid]="comment.invalid && (comment.dirty || comment.touched)" [(ngModel)]="reservation.message"
+                            name="comment" #comment="ngModel" id="comment" required>
+                            </textarea>
+                        <div *ngIf="comment.invalid&& (comment.dirty || comment.touched)" class="invalid-feedback">You must enter a comment</div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="">
+        <div class="row">
+            <div class="col-sm-12 button-container">
+                <button class="btn btn-success pull-right" [disabled]="reservationForm.invalid" (click)="processReservation()">Send</button>
+            </div>
+            <div class="col-sm-12">
+                <br>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="clearfix"></div>
