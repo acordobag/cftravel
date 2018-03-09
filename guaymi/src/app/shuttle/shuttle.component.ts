@@ -25,13 +25,14 @@ export class ShuttleComponent implements OnInit {
   userSettings: Object;
   @Input() shuttle: Shuttle = new Shuttle();
   directionService;
+  discount;
 
   constructor(private router: Router, private reservationService: ReservationService, private http: Http) { }
 
   ngOnInit() {
     this.userSettings = {
       "geoCountryRestriction": ["cr"],
-      "showRecentSearch": false,
+      "showRecentSearch": true,
       "showSearchButton": false,
       "inputPlaceholderText": "",
       "showCurrentLocation": false
@@ -42,6 +43,8 @@ export class ShuttleComponent implements OnInit {
   }
 
   autoCompleteCallback(event, type) {
+    let kPrice: PriceObject;
+    this.shuttle.rate = 0;
     if (type == 1) {
       this.shuttle.departing = event.data;
     } else {
@@ -60,6 +63,15 @@ export class ShuttleComponent implements OnInit {
           }
         }
       };
+      let sjo = {
+        place_id: "ChIJxRUNxULjoI8RgrgRn2pqdOY",
+        geometry: {
+          location: {
+            lat: 9.9280694,
+            lng: -84.09072459999999
+          }
+        }
+      }
       let rate = 0;
       // calculate 
 
@@ -71,26 +83,23 @@ export class ShuttleComponent implements OnInit {
       }, function (response, status) {
         //calculos
         let distance;
-        let kPrice: PriceObject;
+
         distance = response.routes[0].legs[0].distance.value / 1000;
-        console.log(response);
         kPrice = self.getKilometerRate(distance);
         rate += distance * kPrice.price;
         console.log("Km " + distance + "\n" + "Price: $ " + rate)
-        rate = rate - rate * kPrice.discount;
-
-
         self.shuttle.rate = rate;
-        if (self.shuttle.departing.place_id != airport.place_id) {
+
+        if (self.shuttle.departing.place_id != airport.place_id && self.shuttle.departing.place_id != sjo.place_id) {
           self.directionService.route({
             origin: airport.geometry.location,
             destination: self.shuttle.departing.geometry.location,
             travelMode: "DRIVING",
             provideRouteAlternatives: true
           }, function (response, status) {
-            console.log(response);
+            rate = rate - rate * kPrice.discount;
             let distance = response.routes[0].legs[0].distance.value / 1000;
-            let kPrice = self.getKilometerRate(distance);
+            kPrice = self.getKilometerRate(distance);
             homeToDepartingRate = distance * kPrice.price;
             console.log("Km " + distance + "\n" + "Price: $ " + homeToDepartingRate)
             // homeToDepartingRate=homeToDepartingRate-homeToDepartingRate*0.4;
@@ -136,7 +145,7 @@ export class ShuttleComponent implements OnInit {
     } else if (distance > 97.2 && distance <= 99) {
       return {
         price: 1.68,
-        discount: 1
+        discount: 0.9
       };
     } else if (distance > 75 && distance <= 100) {
       return {
@@ -158,14 +167,24 @@ export class ShuttleComponent implements OnInit {
         price: 1.03,
         discount: 0
       };
-    } else if (distance > 233 && distance <= 252) {
+    } else if (distance > 191 && distance <= 193.1) {
       return {
-        price: 1.03,
+        price: 1.43,
+        discount: 1
+      };
+    } else if (distance > 230 && distance <= 259) {
+      return {
+        price: 1.12,
         discount: 0.15
       };
-    } else if (distance > 150 && distance <= 261) {
+    } else if (distance > 150 && distance <= 262) {
       return {
         price: 1.03,
+        discount: 0.3
+      };
+    } else if (distance > 262 && distance <= 264) {
+      return {
+        price: 1.07,
         discount: 0.3
       };
     } else {
