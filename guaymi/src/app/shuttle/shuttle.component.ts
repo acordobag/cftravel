@@ -45,6 +45,9 @@ export class ShuttleComponent implements OnInit {
   autoCompleteCallback(event, type) {
     let kPrice: PriceObject;
     this.shuttle.rate = 0;
+    let distanceOne = 0;
+    let distanceTwo = 0;
+
     if (type == 1) {
       this.shuttle.departing = event.data;
     } else {
@@ -82,14 +85,20 @@ export class ShuttleComponent implements OnInit {
         provideRouteAlternatives: true
       }, function (response, status) {
         //calculos
-        let distance;
+        console.log(response);
+        let normalDistance;
 
-        distance = response.routes[0].legs[0].distance.value / 1000;
-        kPrice = self.getKilometerRate(distance);
-        rate += distance * kPrice.price;
-        console.log("Km " + distance + "\n" + "Price: $ " + rate)
-        self.shuttle.rate = rate;
-
+        normalDistance = response.routes[0].legs[0].distance.value / 1000;
+        if (self.shuttle.departing.place_id != airport.place_id && self.shuttle.departing.place_id != sjo.place_id) {
+          kPrice = self.getKilometerRate(normalDistance);
+        } else {
+          kPrice = self.getKilometerRateBase(normalDistance);
+        }
+        rate += normalDistance * kPrice.price;
+        console.log("Km " + normalDistance + "\n" + "Price: $ " + rate)
+        if (normalDistance == 0) {
+          return;
+        }
         if (self.shuttle.departing.place_id != airport.place_id && self.shuttle.departing.place_id != sjo.place_id) {
           self.directionService.route({
             origin: airport.geometry.location,
@@ -97,14 +106,30 @@ export class ShuttleComponent implements OnInit {
             travelMode: "DRIVING",
             provideRouteAlternatives: true
           }, function (response, status) {
-            rate = rate - rate * kPrice.discount;
-            let distance = response.routes[0].legs[0].distance.value / 1000;
-            kPrice = self.getKilometerRate(distance);
-            homeToDepartingRate = distance * kPrice.price;
-            console.log("Km " + distance + "\n" + "Price: $ " + homeToDepartingRate)
-            // homeToDepartingRate=homeToDepartingRate-homeToDepartingRate*0.4;
-            rate = homeToDepartingRate + rate;
-            self.shuttle.rate = parseFloat(rate.toFixed(2));
+            distanceOne = response.routes[0].legs[0].distance.value / 1000;
+            self.directionService.route({
+              origin: airport.geometry.location,
+              destination: self.shuttle.destination.geometry.location,
+              travelMode: "DRIVING",
+              provideRouteAlternatives: true
+            }, function (response, status) {
+              let distance;
+              distanceTwo = response.routes[0].legs[0].distance.value / 1000;
+
+              if (distanceOne < distanceTwo) {
+                distance = distanceTwo;
+              } else {
+                distance = distanceOne;
+              }
+
+              rate = rate - rate * kPrice.discount;
+              kPrice = self.getKilometerRate(distance);
+              homeToDepartingRate = distance * kPrice.price;
+              console.log("Km " + distance + "\n" + "Price: $ " + homeToDepartingRate)
+              rate = homeToDepartingRate + rate;
+              self.shuttle.rate = parseFloat(rate.toFixed(2));
+            });
+
           })
         } else {
           self.shuttle.rate = parseFloat(rate.toFixed(2));
@@ -126,7 +151,7 @@ export class ShuttleComponent implements OnInit {
     });
   }
 
-  getKilometerRate(distance): PriceObject {
+  getKilometerRate(distance, ): PriceObject {
     if (distance <= 50) {
       return {
         price: 3.57,
@@ -193,6 +218,90 @@ export class ShuttleComponent implements OnInit {
         discount: 0
       };
     }
+  }
+
+  getKilometerRateBase(distance) {
+    if (distance <= 40) {
+      return {
+        price: 3.57,
+        discount: 1
+      };
+    } else if (distance > 40 && distance <= 55) {
+      return {
+        price: 2.55,
+        discount: 0.8
+      };
+    } else if (distance > 55 && distance <= 65) {
+      return {
+        price: 2.24,
+        discount: 0.8
+      };
+    } else if (distance > 50 && distance <= 75) {
+      return {
+        price: 2.24,
+        discount: 0.9
+      };
+    } else if (distance > 75 && distance <= 100) {
+      return {
+        price: 1.68,
+        discount: 0.8
+      };
+    } else if (distance > 127.5 && distance <= 130) {
+      return {
+        price: 1.36,
+        discount: 0.6
+      };
+    } else if (distance > 100 && distance <= 150) {
+      return {
+        price: 1.54,
+        discount: 0.6
+      };
+    } else if (distance > 150 && distance <= 170) {
+      return {
+        price: 1.25,
+        discount: 0.3
+      };
+    } else if (distance > 170 && distance <= 200) {
+      return {
+        price: 1.40,
+        discount: 0.3
+      };
+    } else if (distance > 224 && distance <= 228) {
+      return {
+        price: 1.30,
+        discount: 0.3
+      };
+    } else if (distance > 200 && distance <= 250) {
+      return {
+        price: 1.17,
+        discount: 0.3
+      };
+    } else if (distance > 270 && distance <= 280) {
+      return {
+        price: 1.64,
+        discount: 0.3
+      };
+    }else if (distance > 250 && distance <= 300) {
+      return {
+        price: 1.13,
+        discount: 0.3
+      };
+    } else if (distance > 300 && distance <= 400) {
+      return {
+        price: 1.30,
+        discount: 0.3
+      };
+    } else {
+      return {
+        price: 0.9,
+        discount: 0
+      };
+    }
+  }
+
+
+  calcRate() {
+
   }
 
   goToReservation() {
