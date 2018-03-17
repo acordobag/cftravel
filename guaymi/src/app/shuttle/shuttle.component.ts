@@ -43,6 +43,9 @@ export class ShuttleComponent implements OnInit {
   }
 
   autoCompleteCallback(event, type) {
+    if (!event.data) {
+      return;
+    }
     let kPrice: PriceObject;
     this.shuttle.rate = 0;
     let distanceOne = 0;
@@ -85,20 +88,19 @@ export class ShuttleComponent implements OnInit {
         provideRouteAlternatives: true
       }, function (response, status) {
         //calculos
-        console.log(response);
         let normalDistance;
 
         normalDistance = response.routes[0].legs[0].distance.value / 1000;
-        if (self.shuttle.departing.place_id != airport.place_id && self.shuttle.departing.place_id != sjo.place_id) {
-          kPrice = self.getKilometerRate(normalDistance);
-        } else {
-          kPrice = self.getKilometerRateBase(normalDistance);
-        }
+
+        kPrice = self.getKilometerRate(normalDistance);
+
         rate += normalDistance * kPrice.price;
-        console.log("Km " + normalDistance + "\n" + "Price: $ " + rate)
+        //console.log(self.shuttle.departing.name + " a " + self.shuttle.destination.name + "\nKm " + normalDistance + "\n" + "Price: $ " + rate)
+
         if (normalDistance == 0) {
           return;
         }
+
         if (self.shuttle.departing.place_id != airport.place_id && self.shuttle.departing.place_id != sjo.place_id) {
           self.directionService.route({
             origin: airport.geometry.location,
@@ -106,7 +108,9 @@ export class ShuttleComponent implements OnInit {
             travelMode: "DRIVING",
             provideRouteAlternatives: true
           }, function (response, status) {
+            //Primera distancia
             distanceOne = response.routes[0].legs[0].distance.value / 1000;
+
             self.directionService.route({
               origin: airport.geometry.location,
               destination: self.shuttle.destination.geometry.location,
@@ -114,18 +118,25 @@ export class ShuttleComponent implements OnInit {
               provideRouteAlternatives: true
             }, function (response, status) {
               let distance;
+              //Segunda distancia
               distanceTwo = response.routes[0].legs[0].distance.value / 1000;
-
+              //temp var
+              let temp;
+              //Se usa la distancia mayor
               if (distanceOne < distanceTwo) {
                 distance = distanceTwo;
+                temp = self.shuttle.destination.name;
               } else {
                 distance = distanceOne;
+                temp = self.shuttle.departing.name;
               }
 
+              let rateWoDiscount = rate;
               rate = rate - rate * kPrice.discount;
               kPrice = self.getKilometerRate(distance);
               homeToDepartingRate = distance * kPrice.price;
-              console.log("Km " + distance + "\n" + "Price: $ " + homeToDepartingRate)
+              console.log(self.shuttle.departing.name + " a " + self.shuttle.destination.name + "\nKm " + normalDistance + "\n" + "Price without discount: $ " + rateWoDiscount + "\nPrice with disccount: $ " + rate)
+              console.log("Aeropuerto a " + temp + "\nKm " + distance + "\n" + "Price: $ " + homeToDepartingRate)
               rate = homeToDepartingRate + rate;
               self.shuttle.rate = parseFloat(rate.toFixed(2));
             });
@@ -182,35 +193,81 @@ export class ShuttleComponent implements OnInit {
         price: 1.42,
         discount: 0.3
       };
+    } else if (distance > 105 && distance <= 107) {
+      return {
+        price: 1.42,
+        discount: 1.35
+      };
     } else if (distance > 100 && distance <= 150) {
       return {
         price: 1.42,
-        discount: 0.6
+        discount: 0.55
       };
     } else if (distance > 161 && distance <= 180) {
       return {
         price: 1.03,
         discount: 0
       };
+    }
+    else if (distance > 180 && distance <= 185) {
+      return {
+        price: 1.03,
+        discount: 0.42
+      };
     } else if (distance > 191 && distance <= 193.1) {
       return {
         price: 1.43,
         discount: 1
       };
+    } else if (distance > 205 && distance <= 215) {
+      return {
+        price: 1.03,
+        discount: 0.24
+      };
+    } else if (distance > 229 && distance <= 231) {
+      return {
+        price: 1.12,
+        discount: 0.42
+      };
     } else if (distance > 230 && distance <= 259) {
       return {
         price: 1.12,
-        discount: 0.15
+        discount: 0.67
+      };
+    } else if (distance > 220 && distance <= 230) {
+      return {
+        price: 1.03,
+        discount: 0.4
       };
     } else if (distance > 150 && distance <= 262) {
       return {
         price: 1.03,
-        discount: 0.3
+        discount: 0.75
       };
     } else if (distance > 262 && distance <= 264) {
       return {
         price: 1.07,
+        discount: 0.67
+      };
+    } else if (distance > 300 && distance <= 310) {
+      return {
+        price: 1.07,
+        discount: 0.16
+      };
+    } else if (distance > 264 && distance <= 315) {
+      return {
+        price: 1.07,
         discount: 0.3
+      };
+    } else if (distance > 315 && distance <= 320) {
+      return {
+        price: 1.07,
+        discount: 0.22
+      };
+    } else if (distance > 320 && distance <= 370) {
+      return {
+        price: 0.9,
+        discount: 0.07
       };
     } else {
       return {
@@ -281,7 +338,7 @@ export class ShuttleComponent implements OnInit {
         price: 1.64,
         discount: 0.3
       };
-    }else if (distance > 250 && distance <= 300) {
+    } else if (distance > 250 && distance <= 300) {
       return {
         price: 1.13,
         discount: 0.3

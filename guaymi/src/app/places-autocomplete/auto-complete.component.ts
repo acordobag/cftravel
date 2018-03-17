@@ -604,7 +604,7 @@ export class AutoCompleteComponent implements OnInit, OnChanges, ControlValueAcc
   //function to store the selected user search in the localstorage.
   private setRecentLocation(data: any): any {
     data = JSON.parse(JSON.stringify(data));
-    data.description = data.description ? data.description : data.formatted_address;
+    data.description = data.name ? data.name : data.description;
     data.active = false;
     this.selectedDataIndex = -1;
     this.value = data.name;
