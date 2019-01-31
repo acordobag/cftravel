@@ -1,13 +1,13 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { Http } from '@angular/http';
 import 'rxjs/add/operator/map'
-import { } from '@types/googlemaps';
+//import { } from '@types/googlemaps';
 import { BsDatepickerDirective } from 'ngx-bootstrap/datepicker';
 import { BsDatepickerConfig } from 'ngx-bootstrap';
 import { Router } from '@angular/router';
 import { ReservationService } from '../services/reservation.service';
 import { Shuttle, GmapPlace, backEndUrl, PriceObject } from '../entities/entities';
-import { } from '@types/googlemaps';
+//import { } from '@types/googlemaps';
 
 @Component({
   selector: 'app-shuttle',
