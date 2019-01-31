@@ -347,22 +347,21 @@ export class AutoCompleteComponent implements OnInit, OnChanges, ControlValueAcc
 
   //function called when there is a change in input. (Binded with view)
   searchinputCallback(event: any): any {
+    this.queryItems = [];
+    if (this.userSelectedOption) {
+      this.userQuerySubmit('false');
+    }
+    this.userSelectedOption = '';
+    if (this.settings.showRecentSearch) {
+      this.showRecentSearch();
+    } else {
+      this.dropdownOpen = false;
+    }
     let inputVal: any = this.value;
     if ((event.keyCode === 40) || (event.keyCode === 38) || (event.keyCode === 13)) {
       this.navigateInList(event.keyCode);
     } else if (inputVal) {
       this.getListQuery(inputVal);
-    } else {
-      this.queryItems = [];
-      if (this.userSelectedOption) {
-        this.userQuerySubmit('false');
-      }
-      this.userSelectedOption = '';
-      if (this.settings.showRecentSearch) {
-        this.showRecentSearch();
-      } else {
-        this.dropdownOpen = false;
-      }
     }
   }
 
