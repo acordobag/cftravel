@@ -1,9 +1,8 @@
-var express = require('express');
-var router = express.Router();
-var Place = require('../controllers/place.controller');
-var Shuttle = require('../controllers/shuttle.controller');
-var User = require('../controllers/user.controller');
-var Reservation = require('../controllers/reservation.controller');
+import express from 'express'
+
+import Place from '../controllers/place.controller';
+
+var router = express.Router()
 
 router.param('id', function (req, res, next, id) {
     req.body.id = id;
@@ -22,31 +21,31 @@ router.route('/place')
 
 //Shuttle routes
 
-router.route('/shuttle')
-    .get(function (req, res) {
-        Shuttle.findAll(req, res);
-    })
-    .post(function (req, res) {
-        Shuttle.save(req, res)
-    });
+// router.route('/shuttle')
+//     .get(function (req, res) {
+//         Shuttle.findAll(req, res);
+//     })
+//     .post(function (req, res) {
+//         Shuttle.save(req, res)
+//     });
 
-//User routes
+// //User routes
 
-router.route('/user')
-    .post(function (req, res) {
-        User.save(req, res)
-    });
-router.route('/auth')
-    .post(function (req, res) {
-        User.authenticate(req, res);
-    });
+// router.route('/user')
+//     .post(function (req, res) {
+//         User.save(req, res)
+//     });
+// router.route('/auth')
+//     .post(function (req, res) {
+//         User.authenticate(req, res);
+//     });
 
-//Reservation routes
+// //Reservation routes
 
-router.route('/reservation')
-    .post(function (req, res) {
-        Reservation.save(req, res);
-    });
+// router.route('/reservation')
+//     .post(function (req, res) {
+//         Reservation.save(req, res);
+//     });
 
 
 // router.route('/cars/:id')

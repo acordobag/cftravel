@@ -137,4 +137,4 @@ export class PriceObject{
     discount: number;
 }
 
-export const backEndUrl = 'http://localhost:8000/api'
+export const backEndUrl = 'http://localhost:8080/api'

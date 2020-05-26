@@ -1,5 +1,5 @@
-var Place = require('../models/place.model');
-var Image = require('../models/image.model');
+import Place from '../models/place.model';
+import Image from '../models/image.model';
 
 async function save(req, res) {
     try {
