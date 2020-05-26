@@ -1,0 +1,29 @@
+{
+  "name": "cftravelapi",
+  "version": "2.0.0",
+  "description": "Api",
+  "main": "v2.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "babel-node v2.js --presets env"
+  },
+  "engines": {
+    "node": "^8.12.0"
+  },
+  "dependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.18.2",
+    "chalk": "^2.4.2",
+    "cors": "^2.8.5",
+    "express": "^4.16.2",
+    "fs": "0.0.1-security",
+    "jwt-simple": "^0.5.1",
+    "morgan": "^1.9.1",
+    "mysql2": "^1.5.1",
+    "nodemailer": "^4.4.2",
+    "path": "^0.12.7",
+    "sequelize": "^4.32.2"
+  }
+}

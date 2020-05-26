@@ -1,9 +1,9 @@
-var Place = require('../models/place.model');
-var Image = require('../models/image.model');
+import Place from '../models/place.model';
+import Image from '../models/image.model';
 
-module.exports.save = function (req, res) {
+async function save(req, res) {
 
-    Place.create(req.body, {include: [{model: Image, as: 'images'}]}).then(function (place) {
+    Place.create(req.body, { include: [{ model: Image, as: 'images' }] }).then(function (place) {
         if (place) {
             res.send(place);
         } else if (!place) {
@@ -13,13 +13,22 @@ module.exports.save = function (req, res) {
     });
 };
 
-module.exports.findAll = function (req, res) {
-    Place.findAll({include: [{model: Image, as: 'images'}]}).then(function (places) {
+async function findAll(req, res) {
+    try {
+        let places = await Place.findAll({ include: [{ model: Image, as: 'images' }] })
         if (places) {
             res.send(places);
         } else if (!places) {
             res.send({ status: 400, msj: "NO HAY NINGUN REGISTRO" });
         }
-    });
+    } catch (e) {
+        next(e)
+        console.error(e)
+    }
+
 };
-//  
+
+export default {
+    save,
+    findAll
+}
