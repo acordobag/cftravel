@@ -22,7 +22,7 @@
     "jwt-simple": "^0.5.1",
     "morgan": "^1.9.1",
     "mysql2": "^1.5.1",
-    "nodemailer": "^4.4.2",
+    "nodemailer": "^6.4.16",
     "path": "^0.12.7",
     "sequelize": "^4.32.2"
   }
