@@ -17,7 +17,7 @@
     "body-parser": "^1.18.2",
     "chalk": "^2.4.2",
     "cors": "^2.8.5",
-    "express": "^4.16.2",
+    "express": "^4.17.3",
     "fs": "0.0.1-security",
     "jwt-simple": "^0.5.1",
     "morgan": "^1.9.1",
