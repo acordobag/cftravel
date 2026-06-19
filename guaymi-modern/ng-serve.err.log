@@ -1,0 +1,134 @@
+Node.js version v21.6.2 detected.
+Odd numbered Node.js versions will not enter LTS status and should not be used for production. For more information, please see https://nodejs.org/en/about/previous-releases/.
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2739: Type '{ departing: PlaceOption; destination: PlaceOption; passengers: number; date: string; time: string; routeDistance: number; repositionDistance: number; total: number; }' is missing the following properties from type 'ShuttleQuote': uid, departingSearch, destinationSearch, isCalculating, rateError[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/travel-state.service.ts:45:11:
+[37m      45 │   readonly [32mquote[37m: ShuttleQuote = {
+         ╵            [32m~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'departingSearch' does not exist on type 'TravelStateService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages.ts:53:31:
+[37m      53 │             [(ngModel)]="state.[32mdepartingSearch[37m"
+         ╵                                [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'departingSearch' does not exist on type 'TravelStateService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages.ts:53:31:
+[37m      53 │             [(ngModel)]="state.[32mdepartingSearch[37m"
+         ╵                                [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG4: Expected 3 arguments, but got 2.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages.ts:54:28:
+[37m      54 │ ...        (change)="state.[32mselectKnownPlace[37m('departing', state.dep...
+         ╵                            [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'departingSearch' does not exist on type 'TravelStateService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages.ts:54:64:
+[37m      54 │ ...ange)="state.selectKnownPlace('departing', state.[32mdepartingSearch[37m)"
+         ╵                                                     [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'destinationSearch' does not exist on type 'TravelStateService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages.ts:68:31:
+[37m      68 │             [(ngModel)]="state.[32mdestinationSearch[37m"
+         ╵                                [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'destinationSearch' does not exist on type 'TravelStateService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages.ts:68:31:
+[37m      68 │             [(ngModel)]="state.[32mdestinationSearch[37m"
+         ╵                                [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG4: Expected 3 arguments, but got 2.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages.ts:69:28:
+[37m      69 │ ...        (change)="state.[32mselectKnownPlace[37m('destination', state.d...
+         ╵                            [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'destinationSearch' does not exist on type 'TravelStateService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages.ts:69:66:
+[37m      69 │ ...)="state.selectKnownPlace('destination', state.[32mdestinationSearch[37m)"
+         ╵                                                   [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2554: Expected 3 arguments, but got 2.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages.ts:139:17:
+[37m      139 │       this.state.[32msetGooglePlace[37m(kind, autocomplete.getPlace());
+          ╵                  [32m~~~~~~~~~~~~~~[0m
+
+  An argument for 'place' was not provided.
+
+    src/app/travel-state.service.ts:95:79:
+[37m      95 │ ...e, kind: 'departing' | 'destination', [32mplace: any[37m): Promise<void> {
+         ╵                                          [32m~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'departingSearch' does not exist on type 'TravelStateService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages.ts:54:31:
+[37m      54 │             [(ngModel)]="state.[32mdepartingSearch[37m"
+         ╵                                [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'departingSearch' does not exist on type 'TravelStateService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages.ts:54:31:
+[37m      54 │             [(ngModel)]="state.[32mdepartingSearch[37m"
+         ╵                                [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG4: Expected 3 arguments, but got 2.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages.ts:55:28:
+[37m      55 │ ...        (change)="state.[32mselectKnownPlace[37m('departing', state.dep...
+         ╵                            [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'departingSearch' does not exist on type 'TravelStateService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages.ts:55:64:
+[37m      55 │ ...ange)="state.selectKnownPlace('departing', state.[32mdepartingSearch[37m)"
+         ╵                                                     [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'destinationSearch' does not exist on type 'TravelStateService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages.ts:69:31:
+[37m      69 │             [(ngModel)]="state.[32mdestinationSearch[37m"
+         ╵                                [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'destinationSearch' does not exist on type 'TravelStateService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages.ts:69:31:
+[37m      69 │             [(ngModel)]="state.[32mdestinationSearch[37m"
+         ╵                                [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG4: Expected 3 arguments, but got 2.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages.ts:70:28:
+[37m      70 │ ...        (change)="state.[32mselectKnownPlace[37m('destination', state.d...
+         ╵                            [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'destinationSearch' does not exist on type 'TravelStateService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages.ts:70:66:
+[37m      70 │ ...)="state.selectKnownPlace('destination', state.[32mdestinationSearch[37m)"
+         ╵                                                   [32m~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m

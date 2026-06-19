@@ -1,82 +1,108 @@
-<div class="container">
-
-  <div class="row">
-    <div class=" col-sm-12">
-      <h2 *ngIf="type == 0">Book your shuttle online</h2>
-      <h2 *ngIf="type == 1"> Shuttle # {{number}} </h2>
+<section class="booking-card" [class.booking-card-compact]="type == 1">
+  <div class="booking-card-header">
+    <div>
+      <p class="eyebrow" *ngIf="type == 0">Private shuttle booking</p>
+      <h2 *ngIf="type == 0">Plan your Costa Rica transfer</h2>
+      <h2 *ngIf="type == 1">Transfer {{number}}</h2>
     </div>
-    <form action="" #shuttleForm="ngForm" class="form col-sm-12">
 
-      <div class="row">
-
-        <div class="col-sm-6 col-md-6">
-          <div class="form-group">
-            <label for="initPlace">Departing from:</label>
-            <ng4geo-autocomplete class="formcontrol" name="departing" [(ngModel)]="shuttle.departing.name" (componentCallback)="autoCompleteCallback($event,1)"
-              [userSettings]="userSettings"></ng4geo-autocomplete>
-          </div>
-        </div>
-
-        <div class="col-sm-6 col-md-6">
-          <div class="form-group">
-            <label for="destination">Going to:</label>
-            <ng4geo-autocomplete class="formcontrol" name="destination" [(ngModel)]="shuttle.destination.name" (componentCallback)="autoCompleteCallback($event,2)"
-              [userSettings]="userSettings"></ng4geo-autocomplete>
-          </div>
-        </div>
-
-
-        <div class="col-sm-6 col-md-6">
-          <div class="form-group">
-            <label for="persons">Persons:</label>
-            <input type="number" [(ngModel)]="shuttle.persons" name="persons" class="form-control" id="persons" #persons="ngModel" [class.is-invalid]="persons.invalid && (persons.dirty || persons.touched)"
-              required>
-          </div>
-        </div>
-
-        <div class="col-sm-6 col-md-4 col-xl-4">
-          <div class="form-group">
-            <label for="persons">Date:</label>
-            <div class="input-group">
-              <input type="text" #date="ngModel" name="date" [(ngModel)]="shuttle.date" class="form-control" bsDatepicker #dp="bsDatepicker"
-                [bsConfig]="bsConfig" [minDate]="minDate" #date="ngModel" [class.is-invalid]="date.invalid && (date.dirty || date.touched)"
-                required>
-              <div class="input-group-append">
-                <span class="input-group-text bg-green" (click)="dp.show()">
-                  <i class="fa fa-calendar" aria-hidden="true"></i>
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-sm-12 col-md-2 col-xl-2 hour">
-          <timepicker class="col-sm-4" [(ngModel)]="shuttle.date" name="hour" [showMeridian]="ismeridian"></timepicker>
-        </div>
-
-      </div>
-
-    </form>
-    <div class="container" *ngIf="type == 0">
-
-      <div class="row">
-        <div class="col-sm-12">
-          <button class="btn btn-success pull-right" (click)="goToReservation()">Search</button>
-        </div>
-      </div>
-
-    </div>
-    <div class="container" *ngIf="type == 1">
-      <div class="row">
-        <div class="col-sm-12">
-            <h3>${{shuttle.rate}}</h3>
-        </div>
-      </div>
-
+    <div class="fare-pill" *ngIf="shuttle.rate > 0">
+      <span>Estimated fare</span>
+      <strong>${{shuttle.rate}}</strong>
     </div>
   </div>
 
-</div>
-<div *ngIf="type == 0" class="col-sm-12">
-  <br>
-</div>
+  <form #shuttleForm="ngForm" class="booking-form">
+    <div class="field field-wide">
+      <label for="initPlace">Departing from</label>
+      <ng4geo-autocomplete
+        class="formcontrol modern-autocomplete"
+        name="departing"
+        [(ngModel)]="shuttle.departing.name"
+        (componentCallback)="autoCompleteCallback($event,1)"
+        [userSettings]="userSettings">
+      </ng4geo-autocomplete>
+    </div>
+
+    <div class="field field-wide">
+      <label for="destination">Going to</label>
+      <ng4geo-autocomplete
+        class="formcontrol modern-autocomplete"
+        name="destination"
+        [(ngModel)]="shuttle.destination.name"
+        (componentCallback)="autoCompleteCallback($event,2)"
+        [userSettings]="userSettings">
+      </ng4geo-autocomplete>
+    </div>
+
+    <div class="field">
+      <label for="persons">Passengers</label>
+      <input
+        type="number"
+        min="1"
+        [(ngModel)]="shuttle.persons"
+        name="persons"
+        class="form-control"
+        id="persons"
+        #persons="ngModel"
+        [class.is-invalid]="persons.invalid && (persons.dirty || persons.touched)"
+        required>
+    </div>
+
+    <div class="field">
+      <label for="date">Pickup date</label>
+      <div class="date-control">
+        <input
+          type="text"
+          name="date"
+          id="date"
+          [(ngModel)]="shuttle.date"
+          class="form-control"
+          bsDatepicker
+          #dp="bsDatepicker"
+          [bsConfig]="bsConfig"
+          [minDate]="minDate"
+          #date="ngModel"
+          [class.is-invalid]="date.invalid && (date.dirty || date.touched)"
+          required>
+        <button type="button" class="icon-button" (click)="dp.show()" aria-label="Open calendar">
+          <i class="fa fa-calendar" aria-hidden="true"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="field time-field">
+      <label>Pickup time</label>
+      <timepicker [(ngModel)]="shuttle.date" name="hour" [showMeridian]="ismeridian"></timepicker>
+    </div>
+  </form>
+
+  <div class="rate-status" *ngIf="isCalculatingRate">
+    Calculating the best route...
+  </div>
+
+  <div class="rate-error" *ngIf="rateError">
+    {{rateError}}
+  </div>
+
+  <div class="rate-breakdown" *ngIf="priceBreakdown && shuttle.rate > 0">
+    <div>
+      <span>Route</span>
+      <strong>{{priceBreakdown.routeDistance}} km</strong>
+    </div>
+    <div *ngIf="priceBreakdown.repositionDistance > 0">
+      <span>Operations distance</span>
+      <strong>{{priceBreakdown.repositionDistance}} km</strong>
+    </div>
+    <div>
+      <span>Total</span>
+      <strong>${{priceBreakdown.total}}</strong>
+    </div>
+  </div>
+
+  <div class="booking-actions" *ngIf="type == 0">
+    <button class="btn primary-action" [disabled]="shuttleForm.invalid || shuttle.rate <= 0" (click)="goToReservation()">
+      Continue booking
+    </button>
+  </div>
+</section>

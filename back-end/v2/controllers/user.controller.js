@@ -29,7 +29,7 @@ module.exports.save = function (req, res) {
 };
 
 module.exports.authenticate = function (req, res) {
-    User.find({
+    User.findOne({
         where: {
             email: req.body.email
         }

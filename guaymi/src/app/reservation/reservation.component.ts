@@ -14,18 +14,19 @@ export class ReservationComponent implements OnInit {
 
   @ViewChild("container", { read: ViewContainerRef }) container;
   @ViewChild('firstShuttle') firstShuttle;
-  private shuttles: ShuttleComponent[];
-  private reservation: Reservation;
-  private renderShuttle: boolean;
+  shuttles: ShuttleComponent[];
+  reservation: Reservation;
+  renderShuttle: boolean;
+
   constructor(private resolver: ComponentFactoryResolver, private reservationService: ReservationService, private http: HttpClient, private router: Router) { }
 
   ngOnInit() {
-    this.renderShuttle=true;
+    this.renderShuttle = true;
     this.reservation = new Reservation();
     this.shuttles = new Array<ShuttleComponent>();
-    if(!this.reservationService.getShuttle(0)){
+    if (!this.reservationService.getShuttle(0)) {
       this.router.navigate(["/home"]);
-      this.renderShuttle=false;
+      this.renderShuttle = false;
     }
     this.shuttles.push(this.reservationService.getShuttle(0));
   }

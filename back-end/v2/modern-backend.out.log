@@ -1,0 +1,8 @@
+
+> cftravelapi@2.0.0 start
+> babel-node v2.js --presets env
+
+[Server] -  cftravelapi
+Port: http://:8080/
+App Port: http://:8080/
+[Database] Database initialized

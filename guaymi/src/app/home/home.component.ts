@@ -1,26 +1,26 @@
 import { Component, OnInit } from '@angular/core';
-import { NgxCarousel } from 'ngx-carousel';
-import { forEach } from '@angular/router/src/utils/collection';
-import { debuglog } from 'util';
+import { HttpClient } from '@angular/common/http';
 import { CarouselConfig } from 'ngx-bootstrap';
-import { Place } from '../entities/entities';
+import { Place, Testimonial, backEndUrl } from '../entities/entities';
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css'],
   providers: [
-    { provide: CarouselConfig, useValue: { interval: 4000, noPause: true, showIndicators: true } }
+    { provide: CarouselConfig, useValue: { interval: 4500, noPause: true, showIndicators: true } }
   ]
 })
 export class HomeComponent implements OnInit {
 
-  public carouselOne: NgxCarousel;
   public active: number;
   public destinations: Place[];
-  constructor() { }
-
   public images;
+  public testimonials: Testimonial[];
+  public services;
+  public trustItems;
+
+  constructor(private http: HttpClient) { }
 
   ngOnInit() {
     this.active = 0;
@@ -28,28 +28,108 @@ export class HomeComponent implements OnInit {
       {
         id: 0,
         name: "Arenal Volcano",
-        description: "El volcán Arenal de Costa Rica está situado en el distrito de La Fortuna, cantón de San Carlos, en la provincia de Alajuela. Tiene una altura de 1.670 msnm. El volcán se encuentra dentro del Parque nacional Volcán Arenal. Inició su último y actual período de actividad en el año 1968, el día 29 de julio a las 7:30. Desde esa fecha emite en forma constante gases y vapores de agua, con algunas explosiones con emisión de materiales piroclásticos y en ocasiones fuertes retumbos. Por esto y su frecuente actividad, hacen de este volcán el más activo de Costa Rica. El Arenal es un estratovolcán de forma cónica, ubicado a unos 8 km de La Fortuna. Posee un área de 33 km2. Es distinguible desde considerable distancia. Se le puede ver desde distintos poblados del cantón de San Carlos como Aguas Zarcas, Pocosol, La Fortuna, La Palmera, Cutris, Venado, Florencia e incluso Ciudad Quesada, y cantones como Guatuso y Los Chiles. Geológicamente pertenece a la Sierra de Tilarán y se considera al cercano volcán Chato como su hermano. Es uno de los volcanes de Costa Rica más conocidos nacional e internacionalmente y uno de los más visitados.",
+        description: "Door-to-door private transfers to La Fortuna, hot springs, boutique hotels, and adventure lodges near Arenal Volcano.",
         images: [{ id: 0, src: "../assets/images/arenal.jpg" }]
       },
       {
-        id: 0,
-        name: "Arenal Volcano",
-        description: "El volcán Arenal de Costa Rica está situado en el distrito de La Fortuna, cantón de San Carlos, en la provincia de Alajuela. Tiene una altura de 1.670 msnm. El volcán se encuentra dentro del Parque nacional Volcán Arenal. Inició su último y actual período de actividad en el año 1968, el día 29 de julio a las 7:30. Desde esa fecha emite en forma constante gases y vapores de agua, con algunas explosiones con emisión de materiales piroclásticos y en ocasiones fuertes retumbos. Por esto y su frecuente actividad, hacen de este volcán el más activo de Costa Rica. El Arenal es un estratovolcán de forma cónica, ubicado a unos 8 km de La Fortuna. Posee un área de 33 km2. Es distinguible desde considerable distancia. Se le puede ver desde distintos poblados del cantón de San Carlos como Aguas Zarcas, Pocosol, La Fortuna, La Palmera, Cutris, Venado, Florencia e incluso Ciudad Quesada, y cantones como Guatuso y Los Chiles. Geológicamente pertenece a la Sierra de Tilarán y se considera al cercano volcán Chato como su hermano. Es uno de los volcanes de Costa Rica más conocidos nacional e internacionalmente y uno de los más visitados.",
-        images: [{ id: 0, src: "../assets/images/arenal.jpg" }]
+        id: 1,
+        name: "Jaco Beach",
+        description: "Easy coastal rides for surf trips, family vacations, marina connections, and hotel-to-hotel transfers.",
+        images: [{ id: 0, src: "../assets/images/jaco.jpg" }]
       },
       {
-        id: 0,
-        name: "Arenal Volcano",
-        description: "El volcán Arenal de Costa Rica está situado en el distrito de La Fortuna, cantón de San Carlos, en la provincia de Alajuela. Tiene una altura de 1.670 msnm. El volcán se encuentra dentro del Parque nacional Volcán Arenal. Inició su último y actual período de actividad en el año 1968, el día 29 de julio a las 7:30. Desde esa fecha emite en forma constante gases y vapores de agua, con algunas explosiones con emisión de materiales piroclásticos y en ocasiones fuertes retumbos. Por esto y su frecuente actividad, hacen de este volcán el más activo de Costa Rica. El Arenal es un estratovolcán de forma cónica, ubicado a unos 8 km de La Fortuna. Posee un área de 33 km2. Es distinguible desde considerable distancia. Se le puede ver desde distintos poblados del cantón de San Carlos como Aguas Zarcas, Pocosol, La Fortuna, La Palmera, Cutris, Venado, Florencia e incluso Ciudad Quesada, y cantones como Guatuso y Los Chiles. Geológicamente pertenece a la Sierra de Tilarán y se considera al cercano volcán Chato como su hermano. Es uno de los volcanes de Costa Rica más conocidos nacional e internacionalmente y uno de los más visitados.",
-        images: [{ id: 0, src: "../assets/images/arenal.jpg" }]
+        id: 2,
+        name: "SJO Airport",
+        description: "Reliable private pickups and drop-offs with flight-friendly scheduling and transparent route pricing.",
+        images: [{ id: 0, src: "../assets/images/airport.jpg" }]
       }
     ];
 
     this.images = [
       { state: true, id: 0, src: "assets/images/banner_0.jpg" },
       { state: false, id: 1, src: "assets/images/banner_1.png" }
-    ]
+    ];
 
+    this.services = [
+      {
+        title: "Airport pickups",
+        description: "Private arrivals and departures from SJO and Liberia with route planning around your flight schedule.",
+        icon: "fa-plane"
+      },
+      {
+        title: "Hotel to hotel",
+        description: "Point-to-point transfers between beaches, volcano towns, national parks, and boutique stays.",
+        icon: "fa-map-marker"
+      },
+      {
+        title: "Multi-stop days",
+        description: "Add grocery stops, viewpoints, lunch breaks, or custom stops to make long transfers easier.",
+        icon: "fa-road"
+      }
+    ];
+
+    this.trustItems = [
+      { value: "Route-based", label: "Pricing logic" },
+      { value: "Private", label: "Vehicle assignment" },
+      { value: "Flexible", label: "Stops and schedules" },
+      { value: "Local", label: "Costa Rica routing" }
+    ];
+
+    this.testimonials = this.getDefaultTestimonials();
+    this.loadTestimonials();
   }
 
+  loadTestimonials() {
+    this.http.get<Testimonial[]>(backEndUrl + '/testimonial')
+      .subscribe(testimonials => {
+        if (testimonials && testimonials.length) {
+          this.testimonials = testimonials;
+        }
+      }, () => {
+        this.testimonials = this.getDefaultTestimonials();
+      });
+  }
+
+  getStars(rating: number) {
+    const stars = [];
+    const total = rating || 5;
+
+    for (let i = 0; i < total; i++) {
+      stars.push(i);
+    }
+
+    return stars;
+  }
+
+  private getDefaultTestimonials(): Testimonial[] {
+    return [
+      {
+        id: 1,
+        name: "Mariana G.",
+        location: "San Jose, Costa Rica",
+        route: "SJO Airport to La Fortuna",
+        rating: 5,
+        comment: "The pickup was on time, the van was spotless, and the driver helped us plan a comfortable stop on the way to Arenal.",
+        active: true
+      },
+      {
+        id: 2,
+        name: "David R.",
+        location: "Austin, USA",
+        route: "Jaco to Manuel Antonio",
+        rating: 5,
+        comment: "Clear pricing before booking and a very relaxed ride. It felt private, safe, and easy after a long travel day.",
+        active: true
+      },
+      {
+        id: 3,
+        name: "Sofia L.",
+        location: "Madrid, Spain",
+        route: "Liberia Airport to Tamarindo",
+        rating: 5,
+        comment: "Our driver tracked the arrival time and was waiting when we landed. The whole transfer was smooth from airport to hotel.",
+        active: true
+      }
+    ];
+  }
 }

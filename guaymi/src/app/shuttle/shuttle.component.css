@@ -1,21 +1,259 @@
-.hour{
-    margin-top: -13px;
+.booking-card {
+  background: #ffffff;
+  border: 1px solid rgba(18, 28, 45, 0.08);
+  border-radius: 8px;
+  box-shadow: 0 24px 80px rgba(18, 28, 45, 0.16);
+  color: #172033;
+  margin: -86px auto 42px;
+  max-width: 1120px;
+  padding: 28px;
+  position: relative;
+  z-index: 5;
 }
 
-@media only screen and (min-width: 480px) and (max-width: 768px ){
-    .hour{
-        left:-18px !important
-    }
+.booking-card-compact {
+  box-shadow: 0 18px 48px rgba(18, 28, 45, 0.09);
+  margin: 24px auto;
 }
 
-@media(min-width: 768px){
-    .hour{
-        left:20px
-    }
+.booking-card-header {
+  align-items: center;
+  display: flex;
+  gap: 18px;
+  justify-content: space-between;
+  margin-bottom: 22px;
 }
 
-@media(min-width: 1200px){
-    .hour{
-        left:50px !important
-    }
+.booking-card h2 {
+  color: #172033;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.16;
+  margin: 0;
+}
+
+.eyebrow {
+  color: #0b8f6a;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0;
+  margin: 0 0 7px;
+  text-transform: uppercase;
+}
+
+.fare-pill {
+  background: #102033;
+  border-radius: 8px;
+  color: #ffffff;
+  min-width: 156px;
+  padding: 12px 16px;
+  text-align: right;
+}
+
+.fare-pill span {
+  color: rgba(255, 255, 255, 0.68);
+  display: block;
+  font-size: 12px;
+}
+
+.fare-pill strong {
+  display: block;
+  font-size: 30px;
+  line-height: 1;
+  margin-top: 4px;
+}
+
+.booking-form {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(12, 1fr);
+}
+
+.field {
+  grid-column: span 3;
+  min-width: 0;
+}
+
+.field-wide {
+  grid-column: span 6;
+}
+
+.field label {
+  color: #4f5f72;
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.field input,
+.date-control input {
+  background: #f7f9fc;
+  border: 1px solid #dce4ee;
+  border-radius: 8px;
+  box-shadow: none;
+  color: #172033;
+  font-size: 15px;
+  height: 48px;
+  padding: 11px 13px;
+  width: 100%;
+}
+
+.date-control {
+  display: flex;
+}
+
+.date-control input {
+  border-radius: 8px 0 0 8px;
+}
+
+.icon-button {
+  align-items: center;
+  background: #0b8f6a;
+  border: 0;
+  border-radius: 0 8px 8px 0;
+  color: #ffffff;
+  display: flex;
+  height: 48px;
+  justify-content: center;
+  min-width: 52px;
+}
+
+.time-field {
+  grid-column: span 3;
+}
+
+.time-field timepicker {
+  display: block;
+  height: 48px;
+  overflow: hidden;
+}
+
+.time-field ::ng-deep table {
+  margin: -26px 0 0;
+}
+
+.time-field ::ng-deep td {
+  padding: 0 4px;
+  vertical-align: middle;
+}
+
+.time-field ::ng-deep .form-control {
+  background: #f7f9fc;
+  border: 1px solid #dce4ee;
+  border-radius: 8px;
+  box-shadow: none;
+  color: #172033;
+  font-size: 15px;
+  height: 48px;
+  padding: 11px 8px;
+  text-align: center;
+  width: 54px;
+}
+
+.time-field ::ng-deep a {
+  color: #172033;
+  display: inline-flex;
+  height: 24px;
+  justify-content: center;
+  line-height: 1;
+  width: 54px;
+}
+
+.time-field ::ng-deep .bs-chevron {
+  border-width: 0 3px 3px 0;
+  height: 10px;
+  width: 10px;
+}
+
+.rate-status,
+.rate-error {
+  border-radius: 8px;
+  font-weight: 700;
+  margin-top: 18px;
+  padding: 12px 14px;
+}
+
+.rate-status {
+  background: #edf7f4;
+  color: #0b6f54;
+}
+
+.rate-error {
+  background: #fff0ed;
+  color: #b4442f;
+}
+
+.rate-breakdown {
+  background: #f7f9fc;
+  border: 1px solid #e3eaf2;
+  border-radius: 8px;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, 1fr);
+  margin-top: 18px;
+  padding: 14px;
+}
+
+.rate-breakdown span {
+  color: #607086;
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.rate-breakdown strong {
+  color: #172033;
+  display: block;
+  font-size: 18px;
+  margin-top: 3px;
+}
+
+.booking-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 22px;
+}
+
+.primary-action {
+  background: #0b8f6a;
+  border: 0;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+  min-height: 48px;
+  padding: 0 22px;
+}
+
+.primary-action[disabled] {
+  background: #9fb4c5;
+}
+
+@media (max-width: 991px) {
+  .booking-card {
+    margin: -48px 16px 32px;
+    padding: 22px;
+  }
+
+  .booking-card-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .fare-pill {
+    text-align: left;
+    width: 100%;
+  }
+
+  .field,
+  .field-wide,
+  .time-field {
+    grid-column: span 12;
+  }
+
+  .rate-breakdown {
+    grid-template-columns: 1fr;
+  }
 }

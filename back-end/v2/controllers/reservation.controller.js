@@ -1,60 +1,54 @@
-var Shuttle = require('../models/shuttle.model');
-var User = require('../models/user.model');
-var ShuttleController = require('../controllers/shuttle.controller');
-var ReservationModel = require('../models/reservation.model');
-var mailUtil= require('../utils/mail.util');
+const Shuttle = require('../models/shuttle.model');
+const ReservationModel = require('../models/reservation.model');
+const UserModel = require('../models/user.model');
+const mailUtil = require('../utils/mail.util');
 
-module.exports.save = function (req, res) {
-    var shuttles = [];
-    req.body.shuttles.forEach(shuttle => {
-        shuttles.push({
-            departingId: shuttle.departing.id,
-            destinationId: shuttle.destination.id,
-            date: shuttle.date,
-            persons: shuttle.persons
+const Reservation = {
+    save: async (req, res) => {
+        const shuttles = req.body.shuttles.map(shuttle => {
+            return {
+                departingId: shuttle.departing.id,
+                destinationId: shuttle.destination.id,
+                date: shuttle.date,
+                persons: shuttle.persons
+            }
         });
-    });
-    var reservation = {
-        message: req.body.message,
-        shuttles: shuttles
-    }
-    User.find({ where: { email: req.body.user.email } }).then(function (user) {
+        const reservation = {
+            message: req.body.message,
+            shuttles: shuttles
+        }
+        const user = await UserModel.findOne({ where: { email: req.body.user.email } });
         if (user) {
             reservation.userId = user.id;
-            createReservation(reservation, shuttles, res);
+            await createReservation(reservation, res);
         } else if (!user) {
             req.body.user.password = Math.random().toString(36).slice(-8);
-            User.create(req.body.user)
-                .then(function (user) {
-                    mailUtil.sendEmail(user.email,'Si lees esto es porque todo salion bien we', 'Holi', function(){
+            const newUser = await UserModel.create(req.body.user);
 
-                    });
-                    reservation.userId = user.id;
-                    createReservation(reservation, shuttles, res);
-                });
+            mailUtil.sendEmail(newUser.email, 'Si lees esto es porque todo salion bien we', 'Holi', async () => {
+                reservation.userId = newUser.id;
+                await createReservation(reservation, res);
+            });
         }
-    });
-
-};
-
-function createReservation(reservation, shuttles, res) {
-    ReservationModel.create(reservation, { include: [{ model: Shuttle, as: 'shuttles' }] }).then(function (preservation) {
-        if (preservation) {
-            res.send(preservation);
-        } else if (!reservation) {
+    },
+    createReservation: async (reservation, res) => {
+        const newReservation = await ReservationModel.create(reservation, { include: [{ model: Shuttle, as: 'shuttles' }] });
+        if (newReservation) {
+            res.send(newReservation);
+        } else if (!newReservation) {
             res.send({ status: 400, msj: "NO SE REGISTRO!" });
         }
-
-    });
-}
-
-module.exports.findAll = function (req, res) {
-    Place.findAll().then(function (places) {
+    },
+    findAll: async (req, res) => {
+        const places = await Place.findAll();
         if (places) {
             res.send(places);
         } else if (!places) {
             res.send({ status: 400, msj: "NO HAY NINGUN REGISTRO" });
         }
-    });
-};
+    }
+}
+
+module.exports = Reservation
+
 

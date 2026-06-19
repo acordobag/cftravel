@@ -7,17 +7,17 @@ import { Component, OnInit } from '@angular/core';
 })
 export class FooterComponent implements OnInit {
 
-  phones: Array<object>;
+  phones: Array<any>;
   mail: string;
-  
+
   constructor() { }
 
   ngOnInit() {
-    this.phones=[
-      {code:"506",number:"8337-8382"},
-      {code:"506",number:"8337-8384"}
+    this.phones = [
+      { code: "506", number: "8337-8382" },
+      { code: "506", number: "8337-8384" }
     ]
-    this.mail="info@guaymi.cr"
+    this.mail = "info@guaymi.cr"
   }
 
 }

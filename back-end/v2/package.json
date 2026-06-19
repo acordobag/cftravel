@@ -4,26 +4,26 @@
   "description": "Api",
   "main": "v2.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "babel-node v2.js --presets env"
+    "start": "babel-node v2.js --presets env",
+    "db:sync": "babel-node --presets env -e \"require('babel-polyfill'); const dbConfig = require('./db/db.config').default; dbConfig().then(() => process.exit(0)).catch(err => { console.error(err); process.exit(1); });\"",
+    "test": "npm run db:sync"
   },
   "engines": {
-    "node": "^8.12.0"
+    "node": ">=20 <23",
+    "npm": ">=8"
   },
   "dependencies": {
     "babel-cli": "^6.26.0",
+    "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.7.0",
-    "bcryptjs": "^2.4.3",
-    "body-parser": "^1.18.2",
-    "chalk": "^2.4.2",
-    "cors": "^2.8.5",
-    "express": "^4.16.2",
-    "fs": "0.0.1-security",
+    "bcryptjs": "^3.0.3",
+    "chalk": "^4.1.2",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
     "jwt-simple": "^0.5.1",
-    "morgan": "^1.9.1",
-    "mysql2": "^1.5.1",
-    "nodemailer": "^4.4.2",
-    "path": "^0.12.7",
-    "sequelize": "^4.32.2"
+    "morgan": "^1.11.0",
+    "mysql2": "^3.22.5",
+    "nodemailer": "^9.0.1",
+    "sequelize": "^6.37.8"
   }
 }

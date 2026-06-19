@@ -1,30 +1,129 @@
-<carousel>
-	<slide *ngFor="let img of images">
-		<img [src]="img.src" style="display: block; width: 100%;">
-	</slide>
-</carousel>
-<br>
+<section class="hero">
+  <carousel>
+    <slide *ngFor="let img of images">
+      <div class="hero-slide" [style.background-image]="'linear-gradient(90deg, rgba(10, 20, 34, 0.72), rgba(10, 20, 34, 0.28)), url(' + img.src + ')'">
+        <div class="hero-content">
+          <p class="hero-kicker">Costa Rica private transportation</p>
+          <h1>CF Travel</h1>
+          <p class="hero-copy">Book a private shuttle with route-aware pricing, direct pickups, and flexible multi-stop transfers.</p>
+          <div class="hero-stats">
+            <div>
+              <strong>24/7</strong>
+              <span>Airport routes</span>
+            </div>
+            <div>
+              <strong>CR</strong>
+              <span>Nationwide service</span>
+            </div>
+            <div>
+              <strong>Private</strong>
+              <span>No shared stops</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </slide>
+  </carousel>
+</section>
+
 <app-shuttle [type]="0"></app-shuttle>
-<div class="container">
 
-	<div class="row">
+<section class="services-section">
+  <div class="section-heading">
+    <p class="eyebrow">Services</p>
+    <h2>Built around private travel days</h2>
+  </div>
 
-		<div class="col-lg-12">
-			<h2 class="page-header">Costa Rica Destinations</h2>
-		</div>
+  <div class="service-grid">
+    <article class="service-card" *ngFor="let service of services">
+      <div class="service-icon">
+        <i class="fa" [ngClass]="service.icon" aria-hidden="true"></i>
+      </div>
+      <h3>{{service.title}}</h3>
+      <p>{{service.description}}</p>
+    </article>
+  </div>
+</section>
 
-		<div class="col-md-4 col-xs-6 thumb" *ngFor="let destination of destinations">
-			<a class="thumbnail">
-				<img class="img-responsive" [src]="destination.images[0].src" [alt]="destination.name">
-				<div class="caption">
-					<h3>{{destination.name}}</h3>
-					<p>{{destination.description.substring(1,150)}}...</p>
-					<p>
-						<a class="btn btn-block bg-green">Read more</a>
-					</p>
-				</div>
-			</a>
-		</div>
+<section class="trust-band">
+  <div class="trust-inner">
+    <div class="trust-copy">
+      <p class="eyebrow">Why choose CF Travel</p>
+      <h2>Clear transfer planning before the road begins</h2>
+      <p>Compare your route, see the estimated fare, and send one clean booking request for single or multi-transfer itineraries.</p>
+    </div>
+    <div class="trust-grid">
+      <div *ngFor="let item of trustItems">
+        <strong>{{item.value}}</strong>
+        <span>{{item.label}}</span>
+      </div>
+    </div>
+  </div>
+</section>
 
-	</div>
-	<div class="clearfix"></div>
+<section class="destinations-section">
+  <div class="section-heading">
+    <p class="eyebrow">Popular routes</p>
+    <h2>Costa Rica destinations</h2>
+  </div>
+
+  <div class="destination-grid">
+    <article class="destination-card" *ngFor="let destination of destinations">
+      <img [src]="destination.images[0].src" [alt]="destination.name">
+      <div class="destination-content">
+        <h3>{{destination.name}}</h3>
+        <p>{{destination.description}}</p>
+        <a class="text-link">View route</a>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section class="experience-section">
+  <div class="experience-media">
+    <img src="assets/images/bus.png" alt="Private shuttle van">
+  </div>
+  <div class="experience-copy">
+    <p class="eyebrow">Ride experience</p>
+    <h2>Private vans, planned stops, smoother handoffs</h2>
+    <p>Long routes in Costa Rica can include mountain roads, ferry timing, beach traffic, and airport deadlines. The booking flow keeps the operational distance visible so pricing is easier to understand.</p>
+    <div class="experience-list">
+      <span>Air-conditioned vehicles</span>
+      <span>Hotel and villa pickups</span>
+      <span>Custom stops by request</span>
+    </div>
+  </div>
+</section>
+
+<section class="testimonials-section">
+  <div class="section-heading centered">
+    <p class="eyebrow">Testimonials</p>
+    <h2>Traveler notes from the road</h2>
+  </div>
+
+  <carousel class="testimonial-carousel">
+    <slide *ngFor="let testimonial of testimonials">
+      <div class="testimonial-card">
+        <div class="stars">
+          <i class="fa fa-star" *ngFor="let star of getStars(testimonial.rating)" aria-hidden="true"></i>
+        </div>
+        <p class="quote">“{{testimonial.comment}}”</p>
+        <div class="testimonial-footer">
+          <div>
+            <strong>{{testimonial.name}}</strong>
+            <span>{{testimonial.location}}</span>
+          </div>
+          <small>{{testimonial.route}}</small>
+        </div>
+      </div>
+    </slide>
+  </carousel>
+</section>
+
+<section class="final-cta">
+  <div>
+    <p class="eyebrow">Ready when your route is</p>
+    <h2>Build your private transfer request in minutes</h2>
+  </div>
+  <a class="cta-button" [routerLink]="['/home']">Start with your route</a>
+</section>

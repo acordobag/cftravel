@@ -17,6 +17,7 @@ import { BsDatepickerModule } from 'ngx-bootstrap/datepicker/bs-datepicker.modul
 import { ReservationComponent } from './reservation/reservation.component';
 import { FormsModule } from '@angular/forms';
 import { ReservationService } from './services/reservation.service';
+import { PricingService } from './services/pricing.service';
 import { DestinationsComponent } from './destinations/destinations.component';
 import { PlaceDetailComponent } from './place-detail/place-detail.component';
 import { Ng4GeoautocompleteModule } from './places-autocomplete';
@@ -49,7 +50,7 @@ import { Ng4GeoautocompleteModule } from './places-autocomplete';
     Ng4GeoautocompleteModule.forRoot()
   ],
   entryComponents: [ShuttleComponent],
-  providers: [ReservationService],
+  providers: [ReservationService, PricingService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

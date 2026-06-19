@@ -39,7 +39,7 @@ async function findAll(req, res, next) {
 
 async function findById(req, res, next) {
     try {
-        let account = await Account.find({
+        let account = await Account.findOne({
             where: { id: req.body.id },
             include: [{ model: Payment, include: [User] }]
         })
@@ -80,7 +80,7 @@ async function findAllPendingPayments(req, res, next) {
 
 async function approvePayment(req, res, next) {
     try {
-        let payment = await Payment.find({ where: { id: req.body.id } })
+        let payment = await Payment.findOne({ where: { id: req.body.id } })
         payment.approved = true
         await payment.save()
         res.status(200).send(payment).end()
@@ -105,7 +105,7 @@ async function approveListOfPayments(req, res, next) {
 
 async function findAccountPayments(req, res, next) {
     try {
-        let payments = await Payment.find({ where: { accountId: req.body.id } })
+        let payments = await Payment.findAll({ where: { accountId: req.body.id } })
         res.status(200).send(payments).end()
     } catch (e) {
         next(e)

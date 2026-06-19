@@ -137,4 +137,24 @@ export class PriceObject{
     discount: number;
 }
 
+export class Testimonial {
+    id: number;
+    name: string;
+    location: string;
+    route: string;
+    rating: number;
+    comment: string;
+    active: boolean;
+
+    constructor() {
+        this.id = 0;
+        this.name = "";
+        this.location = "";
+        this.route = "";
+        this.rating = 5;
+        this.comment = "";
+        this.active = true;
+    }
+}
+
 export const backEndUrl = 'http://localhost:8080/api'

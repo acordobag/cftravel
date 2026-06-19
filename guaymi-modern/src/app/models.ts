@@ -1,0 +1,57 @@
+export interface PlaceOption {
+  id: number;
+  name: string;
+  zone: string;
+  image: string;
+  description: string;
+  airportDistance: number;
+  placeId?: string;
+  location?: {
+    lat: number;
+    lng: number;
+  };
+}
+
+export interface ShuttleQuote {
+  uid: number;
+  departing: PlaceOption | null;
+  destination: PlaceOption | null;
+  departingSearch: string;
+  destinationSearch: string;
+  passengers: number;
+  date: string;
+  time: string;
+  routeDistance: number;
+  repositionDistance: number;
+  total: number;
+  isCalculating: boolean;
+  rateError: string;
+}
+
+export interface Testimonial {
+  id: number;
+  name: string;
+  location: string;
+  route: string;
+  rating: number;
+  comment: string;
+  active: boolean;
+}
+
+export interface ReservationPayload {
+  user: {
+    name: string;
+    lastName: string;
+    phone: string;
+    email: string;
+  };
+  message: string;
+  shuttles: Array<{
+    departing: { id: number; name: string };
+    destination: { id: number; name: string };
+    date: string;
+    persons: number;
+    rate: number;
+    distance: number;
+  }>;
+}

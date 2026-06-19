@@ -1,8 +1,11 @@
 import express from 'express'
 
 import Place from '../controllers/place.controller';
+import Reservation from '../controllers/reservation.controller';
+import Testimonial from '../controllers/testimonial.controller';
+import HeroImage from '../controllers/hero-image.controller';
 
-var router = express.Router()
+const router = express.Router()
 
 router.param('id', function (req, res, next, id) {
     req.body.id = id;
@@ -12,11 +15,24 @@ router.param('id', function (req, res, next, id) {
 //Place routes
 
 router.route('/place')
-    .get(function (req, res) {
-        Place.findAll(req, res);
+    .get(function (req, res, next) {
+        Place.findAll(req, res, next);
     })
-    .post(function (req, res) {
-        Place.save(req, res)
+    .post(function (req, res, next) {
+        Place.save(req, res, next)
+    });
+
+router.route('/hero-image')
+    .get(function (req, res, next) {
+        HeroImage.findAll(req, res, next);
+    });
+
+router.route('/testimonial')
+    .get(function (req, res, next) {
+        Testimonial.findAll(req, res, next);
+    })
+    .post(function (req, res, next) {
+        Testimonial.save(req, res, next);
     });
 
 //Shuttle routes
@@ -42,14 +58,14 @@ router.route('/place')
 
 // //Reservation routes
 
-// router.route('/reservation')
-//     .post(function (req, res) {
-//         Reservation.save(req, res);
-//     });
+router.route('/reservation')
+    .post((req, res) => {
+        Reservation.save(req, res);
+    });
 
 
 // router.route('/cars/:id')
-//     .get(function (req, res) {
+//     .get((req, res) => {
 //         Shuttle.findById(req, res);
 //     });
 

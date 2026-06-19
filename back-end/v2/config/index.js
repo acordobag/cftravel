@@ -2,12 +2,13 @@
 'use strict'
 const fs = require('fs')
 const path = require('path')
+const env = process.env
 
 export default {
-    enviroment: 'development',
-    port: 8080,
-    host: '',
-    clientUrl: `http://localhost:8080`,
+    enviroment: env.NODE_ENV || 'development',
+    port: env.PORT || 8080,
+    host: env.HOST || '',
+    clientUrl: env.CLIENT_URL || `http://localhost:8080`,
     authentication: {
       jwtSecret: 'CfTravel20'
     },
@@ -34,10 +35,11 @@ export default {
       secret: ""
     },
     dbSettings: {
-      host: '104.196.65.72',
-      username: 'cftravel',
-      password: 'CfTravel20',
-      database: 'cftravel',
+      host: env.DB_HOST || '127.0.0.1',
+      port: env.DB_PORT || 3306,
+      username: env.DB_USER || 'cftravel',
+      password: env.DB_PASSWORD || 'CfTravel20',
+      database: env.DB_NAME || 'cftravel',
       dialect: 'mysql',
       // timezone: 'America/Costa_Rica',
       logging: msg => {
@@ -53,8 +55,7 @@ export default {
         min: 0,
         acquire: 30000,
         idle: 10000
-      },
-      operatorsAliases: false
+      }
     }
   }
   

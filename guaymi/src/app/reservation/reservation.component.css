@@ -1,3 +1,154 @@
-.button-container{
-    height: 30px;
+.reservation-page {
+  background: #f5f8fb;
+  min-height: 70vh;
+  padding: 42px 20px 72px;
+}
+
+.reservation-shell {
+  margin: 0 auto;
+  max-width: 1120px;
+}
+
+.reservation-heading {
+  margin-bottom: 10px;
+}
+
+.reservation-heading h1,
+.panel-heading h2 {
+  color: #172033;
+  font-weight: 800;
+  letter-spacing: 0;
+  margin: 0;
+}
+
+.reservation-heading h1 {
+  font-size: 38px;
+}
+
+.eyebrow {
+  color: #0b8f6a;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0;
+  margin: 0 0 8px;
+  text-transform: uppercase;
+}
+
+.passenger-alert {
+  background: #fff7e8;
+  border: 1px solid #f3dcad;
+  border-radius: 8px;
+  color: #76510d;
+  font-weight: 700;
+  margin: 18px 0;
+  padding: 14px 16px;
+}
+
+.transfer-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin: 0 0 24px;
+}
+
+.details-panel {
+  background: #ffffff;
+  border: 1px solid rgba(18, 28, 45, 0.08);
+  border-radius: 8px;
+  box-shadow: 0 18px 52px rgba(18, 28, 45, 0.08);
+  padding: 28px;
+}
+
+.panel-heading {
+  margin-bottom: 22px;
+}
+
+.panel-heading h2 {
+  font-size: 30px;
+}
+
+.details-form {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.field {
+  min-width: 0;
+}
+
+.field-full {
+  grid-column: span 2;
+}
+
+.field label {
+  color: #4f5f72;
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.field input,
+.field textarea {
+  background: #f7f9fc;
+  border: 1px solid #dce4ee;
+  border-radius: 8px;
+  box-shadow: none;
+  color: #172033;
+  font-size: 15px;
+  min-height: 48px;
+  padding: 11px 13px;
+  width: 100%;
+}
+
+.field textarea {
+  resize: vertical;
+}
+
+.submit-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+.primary-action,
+.secondary-action {
+  border: 0;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 800;
+  min-height: 48px;
+  padding: 0 22px;
+}
+
+.primary-action {
+  background: #0b8f6a;
+  color: #ffffff;
+}
+
+.primary-action[disabled] {
+  background: #9fb4c5;
+}
+
+.secondary-action {
+  background: #172033;
+  color: #ffffff;
+}
+
+@media (max-width: 767px) {
+  .reservation-heading h1 {
+    font-size: 30px;
+  }
+
+  .details-form {
+    grid-template-columns: 1fr;
+  }
+
+  .field-full {
+    grid-column: span 1;
+  }
+
+  .details-panel {
+    padding: 22px;
+  }
 }
