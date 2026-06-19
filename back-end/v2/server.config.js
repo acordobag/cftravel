@@ -20,7 +20,7 @@ export default (app, server) => {
 
   app.use(cors())
   //app.use(morgan('dev'))
-  app.use(express.json())
+  app.use(express.json({ limit: '12mb' }))
 
 
   //                ____             _
@@ -38,6 +38,7 @@ export default (app, server) => {
   //               |____/ \__\__,_|\__|_|\___| |_|   |_|_|\___|___/
 
   app.use('/dist', express.static(path.join(__dirname, 'dist')))
+  app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
   app.use(express.static(path.join(__dirname, 'dist')))
 
   app.get(/.*/, (req, res) => {

@@ -55,3 +55,25 @@ export interface ReservationPayload {
     distance: number;
   }>;
 }
+
+export interface ContactMethod {
+  id?: number;
+  type: 'phone' | 'whatsapp' | 'email' | 'social' | string;
+  label: string;
+  code?: string;
+  number: string;
+  href?: string;
+  active?: boolean;
+  sortOrder?: number;
+}
+
+export interface CompanyProfile {
+  id?: number;
+  name: string;
+  email: string;
+  tagline?: string;
+  address?: string;
+  website?: string;
+  isDefault?: boolean;
+  phones: ContactMethod[];
+}

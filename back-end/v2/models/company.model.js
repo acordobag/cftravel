@@ -6,7 +6,14 @@ const { sequelize, Sequelize } = db
 const model = () => {
     const Company = sequelize.define('company', {
       name : Sequelize.STRING,
-      email : Sequelize.STRING
+      email : Sequelize.STRING,
+      tagline: Sequelize.STRING,
+      address: Sequelize.STRING,
+      website: Sequelize.STRING,
+      isDefault: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
+      }
     })
     return Company
 }

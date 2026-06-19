@@ -1,16 +1,21 @@
-const Shuttle = require('../models/shuttle.model');
-const ReservationModel = require('../models/reservation.model');
-const UserModel = require('../models/user.model');
-const mailUtil = require('../utils/mail.util');
+import bcrypt from 'bcryptjs'
+import Place from '../models/place.model'
+import ReservationModel from '../models/reservation.model'
+import Shuttle from '../models/shuttle.model'
+import UserModel from '../models/user.model'
+import mailUtil from '../utils/mail.util'
 
 const Reservation = {
-    save: async (req, res) => {
-        const shuttles = req.body.shuttles.map(shuttle => {
+    save: async (req, res, next) => {
+      try {
+        const shuttles = (req.body.shuttles || []).map(shuttle => {
             return {
                 departingId: shuttle.departing.id,
                 destinationId: shuttle.destination.id,
                 date: shuttle.date,
-                persons: shuttle.persons
+                persons: shuttle.persons,
+                rate: shuttle.rate,
+                distance: shuttle.distance
             }
         });
         const reservation = {
@@ -20,19 +25,23 @@ const Reservation = {
         const user = await UserModel.findOne({ where: { email: req.body.user.email } });
         if (user) {
             reservation.userId = user.id;
-            await createReservation(reservation, res);
+            await Reservation.createReservation(reservation, res);
         } else if (!user) {
             req.body.user.password = Math.random().toString(36).slice(-8);
+            req.body.user.password = bcrypt.hashSync(req.body.user.password, bcrypt.genSaltSync(8));
             const newUser = await UserModel.create(req.body.user);
 
             mailUtil.sendEmail(newUser.email, 'Si lees esto es porque todo salion bien we', 'Holi', async () => {
                 reservation.userId = newUser.id;
-                await createReservation(reservation, res);
+                await Reservation.createReservation(reservation, res);
             });
         }
+      } catch (e) {
+        next(e)
+      }
     },
     createReservation: async (reservation, res) => {
-        const newReservation = await ReservationModel.create(reservation, { include: [{ model: Shuttle, as: 'shuttles' }] });
+        const newReservation = await ReservationModel.create(reservation, { include: [{ model: Shuttle }] });
         if (newReservation) {
             res.send(newReservation);
         } else if (!newReservation) {

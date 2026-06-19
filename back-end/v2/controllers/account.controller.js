@@ -1,135 +1,89 @@
-import Account from '../models/account.model'
-import Payment from '../models/payment.model'
-import User from '../models/user.model'
-import PaymentTerm from '../models/paymentTerm.model'
+import bcrypt from 'bcryptjs'
+import Place from '../models/place.model'
+import Reservation from '../models/reservation.model'
+import Shuttle from '../models/shuttle.model'
+import UserMessage from '../models/user-message.model'
 
+const sanitizeUser = (user) => ({
+  id: user.id,
+  name: user.name,
+  lastName: user.lastName,
+  email: user.email,
+  phone: user.phone,
+  role: user.role,
+  active: user.active
+})
 
+const reservationInclude = [
+  {
+    model: Shuttle,
+    include: [
+      { model: Place, as: 'departing' },
+      { model: Place, as: 'destination' }
+    ]
+  }
+]
 
-async function save(req, res, next) {
+const Account = {
+  profile: async (req, res) => {
+    res.status(200).json(sanitizeUser(req.authUser))
+  },
+
+  updateProfile: async (req, res, next) => {
     try {
-        let account = {
-            name: req.body.name,
-            initialAmmount: req.body.initialAmmount,
-            actualAmmount: req.body.actualAmmount,
-            interestRate: req.body.interestRate,
-            numberOfPayments: req.body.numberOfPayments,
-            charge: req.body.charge,
-            paymentTermId: req.body.paymentTerm.id,
-            customerId: req.body.customer.id,
-            already_pay: req.body.already_pay
-        }
-        account = await Account.create(account)
-        res.status(200).send(account).end()
+      const user = req.authUser
+      user.name = req.body.name
+      user.lastName = req.body.lastName
+      user.phone = req.body.phone
+
+      if (req.body.password) {
+        user.password = bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(8))
+      }
+
+      await user.save()
+      res.status(200).json(sanitizeUser(user))
     } catch (e) {
-        next(e)
-        console.error(e)
+      next(e)
     }
+  },
 
-}
-
-async function findAll(req, res, next) {
+  reservations: async (req, res, next) => {
     try {
-        let accounts = await Account.findAll({ include: [PaymentTerm] })
-        res.status(200).send(accounts).end()
+      const reservations = await Reservation.findAll({
+        where: { userId: req.authUser.id },
+        include: reservationInclude,
+        order: [['id', 'DESC']]
+      })
+
+      res.status(200).json(reservations)
     } catch (e) {
-        next(e)
+      next(e)
     }
+  },
 
-}
-
-async function findById(req, res, next) {
+  messages: async (req, res, next) => {
     try {
-        let account = await Account.findOne({
-            where: { id: req.body.id },
-            include: [{ model: Payment, include: [User] }]
-        })
-        res.status(200).send(account).end()
+      const messages = await UserMessage.findAll({
+        where: { userId: req.authUser.id },
+        order: [['id', 'DESC']]
+      })
+
+      if (!messages.length) {
+        return res.status(200).json([{
+          id: 0,
+          title: 'Welcome to your travel account',
+          body: 'Your internal messages, booking updates, and trip notes will appear here.',
+          kind: 'info',
+          read: false,
+          createdAt: new Date()
+        }])
+      }
+
+      res.status(200).json(messages)
     } catch (e) {
-        next(e)
+      next(e)
     }
+  }
 }
 
-async function addPayment(req, res, next) {
-    try {
-        let payment = {
-            ammount: req.body.ammount,
-            approved: req.body.approved,
-            date: req.body.date,
-            userId: req.body.user.id,
-            accountId: req.body.account.id
-        }
-        payment = await Payment.create(payment)
-        res.status(200).send(payment).end()
-    } catch (e) {
-        next(e)
-    }
-}
-
-async function findAllPendingPayments(req, res, next) {
-    try {
-        let payments = await Payment.findAll({
-            where: { approved: false },
-            include: [User, Account]
-        })
-        res.status(200).send(payments).end()
-    } catch (e) {
-        next(e)
-    }
-
-}
-
-async function approvePayment(req, res, next) {
-    try {
-        let payment = await Payment.findOne({ where: { id: req.body.id } })
-        payment.approved = true
-        await payment.save()
-        res.status(200).send(payment).end()
-    } catch (e) {
-        next(e)
-    }
-}
-async function approveListOfPayments(req, res, next) {
-    try {
-        let payments = req.body.payments
-        let payment
-        for (let p of payments) {
-            payment = await Payment.findOne({ where: { id: p.id } })
-            payment.approved = true
-            await payment.save()
-        }
-        res.status(200).send({}).end()
-    } catch (e) {
-        next(e)
-    }
-}
-
-async function findAccountPayments(req, res, next) {
-    try {
-        let payments = await Payment.findAll({ where: { accountId: req.body.id } })
-        res.status(200).send(payments).end()
-    } catch (e) {
-        next(e)
-    }
-
-}
-
-async function findAllPaymentsTerms(req, res, next) {
-    try {
-        let payments = await PaymentTerm.findAll()
-        res.status(200).send(payments).end()
-    } catch (e) {
-        next(e)
-    }
-}
-
-export default {
-    save,
-    findAll,
-    findById,
-    addPayment, 
-    findAllPendingPayments,
-    approvePayment,
-    approveListOfPayments,
-    findAccountPayments,
-    findAllPaymentsTerms
-}
+module.exports = Account

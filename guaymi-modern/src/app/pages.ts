@@ -159,18 +159,42 @@ export class BookingCardComponent {
         <p class="eyebrow">Costa Rica private transportation</p>
         <h1>CR Travel Service</h1>
         <p>Book a private shuttle with route-aware pricing, direct pickups, and flexible stops for real travel days.</p>
+        <div class="hero-actions">
+          <a routerLink="/reservation" class="hero-button">Book your ride</a>
+          <a routerLink="/destinations" class="hero-link">Explore routes</a>
+        </div>
         <div class="hero-stats">
-          <div><strong>24/7</strong><span>Airport routes</span></div>
-          <div><strong>Private</strong><span>No shared stops</span></div>
-          <div><strong>Local</strong><span>Costa Rica routing</span></div>
+          <div *ngFor="let item of state.routeHighlights"><strong>{{ item.value }}</strong><span>{{ item.label }}</span></div>
         </div>
       </div>
     </section>
     <app-booking-card></app-booking-card>
+    <section class="route-promises page-band">
+      <div><strong>Door-to-door</strong><span>Hotel, villa, airport and marina pickups</span></div>
+      <div><strong>Stops by request</strong><span>Groceries, lunch, viewpoints and comfort breaks</span></div>
+      <div><strong>Private vehicles</strong><span>Space planned around passengers and luggage</span></div>
+    </section>
+    <section class="assurance-strip page-band">
+      <span *ngFor="let badge of state.assuranceBadges">{{ badge }}</span>
+    </section>
     <section class="quick-grid page-band">
       <a routerLink="/services" class="quick-card"><span>Services</span><strong>Airport, hotel-to-hotel, multi-stop routes</strong></a>
       <a routerLink="/destinations" class="quick-card"><span>Destinations</span><strong>Explore popular Costa Rica transfers</strong></a>
+      <a routerLink="/fleet" class="quick-card"><span>Fleet</span><strong>Private shuttle fleet</strong></a>
       <a routerLink="/testimonials" class="quick-card"><span>Testimonials</span><strong>Traveler notes from the road</strong></a>
+    </section>
+    <section class="process-section">
+      <div class="section-heading centered">
+        <p class="eyebrow">How it works</p>
+        <h2>Book without guessing the route</h2>
+      </div>
+      <div class="process-grid">
+        <article class="process-card" *ngFor="let item of state.bookingSteps">
+          <span>{{ item.step }}</span>
+          <h3>{{ item.title }}</h3>
+          <p>{{ item.text }}</p>
+        </article>
+      </div>
     </section>
     <section class="services-section">
       <div class="section-heading">
@@ -196,6 +220,41 @@ export class BookingCardComponent {
         </article>
       </div>
     </section>
+    <section class="confidence-section">
+      <div class="section-heading centered">
+        <p class="eyebrow">Travel with confidence</p>
+        <h2>Built for real Costa Rica travel days</h2>
+      </div>
+      <div class="confidence-grid">
+        <article class="confidence-card" *ngFor="let item of state.confidenceItems">
+          <div class="confidence-icon" [ngSwitch]="item.icon">
+            <svg *ngSwitchCase="'SAFE'" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22c-4.7-1.4-8-5.8-8-10.7V5l8-3 8 3v6.3c0 4.9-3.3 9.3-8 10.7Zm0-2.1c3.5-1.2 6-4.6 6-8.6V6.4l-6-2.3-6 2.3v4.9c0 4 2.5 7.4 6 8.6Zm-1.1-5.1 5-5-1.4-1.4-3.6 3.6-1.4-1.4-1.4 1.4 2.8 2.8Z"/></svg>
+            <svg *ngSwitchCase="'TIME'" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20Zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm1-8.4 3.3 3.3-1.4 1.4-3.9-3.9V6h2v5.6Z"/></svg>
+            <svg *ngSwitchCase="'CHAT'" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20.5V5a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3H8.4L4 20.5ZM7 4a1 1 0 0 0-1 1v10.1L7.6 13H17a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1H7Zm1.5 3h7v2h-7V7Zm0 3h5v2h-5v-2Z"/></svg>
+            <svg *ngSwitchCase="'VIP'" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 2.8 6.1 6.7.8-5 4.5 1.3 6.6L12 16.6 6.2 20l1.3-6.6-5-4.5 6.7-.8L12 2Zm0 4.9-1.5 3.2-3.5.4 2.6 2.3-.7 3.4 3.1-1.8 3.1 1.8-.7-3.4 2.6-2.3-3.5-.4L12 6.9Z"/></svg>
+            <svg *ngSwitchCase="'PRICE'" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a3 3 0 0 1 3-3h8.2L21 7.8V19a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V5Zm3-1a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V9h-5V4H7Zm9 .4V7h2.6L16 4.4ZM8 9h6v2H8V9Zm0 4h8v2H8v-2Zm0 4h5v2H8v-2Z"/></svg>
+            <svg *ngSwitchCase="'FAMILY'" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8Zm0-2a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm8.5 2.5a3 3 0 1 1 0-6 3 3 0 0 1 0 6Zm0-2a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM2 21v-3a5 5 0 0 1 10 0v3H2Zm2-2h6v-1a3 3 0 0 0-6 0v1Zm9 2v-2.5a4.5 4.5 0 0 0-1-2.8 4 4 0 0 1 8 2.3v3h-7Zm2.5-2H18v-1a2 2 0 0 0-3.2-1.6c.4.7.7 1.5.7 2.1v.5Z"/></svg>
+          </div>
+          <h3>{{ item.title }}</h3>
+          <p>{{ item.text }}</p>
+        </article>
+      </div>
+    </section>
+    <section class="fleet-section">
+      <div class="section-heading">
+        <p class="eyebrow">Fleet</p>
+        <h2>One modern private shuttle, planned carefully for every route</h2>
+      </div>
+      <div class="fleet-grid">
+        <article class="fleet-card" *ngFor="let item of state.fleetHighlights">
+          <img src="assets/images/bus.png" alt="Private shuttle vehicle">
+          <div>
+            <h3>{{ item.title }}</h3>
+            <p>{{ item.text }}</p>
+          </div>
+        </article>
+      </div>
+    </section>
     <section class="trust-band">
       <div class="trust-copy">
         <p class="eyebrow">Why choose CR Travel Service</p>
@@ -212,11 +271,18 @@ export class BookingCardComponent {
         <h2>Costa Rica destinations</h2>
       </div>
       <div class="destination-grid">
-        <article class="destination-card" *ngFor="let place of state.places.slice(0, 3)">
+        <article class="destination-card" *ngFor="let place of state.places.slice(0, 4)">
           <img [src]="place.image" [alt]="place.name">
           <div><span>{{ place.zone }}</span><h3>{{ place.name }}</h3><p>{{ place.description }}</p></div>
         </article>
       </div>
+    </section>
+    <section class="split-cta">
+      <div>
+        <p class="eyebrow">Private routes, simple planning</p>
+        <h2>Airport transfers, beach transfers, and custom travel days in one flow.</h2>
+      </div>
+      <a routerLink="/reservation" class="cta-button">Reserve now</a>
     </section>
     <section class="experience-section">
       <div class="experience-media"><img src="assets/images/bus.png" alt="Private shuttle van"></div>
@@ -296,6 +362,28 @@ export class HomePageComponent {
   `
 })
 export class ServicesPageComponent {
+  constructor(public readonly state: TravelStateService) {}
+}
+
+@Component({
+  standalone: true,
+  imports: [CommonModule, PageHeroComponent],
+  template: `
+    <app-page-hero title="Fleet" eyebrow="Comfort on the road" text="Modern private shuttle transportation planned around passengers, luggage, pickup locations, and long Costa Rica routes."></app-page-hero>
+    <section class="fleet-section page-content">
+      <div class="fleet-grid">
+        <article class="fleet-card" *ngFor="let item of state.fleetHighlights">
+          <img src="assets/images/bus.png" alt="Private shuttle vehicle">
+          <div>
+            <h3>{{ item.title }}</h3>
+            <p>{{ item.text }}</p>
+          </div>
+        </article>
+      </div>
+    </section>
+  `
+})
+export class FleetPageComponent {
   constructor(public readonly state: TravelStateService) {}
 }
 

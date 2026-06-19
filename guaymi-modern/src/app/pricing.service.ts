@@ -1,55 +1,140 @@
-import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Injectable, signal } from '@angular/core';
 
-interface PriceRule {
-  min: number;
-  max: number;
-  price: number;
+const API_URL = 'http://localhost:8080/api';
+
+export interface PriceRule {
+  id?: number;
+  name: string;
+  minDistance: number;
+  maxDistance: number;
+  pricePerKm: number;
   discount: number;
+  active: boolean;
+  sortOrder: number;
+}
+
+export interface FixedRoutePrice {
+  id?: number;
+  departingId: number;
+  destinationId: number;
+  price: number;
+  label: string;
+  notes: string;
+  active: boolean;
+  departing?: { id: number; name: string };
+  destination?: { id: number; name: string };
+}
+
+export interface ServicePricingRule {
+  id?: number;
+  title: string;
+  description: string;
+  active: boolean;
+  sortOrder: number;
+}
+
+export interface PricingConfig {
+  pricingRules: PriceRule[];
+  fixedRoutePrices: FixedRoutePrice[];
+  serviceRules: ServicePricingRule[];
 }
 
 @Injectable({ providedIn: 'root' })
 export class PricingService {
-  private readonly rateRules: PriceRule[] = [
-    { min: 0, max: 50, price: 3.57, discount: 1 },
-    { min: 55, max: 65, price: 2.24, discount: 0.8 },
-    { min: 50, max: 75, price: 2.24, discount: 0.9 },
-    { min: 97.2, max: 99, price: 1.68, discount: 0.9 },
-    { min: 75, max: 100, price: 1.68, discount: 0.8 },
-    { min: 113, max: 116, price: 1.42, discount: 0.3 },
-    { min: 124, max: 126, price: 1.42, discount: 0.3 },
-    { min: 105, max: 107, price: 1.42, discount: 1.35 },
-    { min: 100, max: 150, price: 1.42, discount: 0.55 },
-    { min: 161, max: 180, price: 1.03, discount: 0 },
-    { min: 180, max: 185, price: 1.03, discount: 0.42 },
-    { min: 191, max: 193.1, price: 1.43, discount: 1 },
-    { min: 205, max: 215, price: 1.03, discount: 0.24 },
-    { min: 229, max: 231, price: 1.12, discount: 0.42 },
-    { min: 230, max: 259, price: 1.12, discount: 0.67 },
-    { min: 220, max: 230, price: 1.03, discount: 0.4 },
-    { min: 150, max: 262, price: 1.03, discount: 0.75 },
-    { min: 262, max: 264, price: 1.07, discount: 0.67 },
-    { min: 300, max: 310, price: 1.07, discount: 0.16 },
-    { min: 264, max: 315, price: 1.07, discount: 0.3 },
-    { min: 315, max: 320, price: 1.07, discount: 0.22 },
-    { min: 320, max: 370, price: 0.9, discount: 0.07 }
-  ];
+  readonly pricingConfig = signal<PricingConfig>({
+    pricingRules: this.defaultRateRules(),
+    fixedRoutePrices: [],
+    serviceRules: []
+  });
 
-  estimate(routeDistance: number, repositionDistance: number): number {
+  constructor(private readonly http: HttpClient) {
+    this.loadPricing();
+  }
+
+  loadPricing(): void {
+    this.http.get<PricingConfig>(`${API_URL}/pricing`).subscribe({
+      next: (config) => {
+        this.pricingConfig.set({
+          pricingRules: config.pricingRules?.length ? config.pricingRules : this.defaultRateRules(),
+          fixedRoutePrices: config.fixedRoutePrices || [],
+          serviceRules: config.serviceRules || []
+        });
+      }
+    });
+  }
+
+  estimate(routeDistance: number, repositionDistance: number, departingId?: number, destinationId?: number): number {
+    const fixedRoute = this.getFixedRoutePrice(departingId, destinationId);
+    if (fixedRoute) {
+      return this.roundMoney(fixedRoute.price);
+    }
+
     const routeRate = this.getKilometerRate(routeDistance);
     const repositionRate = this.getKilometerRate(repositionDistance);
-    const routeSubtotal = routeDistance * routeRate.price;
+    const routeSubtotal = routeDistance * routeRate.pricePerKm;
     const routeTotal = Math.max(routeSubtotal - routeSubtotal * routeRate.discount, 0);
-    const repositionTotal = repositionDistance * repositionRate.price;
+    const repositionTotal = repositionDistance * repositionRate.pricePerKm;
 
     return this.roundMoney(routeTotal + repositionTotal);
   }
 
-  getKilometerRate(distance: number): { price: number; discount: number } {
-    const match = this.rateRules.find((rule) => distance > rule.min && distance <= rule.max || distance === 0 && rule.min === 0);
-    return match ? { price: match.price, discount: match.discount } : { price: 0.9, discount: 0 };
+  getFixedRoutePrice(departingId?: number, destinationId?: number): FixedRoutePrice | null {
+    if (!departingId || !destinationId) {
+      return null;
+    }
+
+    return this.pricingConfig().fixedRoutePrices.find((route) => {
+      const direct = route.departingId === departingId && route.destinationId === destinationId;
+      const reverse = route.departingId === destinationId && route.destinationId === departingId;
+      return route.active && (direct || reverse);
+    }) || null;
+  }
+
+  getKilometerRate(distance: number): PriceRule {
+    const match = this.pricingConfig().pricingRules.find((rule) =>
+      rule.active && (distance > rule.minDistance && distance <= rule.maxDistance || distance === 0 && rule.minDistance === 0)
+    );
+
+    return match || {
+      name: 'Default fallback',
+      minDistance: 0,
+      maxDistance: 9999,
+      pricePerKm: 0.9,
+      discount: 0,
+      active: true,
+      sortOrder: 999
+    };
   }
 
   private roundMoney(value: number): number {
     return Number(value.toFixed(2));
+  }
+
+  private defaultRateRules(): PriceRule[] {
+    return [
+      { name: 'Very short routes', minDistance: 0, maxDistance: 50, pricePerKm: 3.57, discount: 1, active: true, sortOrder: 1 },
+      { name: 'Short route promo', minDistance: 55, maxDistance: 65, pricePerKm: 2.24, discount: 0.8, active: true, sortOrder: 2 },
+      { name: 'Short routes', minDistance: 50, maxDistance: 75, pricePerKm: 2.24, discount: 0.9, active: true, sortOrder: 3 },
+      { name: 'Mid route promo', minDistance: 97.2, maxDistance: 99, pricePerKm: 1.68, discount: 0.9, active: true, sortOrder: 4 },
+      { name: 'Mid routes', minDistance: 75, maxDistance: 100, pricePerKm: 1.68, discount: 0.8, active: true, sortOrder: 5 },
+      { name: 'Specific route adjustment A', minDistance: 113, maxDistance: 116, pricePerKm: 1.42, discount: 0.3, active: true, sortOrder: 6 },
+      { name: 'Specific route adjustment B', minDistance: 124, maxDistance: 126, pricePerKm: 1.42, discount: 0.3, active: true, sortOrder: 7 },
+      { name: 'Specific route adjustment C', minDistance: 105, maxDistance: 107, pricePerKm: 1.42, discount: 1.35, active: true, sortOrder: 8 },
+      { name: 'Long mid routes', minDistance: 100, maxDistance: 150, pricePerKm: 1.42, discount: 0.55, active: true, sortOrder: 9 },
+      { name: 'Long route base', minDistance: 161, maxDistance: 180, pricePerKm: 1.03, discount: 0, active: true, sortOrder: 10 },
+      { name: 'Long route adjustment A', minDistance: 180, maxDistance: 185, pricePerKm: 1.03, discount: 0.42, active: true, sortOrder: 11 },
+      { name: 'Long route adjustment B', minDistance: 191, maxDistance: 193.1, pricePerKm: 1.43, discount: 1, active: true, sortOrder: 12 },
+      { name: 'Extended route adjustment A', minDistance: 205, maxDistance: 215, pricePerKm: 1.03, discount: 0.24, active: true, sortOrder: 13 },
+      { name: 'Extended route adjustment B', minDistance: 229, maxDistance: 231, pricePerKm: 1.12, discount: 0.42, active: true, sortOrder: 14 },
+      { name: 'Extended route band', minDistance: 230, maxDistance: 259, pricePerKm: 1.12, discount: 0.67, active: true, sortOrder: 15 },
+      { name: 'Extended route fallback A', minDistance: 220, maxDistance: 230, pricePerKm: 1.03, discount: 0.4, active: true, sortOrder: 16 },
+      { name: 'Extended routes', minDistance: 150, maxDistance: 262, pricePerKm: 1.03, discount: 0.75, active: true, sortOrder: 17 },
+      { name: 'Far route adjustment A', minDistance: 262, maxDistance: 264, pricePerKm: 1.07, discount: 0.67, active: true, sortOrder: 18 },
+      { name: 'Far route adjustment B', minDistance: 300, maxDistance: 310, pricePerKm: 1.07, discount: 0.16, active: true, sortOrder: 19 },
+      { name: 'Far routes', minDistance: 264, maxDistance: 315, pricePerKm: 1.07, discount: 0.3, active: true, sortOrder: 20 },
+      { name: 'Far route adjustment C', minDistance: 315, maxDistance: 320, pricePerKm: 1.07, discount: 0.22, active: true, sortOrder: 21 },
+      { name: 'Very far routes', minDistance: 320, maxDistance: 370, pricePerKm: 0.9, discount: 0.07, active: true, sortOrder: 22 }
+    ];
   }
 }

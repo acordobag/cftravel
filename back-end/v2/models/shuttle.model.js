@@ -6,7 +6,9 @@ const { sequelize, Sequelize } = db
 const model = () => {
     const Shuttle = sequelize.define('shuttle', {
         date: Sequelize.DATE,
-        persons: Sequelize.INTEGER
+        persons: Sequelize.INTEGER,
+        rate: Sequelize.FLOAT,
+        distance: Sequelize.FLOAT
     })
     return Shuttle
 }

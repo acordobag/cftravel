@@ -64,6 +64,47 @@ const Testimonial = {
     } catch (e) {
       next(e)
     }
+  },
+
+  findAllAdmin: async (req, res, next) => {
+    try {
+      const testimonials = await TestimonialModel.findAll({
+        order: [['id', 'ASC']]
+      })
+      res.status(200).send(testimonials).end()
+    } catch (e) {
+      next(e)
+    }
+  },
+
+  update: async (req, res, next) => {
+    try {
+      const testimonial = await TestimonialModel.findOne({ where: { id: req.params.id } })
+      if (!testimonial) {
+        return res.status(404).json({ message: 'Testimonial not found.' })
+      }
+
+      testimonial.name = req.body.name
+      testimonial.location = req.body.location
+      testimonial.route = req.body.route
+      testimonial.rating = req.body.rating
+      testimonial.comment = req.body.comment
+      testimonial.active = req.body.active
+      await testimonial.save()
+
+      res.status(200).send(testimonial).end()
+    } catch (e) {
+      next(e)
+    }
+  },
+
+  delete: async (req, res, next) => {
+    try {
+      await TestimonialModel.destroy({ where: { id: req.params.id } })
+      res.status(200).send({ success: true }).end()
+    } catch (e) {
+      next(e)
+    }
   }
 }
 

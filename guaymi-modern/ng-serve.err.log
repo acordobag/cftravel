@@ -132,3 +132,633 @@ Odd numbered Node.js versions will not enter LTS status and should not be used f
          ╵                                                   [32m~~~~~~~~~~~~~~~~~[0m
 
 [39m[22m
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8103: The `*ngFor` directive was used in the template, but neither the `NgFor` directive nor the `CommonModule` was imported. Use Angular's built-in control flow @for or make sure that either the `NgFor` directive or the `CommonModule` is included in the `@Component.imports` array of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.html:7:8:
+[37m      7 │     <a *[32mngFor[37m="let phone of state.contactPhones" [href]="phone.href">
+        ╵         [32m~~~~~[0m
+
+  Error occurs in the template of component AppComponent.
+
+    src/app/app.component.ts:10:15:
+[37m      10 │   templateUrl: [32m'./app.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5002: Incomplete block "crtravelservice". If you meant to write the @ character, you should use the "&#64;" HTML entity instead.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.html:49:68:
+[37m      49 │ ...rvations@crtravelservice.com">reservations[32m@crtravelservice[37m.com</a>
+         ╵                                              [32m~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AppComponent.
+
+    src/app/app.component.ts:11:15:
+[37m      11 │   templateUrl: [32m'./app.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5002: Incomplete block "crtravelservice". If you meant to write the @ character, you should use the "&#64;" HTML entity instead.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.html:49:68:
+[37m      49 │ ...rvations@crtravelservice.com">reservations[32m@crtravelservice[37m.com</a>
+         ╵                                              [32m~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AppComponent.
+
+    src/app/app.component.ts:11:15:
+[37m      11 │   templateUrl: [32m'./app.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2724: '"./pages"' has no exported member named 'RatesPageComponent'. Did you mean 'AboutPageComponent'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.routes.ts:8:2:
+[37m      8 │   [32mRatesPageComponent[37m,
+        ╵   [32m~~~~~~~~~~~~~~~~~~[0m
+
+  'AboutPageComponent' is declared here.
+
+    src/app/pages.ts:528:13:
+[37m      528 │ export class [32mAboutPageComponent[37m {}
+          ╵              [32m~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5002: Incomplete block "crtravelservice". If you meant to write the @ character, you should use the "&#64;" HTML entity instead.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.html:49:68:
+[37m      49 │ ...rvations@crtravelservice.com">reservations[32m@crtravelservice[37m.com</a>
+         ╵                                              [32m~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AppComponent.
+
+    src/app/app.component.ts:11:15:
+[37m      11 │   templateUrl: [32m'./app.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5002: Incomplete block "crtravelservice". If you meant to write the @ character, you should use the "&#64;" HTML entity instead.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.html:49:68:
+[37m      49 │ ...rvations@crtravelservice.com">reservations[32m@crtravelservice[37m.com</a>
+         ╵                                              [32m~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AppComponent.
+
+    src/app/app.component.ts:11:15:
+[37m      11 │   templateUrl: [32m'./app.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5002: Incomplete block "crtravelservice". If you meant to write the @ character, you should use the "&#64;" HTML entity instead.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.html:49:68:
+[37m      49 │ ...rvations@crtravelservice.com">reservations[32m@crtravelservice[37m.com</a>
+         ╵                                              [32m~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AppComponent.
+
+    src/app/app.component.ts:11:15:
+[37m      11 │   templateUrl: [32m'./app.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'stateAuth' does not exist on type 'AppComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.html:27:60:
+[37m      27 │ ...uterLinkActive="active" *ngIf="[32mstateAuth[37m.isPrivileged()">Admin</a>
+         ╵                                   [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component AppComponent.
+
+    src/app/app.component.ts:11:15:
+[37m      11 │   templateUrl: [32m'./app.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'stateAuth' does not exist on type 'AppComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.html:28:61:
+[37m      28 │ ...uterLinkActive="active" *ngIf="![32mstateAuth[37m.currentUser()">Login</a>
+         ╵                                    [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component AppComponent.
+
+    src/app/app.component.ts:11:15:
+[37m      11 │   templateUrl: [32m'./app.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'stateAuth' does not exist on type 'AppComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.html:29:57:
+[37m      29 │ ...s="nav-link-button" *ngIf="[32mstateAuth[37m.currentUser()" (click)="st...
+         ╵                               [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component AppComponent.
+
+    src/app/app.component.ts:11:15:
+[37m      11 │   templateUrl: [32m'./app.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'stateAuth' does not exist on type 'AppComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.html:29:91:
+[37m      29 │ ...teAuth.currentUser()" (click)="[32mstateAuth[37m.logout()">Logout</button>
+         ╵                                   [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component AppComponent.
+
+    src/app/app.component.ts:11:15:
+[37m      11 │   templateUrl: [32m'./app.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mCould not resolve "./admin-pages"[0m
+
+    src/app/app.routes.ts:1:35:
+[37m      1 │ import { AdminPageComponent } from [32m'./admin-pages'[37m;
+        ╵                                    [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2307: Cannot find module './admin-pages' or its corresponding type declarations.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.routes.ts:2:35:
+[37m      2 │ import { AdminPageComponent } from [32m'./admin-pages'[37m;
+        ╵                                    [32m~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2307: Cannot find module './admin-pages' or its corresponding type declarations.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.routes.ts:2:35:
+[37m      2 │ import { AdminPageComponent } from [32m'./admin-pages'[37m;
+        ╵                                    [32m~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2307: Cannot find module './admin-pages' or its corresponding type declarations.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.routes.ts:2:35:
+[37m      2 │ import { AdminPageComponent } from [32m'./admin-pages'[37m;
+        ╵                                    [32m~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2307: Cannot find module './admin-pages' or its corresponding type declarations.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.routes.ts:2:35:
+[37m      2 │ import { AdminPageComponent } from [32m'./admin-pages'[37m;
+        ╵                                    [32m~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mCould not resolve "./admin-pages"[0m
+
+    src/app/app.routes.ts:1:35:
+[37m      1 │ import { AdminPageComponent } from [32m'./admin-pages'[37m;
+        ╵                                    [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2307: Cannot find module './admin-pages' or its corresponding type declarations.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.routes.ts:3:35:
+[37m      3 │ import { AdminPageComponent } from [32m'./admin-pages'[37m;
+        ╵                                    [32m~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2307: Cannot find module './admin-pages' or its corresponding type declarations.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.routes.ts:3:35:
+[37m      3 │ import { AdminPageComponent } from [32m'./admin-pages'[37m;
+        ╵                                    [32m~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2307: Cannot find module './admin-pages' or its corresponding type declarations.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.routes.ts:3:35:
+[37m      3 │ import { AdminPageComponent } from [32m'./admin-pages'[37m;
+        ╵                                    [32m~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2307: Cannot find module './admin-pages' or its corresponding type declarations.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.routes.ts:3:35:
+[37m      3 │ import { AdminPageComponent } from [32m'./admin-pages'[37m;
+        ╵                                    [32m~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mCould not resolve "./pricing.service"[0m
+
+    src/app/travel-state.service.ts:4:20:
+[37m      4 │ import * as i2 from [32m"./pricing.service"[37m;
+        ╵                     [32m~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2307: Cannot find module './pricing.service' or its corresponding type declarations.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/travel-state.service.ts:5:31:
+[37m      5 │ import { PricingService } from [32m'./pricing.service'[37m;
+        ╵                                [32m~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2307: Cannot find module './pricing.service' or its corresponding type declarations.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/travel-state.service.ts:5:31:
+[37m      5 │ import { PricingService } from [32m'./pricing.service'[37m;
+        ╵                                [32m~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'createFixedRoutePrice' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:207:112:
+[37m      207 │ ...m" #fixedRouteForm="ngForm" (ngSubmit)="[32mcreateFixedRoutePrice[37m()">
+          ╵                                            [32m~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'newFixedRoutePrice' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:208:57:
+[37m      208 │ ...Departing" [(ngModel)]="[32mnewFixedRoutePrice[37m.departingId" required>
+          ╵                            [32m~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'newFixedRoutePrice' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:208:57:
+[37m      208 │ ...Departing" [(ngModel)]="[32mnewFixedRoutePrice[37m.departingId" required>
+          ╵                            [32m~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'newFixedRoutePrice' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:212:59:
+[37m      212 │ ...ination" [(ngModel)]="[32mnewFixedRoutePrice[37m.destinationId" required>
+          ╵                          [32m~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'newFixedRoutePrice' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:212:59:
+[37m      212 │ ...ination" [(ngModel)]="[32mnewFixedRoutePrice[37m.destinationId" required>
+          ╵                          [32m~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'newFixedRoutePrice' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:216:112:
+[37m      216 │ ...er="Fixed price" [(ngModel)]="[32mnewFixedRoutePrice[37m.price" required>
+          ╵                                  [32m~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'newFixedRoutePrice' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:216:112:
+[37m      216 │ ...er="Fixed price" [(ngModel)]="[32mnewFixedRoutePrice[37m.price" required>
+          ╵                                  [32m~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'newFixedRoutePrice' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:217:92:
+[37m      217 │ ...abel, e.g. SJO to Arenal" [(ngModel)]="[32mnewFixedRoutePrice[37m.label">
+          ╵                                           [32m~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'newFixedRoutePrice' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:217:92:
+[37m      217 │ ...abel, e.g. SJO to Arenal" [(ngModel)]="[32mnewFixedRoutePrice[37m.label">
+          ╵                                           [32m~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'newFixedRoutePrice' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:218:116:
+[37m      218 │ ...or this route" [(ngModel)]="[32mnewFixedRoutePrice[37m.notes"></textarea>
+          ╵                                [32m~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'newFixedRoutePrice' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:218:116:
+[37m      218 │ ...or this route" [(ngModel)]="[32mnewFixedRoutePrice[37m.notes"></textarea>
+          ╵                                [32m~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'newFixedRoutePrice' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:219:96:
+[37m      219 │ ...edActive" [(ngModel)]="[32mnewFixedRoutePrice[37m.active"> Active</label>
+          ╵                           [32m~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'newFixedRoutePrice' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:219:96:
+[37m      219 │ ...edActive" [(ngModel)]="[32mnewFixedRoutePrice[37m.active"> Active</label>
+          ╵                           [32m~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'newFixedRoutePrice' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:220:98:
+[37m      220 │ ...RouteForm.invalid || ![32mnewFixedRoutePrice[37m.departingId || !newFi...
+          ╵                          [32m~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'newFixedRoutePrice' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:220:133:
+[37m      220 │ ...Price.departingId || ![32mnewFixedRoutePrice[37m.destinationId">Add fi...
+          ╵                          [32m~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'fixedRoutePrices' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:227:43:
+[37m      227 │                   <tr *ngFor="let route of [32mfixedRoutePrices[37m">
+          ╵                                            [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'formatCurrency' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:229:27:
+[37m      229 │                     <td>{{ [32mformatCurrency[37m(route.price) }}</td>
+          ╵                            [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'deleteFixedRoutePrice' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:234:77:
+[37m      234 │ ...e-transfer" (click)="[32mdeleteFixedRoutePrice[37m(route)">Delete</but...
+          ╵                         [32m~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'createPricingRule' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:249:111:
+[37m      249 │ ...form" #pricingRuleForm="ngForm" (ngSubmit)="[32mcreatePricingRule[37m()">
+          ╵                                                [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'newPricingRule' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:250:74:
+[37m      250 │ ...aceholder="Rule name" [(ngModel)]="[32mnewPricingRule[37m.name" required>
+          ╵                                       [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'newPricingRule' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:250:74:
+[37m      250 │ ...aceholder="Rule name" [(ngModel)]="[32mnewPricingRule[37m.name" required>
+          ╵                                       [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'newPricingRule' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:251:103:
+[37m      251 │ ...older="Min km" [(ngModel)]="[32mnewPricingRule[37m.minDistance" required>
+          ╵                                [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'newPricingRule' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:251:103:
+[37m      251 │ ...older="Min km" [(ngModel)]="[32mnewPricingRule[37m.minDistance" required>
+          ╵                                [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'newPricingRule' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:252:103:
+[37m      252 │ ...older="Max km" [(ngModel)]="[32mnewPricingRule[37m.maxDistance" required>
+          ╵                                [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'newPricingRule' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:252:103:
+[37m      252 │ ...older="Max km" [(ngModel)]="[32mnewPricingRule[37m.maxDistance" required>
+          ╵                                [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'newPricingRule' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:253:108:
+[37m      253 │ ...lder="Price/km" [(ngModel)]="[32mnewPricingRule[37m.pricePerKm" required>
+          ╵                                 [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'newPricingRule' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:253:108:
+[37m      253 │ ...lder="Price/km" [(ngModel)]="[32mnewPricingRule[37m.pricePerKm" required>
+          ╵                                 [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'newPricingRule' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:254:111:
+[37m      254 │ ...holder="Discount" [(ngModel)]="[32mnewPricingRule[37m.discount" required>
+          ╵                                   [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'newPricingRule' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:254:111:
+[37m      254 │ ...holder="Discount" [(ngModel)]="[32mnewPricingRule[37m.discount" required>
+          ╵                                   [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'newPricingRule' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:255:102:
+[37m      255 │ ...ceholder="Order" [(ngModel)]="[32mnewPricingRule[37m.sortOrder" required>
+          ╵                                  [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'newPricingRule' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:255:102:
+[37m      255 │ ...ceholder="Order" [(ngModel)]="[32mnewPricingRule[37m.sortOrder" required>
+          ╵                                  [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'newPricingRule' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:256:95:
+[37m      256 │ ...="ruleActive" [(ngModel)]="[32mnewPricingRule[37m.active"> Active</label>
+          ╵                               [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'newPricingRule' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:256:95:
+[37m      256 │ ...="ruleActive" [(ngModel)]="[32mnewPricingRule[37m.active"> Active</label>
+          ╵                               [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'pricingRules' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:264:42:
+[37m      264 │                   <tr *ngFor="let rule of [32mpricingRules[37m">
+          ╵                                           [32m~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'formatCurrency' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:267:27:
+[37m      267 │                     <td>{{ [32mformatCurrency[37m(rule.pricePerKm) }}/km<...
+          ╵                            [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'formatPercent' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:268:27:
+[37m      268 │                     <td>{{ [32mformatPercent[37m(rule.discount) }}</td>
+          ╵                            [32m~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'deletePricingRule' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:272:77:
+[37m      272 │ ...emove-transfer" (click)="[32mdeletePricingRule[37m(rule)">Delete</button>
+          ╵                             [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'createServicePricingRule' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:287:111:
+[37m      287 │ ...serviceRuleForm="ngForm" (ngSubmit)="[32mcreateServicePricingRule[37m()">
+          ╵                                         [32m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'newServiceRule' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:288:83:
+[37m      288 │ ...eholder="Rule title" [(ngModel)]="[32mnewServiceRule[37m.title" required>
+          ╵                                      [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'newServiceRule' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:288:83:
+[37m      288 │ ...eholder="Rule title" [(ngModel)]="[32mnewServiceRule[37m.title" required>
+          ╵                                      [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'newServiceRule' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:289:100:
+[37m      289 │ ...ceholder="Order" [(ngModel)]="[32mnewServiceRule[37m.sortOrder" required>
+          ╵                                  [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'newServiceRule' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:289:100:
+[37m      289 │ ...ceholder="Order" [(ngModel)]="[32mnewServiceRule[37m.sortOrder" required>
+          ╵                                  [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'newServiceRule' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:290:102:
+[37m      290 │ ...ceRuleActive" [(ngModel)]="[32mnewServiceRule[37m.active"> Active</label>
+          ╵                               [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'newServiceRule' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:290:102:
+[37m      290 │ ...ceRuleActive" [(ngModel)]="[32mnewServiceRule[37m.active"> Active</label>
+          ╵                               [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'newServiceRule' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:291:117:
+[37m      291 │ ...eam know?" [(ngModel)]="[32mnewServiceRule[37m.description" required><...
+          ╵                            [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'newServiceRule' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:291:117:
+[37m      291 │ ...eam know?" [(ngModel)]="[32mnewServiceRule[37m.description" required><...
+          ╵                            [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'serviceRules' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:299:42:
+[37m      299 │                   <tr *ngFor="let rule of [32mserviceRules[37m">
+          ╵                                           [32m~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'deleteServicePricingRule' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:305:77:
+[37m      305 │ ...transfer" (click)="[32mdeleteServicePricingRule[37m(rule)">Delete</but...
+          ╵                       [32m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5002: Parser Error: Bindings cannot contain assignments at column 31 in [state.contactLinks.find(link => link.type === 'whatsapp')?.href || '/contact-us'] in C:/Users/adria/cftravel/guaymi-modern/src/app/app.component.html@78:36[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.html:79:36:
+[37m      79 │ ..." [href]="[32mstate.contactLinks.find(link => link.type === 'whatsa[37m...
+         ╵              [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AppComponent.
+
+    src/app/app.component.ts:12:15:
+[37m      12 │   templateUrl: [32m'./app.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: No overload matches this call.
+  Overload 1 of 2, '(predicate: (value: { label: string; value: string; href: string; type: string; }, index: number, obj: { label: string; value: string; href: string; type: string; }[]) => value is { label: string; value: string; href: string; type: string; }, thisArg?: any): { ...; } | undefined', gave the following error.
+    Argument of type 'undefined' is not assignable to parameter of type '(value: { label: string; value: string; href: string; type: string; }, index: number, obj: { label: string; value: string; href: string; type: string; }[]) => value is { label: string; value: string; href: string; type: string; }'.
+  Overload 2 of 2, '(predicate: (value: { label: string; value: string; href: string; type: string; }, index: number, obj: { label: string; value: string; href: string; type: string; }[]) => unknown, thisArg?: any): { label: string; value: string; href: string; type: string; } | undefined', gave the following error.
+    Argument of type 'undefined' is not assignable to parameter of type '(value: { label: string; value: string; href: string; type: string; }, index: number, obj: { label: string; value: string; href: string; type: string; }[]) => unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.html:79:60:
+[37m      79 │ ...ntactLinks.find([32mlink => link.type === 'whatsapp'[37m)?.href || '/co...
+         ╵                    [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AppComponent.
+
+    src/app/app.component.ts:12:15:
+[37m      12 │   templateUrl: [32m'./app.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5002: Parser Error: Bindings cannot contain assignments at column 31 in [state.contactLinks.find(link => link.type === 'whatsapp')?.href || '/contact-us'] in C:/Users/adria/cftravel/guaymi-modern/src/app/app.component.html@78:36[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.html:79:36:
+[37m      79 │ ..." [href]="[32mstate.contactLinks.find(link => link.type === 'whatsa[37m...
+         ╵              [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AppComponent.
+
+    src/app/app.component.ts:12:15:
+[37m      12 │   templateUrl: [32m'./app.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: No overload matches this call.
+  Overload 1 of 2, '(predicate: (value: { label: string; value: string; href: string; type: string; }, index: number, obj: { label: string; value: string; href: string; type: string; }[]) => value is { label: string; value: string; href: string; type: string; }, thisArg?: any): { ...; } | undefined', gave the following error.
+    Argument of type 'undefined' is not assignable to parameter of type '(value: { label: string; value: string; href: string; type: string; }, index: number, obj: { label: string; value: string; href: string; type: string; }[]) => value is { label: string; value: string; href: string; type: string; }'.
+  Overload 2 of 2, '(predicate: (value: { label: string; value: string; href: string; type: string; }, index: number, obj: { label: string; value: string; href: string; type: string; }[]) => unknown, thisArg?: any): { label: string; value: string; href: string; type: string; } | undefined', gave the following error.
+    Argument of type 'undefined' is not assignable to parameter of type '(value: { label: string; value: string; href: string; type: string; }, index: number, obj: { label: string; value: string; href: string; type: string; }[]) => unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.html:79:60:
+[37m      79 │ ...ntactLinks.find([32mlink => link.type === 'whatsapp'[37m)?.href || '/co...
+         ╵                    [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AppComponent.
+
+    src/app/app.component.ts:12:15:
+[37m      12 │   templateUrl: [32m'./app.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m

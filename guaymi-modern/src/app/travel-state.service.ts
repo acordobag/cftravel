@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, effect, signal } from '@angular/core';
 
-import { PlaceOption, ReservationPayload, ShuttleQuote, Testimonial } from './models';
+import { CompanyProfile, ContactMethod, PlaceOption, ReservationPayload, ShuttleQuote, Testimonial } from './models';
 import { PricingService } from './pricing.service';
 
 const API_URL = 'http://localhost:8080/api';
@@ -41,6 +41,54 @@ export class TravelStateService {
     { value: 'Local', label: 'Costa Rica routing' }
   ];
 
+  readonly confidenceItems = [
+    { icon: 'SAFE', title: 'Safe & insured', text: 'Professional drivers, clean vehicles, and transfer planning built for Costa Rica roads.' },
+    { icon: 'TIME', title: 'Flight-aware timing', text: 'Airport pickups are planned around arrival windows, delays, luggage, and immigration time.' },
+    { icon: 'CHAT', title: 'Fast trip support', text: 'Clear communication before your ride, with route notes and schedule changes handled early.' },
+    { icon: 'VIP', title: 'Private comfort', text: 'Door-to-door Toyota HiAce service with room for families, luggage, custom stops, and longer travel days.' },
+    { icon: 'PRICE', title: 'Transparent fares', text: 'Route and operations distance stay visible so pricing feels easier to understand.' },
+    { icon: 'FAMILY', title: 'Family friendly', text: 'Comfort stops, direct hotel pickups, and vehicle planning for groups or extra bags.' }
+  ];
+
+  readonly routeHighlights = [
+    { value: 'SJO & LIR', label: 'Airport transfers' },
+    { value: '24/7', label: 'Travel-day support' },
+    { value: '4.9', label: 'Guest-style rating' }
+  ];
+
+  company: CompanyProfile = this.defaultCompany();
+  contactPhones = this.company.phones.filter((contact) => contact.type === 'phone').map((contact) => this.toDisplayContact(contact));
+  contactLinks = this.company.phones.map((contact) => this.toDisplayContact(contact));
+
+  get whatsappHref(): string {
+    return this.contactLinks.find((contact) => contact.type === 'whatsapp')?.href || '/contact-us';
+  }
+
+  readonly bookingSteps = [
+    { step: '01', title: 'Choose your route', text: 'Search your pickup and drop-off, then select passengers, date, and time.' },
+    { step: '02', title: 'Review the fare', text: 'See route distance, operations distance, and the estimated private transfer fare.' },
+    { step: '03', title: 'Confirm with support', text: 'Send your request and we confirm vehicle, timing, stops, and final details.' }
+  ];
+
+  readonly fleetHighlights = [
+    { title: 'Toyota HiAce 2026', text: 'Modern private shuttle van with air conditioning, generous luggage space, comfortable seating, and flexible stops for airport, beach, and hotel-to-hotel routes.' }
+  ];
+
+  readonly rateNotes = [
+    'No shared shuttle stops unless you request them',
+    'Route-aware pricing with clear distance breakdowns',
+    'Custom stops reviewed before final confirmation'
+  ];
+
+  readonly assuranceBadges = [
+    'Flight-aware pickups',
+    'Door-to-door service',
+    'WhatsApp support',
+    'Private routes',
+    'Family friendly',
+    'Custom stops'
+  ];
+
   readonly quote: ShuttleQuote = this.createQuote();
 
   readonly customer = {
@@ -56,8 +104,17 @@ export class TravelStateService {
 
   constructor(private readonly http: HttpClient, private readonly pricing: PricingService) {
     this.recalculate();
+    effect(() => {
+      this.pricing.pricingConfig();
+      this.recalculate();
+      this.reservationShuttles.update((shuttles) => shuttles.map((shuttle) => {
+        this.recalculate(shuttle);
+        return shuttle;
+      }));
+    }, { allowSignalWrites: true });
     this.loadPlaces();
     this.loadHeroImages();
+    this.loadCompany();
     this.loadTestimonials();
     window.setInterval(() => this.activeHero.update((value) => (value + 1) % this.heroImages.length), 5200);
   }
@@ -76,7 +133,7 @@ export class TravelStateService {
 
     quote.routeDistance = Math.round(routeDistance);
     quote.repositionDistance = Math.round(repositionDistance);
-    quote.total = this.pricing.estimate(quote.routeDistance, quote.repositionDistance);
+    quote.total = this.pricing.estimate(quote.routeDistance, quote.repositionDistance, quote.departing.id, quote.destination.id);
   }
 
   selectKnownPlace(quote: ShuttleQuote, kind: 'departing' | 'destination', name: string): void {
@@ -156,7 +213,7 @@ export class TravelStateService {
 
       quote.routeDistance = Math.round(routeDistance);
       quote.repositionDistance = Math.round(repositionDistance);
-      quote.total = this.pricing.estimate(quote.routeDistance, quote.repositionDistance);
+      quote.total = this.pricing.estimate(quote.routeDistance, quote.repositionDistance, quote.departing.id, quote.destination.id);
     } catch {
       quote.rateError = 'We could not calculate this route yet. Please check both locations.';
       this.recalculate(quote);
@@ -286,6 +343,26 @@ export class TravelStateService {
     });
   }
 
+  private loadCompany(): void {
+    this.http.get<CompanyProfile | null>(`${API_URL}/company`).subscribe({
+      next: (company) => {
+        if (!company) {
+          return;
+        }
+
+        this.company = { ...company, phones: company.phones || [] };
+        this.contactPhones = this.company.phones
+          .filter((contact) => contact.active !== false && contact.type === 'phone')
+          .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
+          .map((contact) => this.toDisplayContact(contact));
+        this.contactLinks = this.company.phones
+          .filter((contact) => contact.active !== false)
+          .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
+          .map((contact) => this.toDisplayContact(contact));
+      }
+    });
+  }
+
   private getRouteDistance(origin: { lat: number; lng: number }, destination: { lat: number; lng: number }): Promise<number> {
     return new Promise((resolve, reject) => {
       const service = new google.maps.DirectionsService();
@@ -339,5 +416,31 @@ export class TravelStateService {
       { id: 2, name: 'David R.', location: 'Austin, USA', route: 'Jaco to Manuel Antonio', rating: 5, comment: 'Clear pricing before booking and a relaxed private ride after a long travel day.', active: true },
       { id: 3, name: 'Sofia L.', location: 'Madrid, Spain', route: 'Liberia Airport to Tamarindo', rating: 5, comment: 'Our driver tracked the arrival time and was waiting when we landed. The whole transfer was smooth.', active: true }
     ];
+  }
+
+  private defaultCompany(): CompanyProfile {
+    return {
+      name: 'CR Travel Service',
+      email: 'reservations@crtravelservice.com',
+      tagline: 'Private shuttle transportation in Costa Rica',
+      address: 'Costa Rica',
+      website: 'https://crtravelservice.com',
+      isDefault: true,
+      phones: [
+        { type: 'phone', label: 'Costa Rica', code: 'Costa Rica', number: '+506 0000-0000', href: 'tel:+50600000000', active: true, sortOrder: 1 },
+        { type: 'phone', label: 'US & Canada', code: 'US & Canada', number: '+1 (800) 000-0000', href: 'tel:+18000000000', active: true, sortOrder: 2 },
+        { type: 'whatsapp', label: 'WhatsApp', code: 'WhatsApp', number: '+506 0000-0000', href: 'https://wa.me/50600000000', active: true, sortOrder: 3 },
+        { type: 'email', label: 'Email', code: 'Email', number: 'reservations@crtravelservice.com', href: 'mailto:reservations@crtravelservice.com', active: true, sortOrder: 4 }
+      ]
+    };
+  }
+
+  private toDisplayContact(contact: ContactMethod): { label: string; value: string; href: string; type: string } {
+    return {
+      label: contact.label || contact.code || contact.type,
+      value: contact.number,
+      href: contact.href || (contact.type === 'email' ? `mailto:${contact.number}` : contact.type === 'phone' ? `tel:${contact.number.replace(/[^+0-9]/g, '')}` : '/contact-us'),
+      type: contact.type
+    };
   }
 }

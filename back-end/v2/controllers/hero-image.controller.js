@@ -25,6 +25,39 @@ const HeroImage = {
     } catch (e) {
       next(e)
     }
+  },
+
+  save: async (req, res, next) => {
+    try {
+      const image = await Image.create({ src: req.body.src, placeId: null })
+      res.status(201).send(image).end()
+    } catch (e) {
+      next(e)
+    }
+  },
+
+  update: async (req, res, next) => {
+    try {
+      const image = await Image.findOne({ where: { id: req.params.id, placeId: null } })
+      if (!image) {
+        return res.status(404).json({ message: 'Hero image not found.' })
+      }
+
+      image.src = req.body.src
+      await image.save()
+      res.status(200).send(image).end()
+    } catch (e) {
+      next(e)
+    }
+  },
+
+  delete: async (req, res, next) => {
+    try {
+      await Image.destroy({ where: { id: req.params.id, placeId: null } })
+      res.status(200).send({ success: true }).end()
+    } catch (e) {
+      next(e)
+    }
   }
 }
 

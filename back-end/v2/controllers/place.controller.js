@@ -57,6 +57,41 @@ const Place = {
         } catch (e) {
             next(e)
         }
+    },
+
+    update: async (req, res, next) => {
+        try {
+            const place = await PlaceModel.findOne({ where: { id: req.params.id }, include: [{ model: Image }] })
+            if (!place) {
+                return res.status(404).json({ message: 'Place not found.' })
+            }
+
+            place.name = req.body.name
+            place.description = req.body.description
+            await place.save()
+
+            if (req.body.image) {
+                const image = place.images && place.images.length ? place.images[0] : await Image.create({ placeId: place.id })
+                image.src = req.body.image
+                image.placeId = place.id
+                await image.save()
+            }
+
+            const updated = await PlaceModel.findOne({ where: { id: req.params.id }, include: [{ model: Image }] })
+            res.status(200).send(updated).end()
+        } catch (e) {
+            next(e)
+        }
+    },
+
+    delete: async (req, res, next) => {
+        try {
+            await Image.destroy({ where: { placeId: req.params.id } })
+            await PlaceModel.destroy({ where: { id: req.params.id } })
+            res.status(200).send({ success: true }).end()
+        } catch (e) {
+            next(e)
+        }
     }
 }
 

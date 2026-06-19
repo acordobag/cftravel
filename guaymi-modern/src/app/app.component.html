@@ -1,18 +1,79 @@
+<div class="top-strip">
+  <div class="top-strip-copy">
+    <span>Private Costa Rica transfers</span>
+    <span>Airport, hotel-to-hotel, custom stops</span>
+  </div>
+  <div class="top-strip-phones">
+    <a *ngFor="let phone of state.contactPhones" [href]="phone.href">
+      <span>{{ phone.label }}</span>
+      <strong>{{ phone.value }}</strong>
+    </a>
+    <a class="whatsapp-link" routerLink="/contact-us">WhatsApp quote</a>
+  </div>
+</div>
+
 <nav class="site-nav">
-  <a class="brand" routerLink="/home">CR Travel Service</a>
+  <a class="brand" routerLink="/home" aria-label="CR Travel Service home">
+    <img src="assets/images/cr-travel-service-logo.svg" alt="CR Travel Service">
+  </a>
   <div class="nav-links">
     <a routerLink="/home" routerLinkActive="active">Book</a>
     <a routerLink="/services" routerLinkActive="active">Services</a>
     <a routerLink="/destinations" routerLinkActive="active">Destinations</a>
+    <a routerLink="/fleet" routerLinkActive="active">Fleet</a>
     <a routerLink="/testimonials" routerLinkActive="active">Testimonials</a>
     <a routerLink="/about-us" routerLinkActive="active">About</a>
     <a routerLink="/contact-us" routerLinkActive="active">Contact</a>
+    <a routerLink="/account" routerLinkActive="active" *ngIf="stateAuth.currentUser() && !stateAuth.isPrivileged()">Account</a>
+    <a routerLink="/admin" routerLinkActive="active" *ngIf="stateAuth.isPrivileged()">Admin</a>
+    <a routerLink="/login" routerLinkActive="active" *ngIf="!stateAuth.currentUser()">Login</a>
+    <button type="button" class="nav-link-button" *ngIf="stateAuth.currentUser()" (click)="stateAuth.logout()">Logout</button>
+    <a class="nav-cta" routerLink="/reservation">Reserve now</a>
   </div>
 </nav>
 
 <router-outlet></router-outlet>
 
-<footer>
-  <strong>CR Travel Service</strong>
-  <span>Private shuttle transportation in Costa Rica</span>
+<footer class="site-footer">
+  <div class="footer-inner">
+    <section class="footer-brand">
+      <img src="assets/images/cr-travel-service-logo.svg" alt="CR Travel Service">
+      <p>{{ state.company.tagline || 'Private shuttle transportation for airports, hotels, beaches, and custom Costa Rica travel days.' }}</p>
+      <div class="footer-badges">
+        <span>Private transfers</span>
+        <span>Custom stops</span>
+        <span>Flight-aware pickups</span>
+      </div>
+    </section>
+
+    <section>
+      <h3>Contact</h3>
+      <a *ngFor="let phone of state.contactPhones" [href]="phone.href">{{ phone.label }}: {{ phone.value }}</a>
+      <a *ngFor="let link of state.contactLinks" [href]="link.href" [hidden]="link.type === 'phone'">{{ link.label }}: {{ link.value }}</a>
+      <span *ngIf="state.company.address">{{ state.company.address }}</span>
+    </section>
+
+    <section>
+      <h3>Explore</h3>
+      <a routerLink="/home">Book</a>
+      <a routerLink="/services">Services</a>
+      <a routerLink="/destinations">Destinations</a>
+      <a routerLink="/fleet">Fleet</a>
+      <a routerLink="/testimonials">Testimonials</a>
+    </section>
+
+    <section>
+      <h3>Popular Routes</h3>
+      <span>SJO Airport to La Fortuna</span>
+      <span>SJO Airport to Jaco Beach</span>
+      <span>Jaco Beach to Manuel Antonio</span>
+      <span>Liberia routes by request</span>
+    </section>
+  </div>
+  <div class="footer-bottom">
+    <span>{{ state.company.name }}</span>
+    <span>{{ state.company.tagline || 'Private shuttle transportation in Costa Rica' }}</span>
+  </div>
 </footer>
+
+<a class="floating-contact" [href]="state.whatsappHref">WhatsApp quote</a>
