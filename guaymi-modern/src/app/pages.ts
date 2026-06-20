@@ -1,8 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, ElementRef, Input, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, NgZone, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
+import { I18nService } from './i18n.service';
+import { PhoneFieldComponent } from './phone-field.component';
 import { TravelStateService } from './travel-state.service';
 import { ShuttleQuote } from './models';
 declare const google: any;
@@ -34,71 +36,81 @@ export class PageHeroComponent {
     <section class="booking-card" [class.booking-card-compact]="compact">
       <div class="booking-heading">
         <div>
-          <p class="eyebrow" *ngIf="!compact">Private shuttle booking</p>
-          <h2>{{ compact ? 'Transfer ' + number : 'Plan your Costa Rica transfer' }}</h2>
+          <p class="eyebrow" *ngIf="!compact">{{ i18n.tx().booking.eyebrow }}</p>
+          <h2>{{ compact ? i18n.tx().booking.compactPrefix + ' ' + number : i18n.tx().booking.heading }}</h2>
         </div>
-        <div class="fare-pill" *ngIf="activeQuote.total > 0">
-          <span>Estimated fare</span>
+        <div class="fare-pill" *ngIf="activeQuote.total > 0 && !activeQuote.isCalculating">
+          <span>{{ i18n.tx().booking.estimatedFare }}</span>
           <strong>\${{ activeQuote.total | number:'1.2-2' }}</strong>
+        </div>
+        <div class="fare-pill fare-pill-calculating" *ngIf="activeQuote.isCalculating">
+          <span>{{ i18n.tx().booking.calculatingRoute }}</span>
+          <span class="fare-spinner"></span>
         </div>
       </div>
 
       <form class="booking-form">
-        <label class="field field-wide">
-          <span>Departing from</span>
+        <label class="field field-wide" [class.field-loading]="activeQuote.isCalculating && resolvingKind === 'departing'">
+          <span>{{ i18n.tx().booking.departing }}</span>
           <input
             #departingInput
             type="text"
             name="departing"
             list="departing-options"
             [(ngModel)]="activeQuote.departingSearch"
-            (change)="state.selectKnownPlace(activeQuote, 'departing', activeQuote.departingSearch)"
+            (change)="onPlaceChange('departing')"
             autocomplete="off"
             required>
+          <span class="field-spinner" *ngIf="activeQuote.isCalculating && resolvingKind === 'departing'"></span>
           <datalist id="departing-options">
             <option *ngFor="let place of state.places" [value]="place.name"></option>
           </datalist>
         </label>
-        <label class="field field-wide">
-          <span>Going to</span>
+        <label class="field field-wide" [class.field-loading]="activeQuote.isCalculating && resolvingKind === 'destination'">
+          <span>{{ i18n.tx().booking.destination }}</span>
           <input
             #destinationInput
             type="text"
             name="destination"
             list="destination-options"
             [(ngModel)]="activeQuote.destinationSearch"
-            (change)="state.selectKnownPlace(activeQuote, 'destination', activeQuote.destinationSearch)"
+            (change)="onPlaceChange('destination')"
             autocomplete="off"
             required>
+          <span class="field-spinner" *ngIf="activeQuote.isCalculating && resolvingKind === 'destination'"></span>
           <datalist id="destination-options">
             <option *ngFor="let place of state.places" [value]="place.name"></option>
           </datalist>
         </label>
         <label class="field">
-          <span>Passengers</span>
+          <span>{{ i18n.tx().booking.passengers }}</span>
           <input type="number" name="passengers" min="1" max="20" [(ngModel)]="activeQuote.passengers" required>
         </label>
         <label class="field">
-          <span>Pickup date</span>
+          <span>{{ i18n.tx().booking.date }}</span>
           <input type="date" name="date" [min]="state.today" [(ngModel)]="activeQuote.date" required>
         </label>
         <label class="field">
-          <span>Pickup time</span>
+          <span>{{ i18n.tx().booking.time }}</span>
           <input type="time" name="time" [(ngModel)]="activeQuote.time" required>
         </label>
       </form>
 
-      <div class="rate-status" *ngIf="activeQuote.isCalculating">Calculating the best route...</div>
       <div class="rate-error" *ngIf="activeQuote.rateError">{{ activeQuote.rateError }}</div>
 
-      <div class="rate-breakdown" *ngIf="activeQuote.total > 0">
-        <div><span>Route</span><strong>{{ activeQuote.routeDistance }} km</strong></div>
-        <div><span>Operations distance</span><strong>{{ activeQuote.repositionDistance }} km</strong></div>
-        <div><span>Total</span><strong>\${{ activeQuote.total | number:'1.2-2' }}</strong></div>
+      <div class="rate-breakdown" *ngIf="activeQuote.total > 0 && !activeQuote.isCalculating">
+        <div><span>{{ i18n.tx().booking.routeLabel }}</span><strong>{{ activeQuote.routeDistance }} km</strong></div>
+        <div><span>{{ i18n.tx().booking.operationsLabel }}</span><strong>{{ activeQuote.repositionDistance }} km</strong></div>
+        <div><span>{{ i18n.tx().booking.totalLabel }}</span><strong>\${{ activeQuote.total | number:'1.2-2' }}</strong></div>
+      </div>
+      <div class="rate-breakdown rate-breakdown-skeleton" *ngIf="activeQuote.isCalculating">
+        <div><span>{{ i18n.tx().booking.routeLabel }}</span><strong class="skeleton-bar"></strong></div>
+        <div><span>{{ i18n.tx().booking.operationsLabel }}</span><strong class="skeleton-bar"></strong></div>
+        <div><span>{{ i18n.tx().booking.totalLabel }}</span><strong class="skeleton-bar"></strong></div>
       </div>
 
       <div class="booking-actions" *ngIf="!compact">
-        <button type="button" class="primary-action" [disabled]="activeQuote.total <= 0" (click)="continueBooking()">Continue booking</button>
+        <button type="button" class="primary-action" [disabled]="activeQuote.total <= 0 || activeQuote.isCalculating" (click)="continueBooking()">{{ i18n.tx().booking.continueBtn }}</button>
       </div>
     </section>
   `
@@ -110,7 +122,9 @@ export class BookingCardComponent {
   @ViewChild('departingInput') departingInput?: ElementRef<HTMLInputElement>;
   @ViewChild('destinationInput') destinationInput?: ElementRef<HTMLInputElement>;
 
-  constructor(public readonly state: TravelStateService, private readonly router: Router) {}
+  resolvingKind: 'departing' | 'destination' | null = null;
+
+  constructor(public readonly state: TravelStateService, private readonly router: Router, private readonly zone: NgZone, public readonly i18n: I18nService) {}
 
   get activeQuote(): ShuttleQuote {
     return this.quote || this.state.quote;
@@ -119,6 +133,14 @@ export class BookingCardComponent {
   ngAfterViewInit(): void {
     this.attachAutocomplete(this.departingInput, 'departing');
     this.attachAutocomplete(this.destinationInput, 'destination');
+  }
+
+  onPlaceChange(kind: 'departing' | 'destination'): void {
+    this.resolvingKind = kind;
+    this.state.selectKnownPlace(this.activeQuote, kind,
+      kind === 'departing' ? this.activeQuote.departingSearch : this.activeQuote.destinationSearch
+    );
+    this.resolvingKind = null;
   }
 
   continueBooking(): void {
@@ -145,7 +167,11 @@ export class BookingCardComponent {
     });
 
     autocomplete.addListener('place_changed', () => {
-      this.state.setGooglePlace(this.activeQuote, kind, autocomplete.getPlace());
+      this.zone.run(async () => {
+        this.resolvingKind = kind;
+        await this.state.setGooglePlace(this.activeQuote, kind, autocomplete.getPlace());
+        this.resolvingKind = null;
+      });
     });
   }
 }
@@ -156,40 +182,35 @@ export class BookingCardComponent {
   template: `
     <section class="hero" [style.background-image]="'linear-gradient(90deg, rgba(10, 20, 34, 0.76), rgba(10, 20, 34, 0.24)), url(' + state.heroImages[state.activeHero()] + ')'">
       <div class="hero-content">
-        <p class="eyebrow">Costa Rica private transportation</p>
-        <h1>CR Travel Service</h1>
-        <p>Book a private shuttle with route-aware pricing, direct pickups, and flexible stops for real travel days.</p>
+        <p class="eyebrow">{{ i18n.tx().hero.eyebrow }}</p>
+        <h1>{{ i18n.tx().hero.h1 }}</h1>
+        <p>{{ i18n.tx().hero.p }}</p>
         <div class="hero-actions">
-          <a routerLink="/reservation" class="hero-button">Book your ride</a>
-          <a routerLink="/destinations" class="hero-link">Explore routes</a>
+          <a routerLink="/reservation" class="hero-button">{{ i18n.tx().hero.cta }}</a>
+          <a routerLink="/destinations" class="hero-link">{{ i18n.tx().hero.ctaLink }}</a>
         </div>
         <div class="hero-stats">
-          <div *ngFor="let item of state.routeHighlights"><strong>{{ item.value }}</strong><span>{{ item.label }}</span></div>
+          <div *ngFor="let item of i18n.tx().routeHighlights"><strong>{{ item.value }}</strong><span>{{ item.label }}</span></div>
         </div>
       </div>
     </section>
     <app-booking-card></app-booking-card>
     <section class="route-promises page-band">
-      <div><strong>Door-to-door</strong><span>Hotel, villa, airport and marina pickups</span></div>
-      <div><strong>Stops by request</strong><span>Groceries, lunch, viewpoints and comfort breaks</span></div>
-      <div><strong>Private vehicles</strong><span>Space planned around passengers and luggage</span></div>
+      <div *ngFor="let p of i18n.tx().promises"><strong>{{ p.title }}</strong><span>{{ p.text }}</span></div>
     </section>
     <section class="assurance-strip page-band">
-      <span *ngFor="let badge of state.assuranceBadges">{{ badge }}</span>
+      <span *ngFor="let badge of i18n.tx().assurance">{{ badge }}</span>
     </section>
     <section class="quick-grid page-band">
-      <a routerLink="/services" class="quick-card"><span>Services</span><strong>Airport, hotel-to-hotel, multi-stop routes</strong></a>
-      <a routerLink="/destinations" class="quick-card"><span>Destinations</span><strong>Explore popular Costa Rica transfers</strong></a>
-      <a routerLink="/fleet" class="quick-card"><span>Fleet</span><strong>Private shuttle fleet</strong></a>
-      <a routerLink="/testimonials" class="quick-card"><span>Testimonials</span><strong>Traveler notes from the road</strong></a>
+      <a *ngFor="let card of i18n.tx().quickGrid" [routerLink]="card.path" class="quick-card"><span>{{ card.label }}</span><strong>{{ card.text }}</strong></a>
     </section>
     <section class="process-section">
       <div class="section-heading centered">
-        <p class="eyebrow">How it works</p>
-        <h2>Book without guessing the route</h2>
+        <p class="eyebrow">{{ i18n.tx().howItWorks.eyebrow }}</p>
+        <h2>{{ i18n.tx().howItWorks.heading }}</h2>
       </div>
       <div class="process-grid">
-        <article class="process-card" *ngFor="let item of state.bookingSteps">
+        <article class="process-card" *ngFor="let item of i18n.tx().bookingSteps">
           <span>{{ item.step }}</span>
           <h3>{{ item.title }}</h3>
           <p>{{ item.text }}</p>
@@ -198,11 +219,11 @@ export class BookingCardComponent {
     </section>
     <section class="services-section">
       <div class="section-heading">
-        <p class="eyebrow">Services</p>
-        <h2>Built around private travel days</h2>
+        <p class="eyebrow">{{ i18n.tx().servicesSection.eyebrow }}</p>
+        <h2>{{ i18n.tx().servicesSection.heading }}</h2>
       </div>
       <div class="service-grid">
-        <article class="service-card" *ngFor="let service of state.services">
+        <article class="service-card" *ngFor="let service of i18n.tx().services">
           <div class="service-icon" [ngSwitch]="service.icon">
             <svg *ngSwitchCase="'AIR'" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M2.5 16.5 21 3.5l-5 17-4.4-7.1-6.8 3.3-2.3-.2Zm4.8-2.8 5.1-2.5 2.3 3.7 2.5-8.6-9.9 7.4Z"/>
@@ -222,11 +243,11 @@ export class BookingCardComponent {
     </section>
     <section class="confidence-section">
       <div class="section-heading centered">
-        <p class="eyebrow">Travel with confidence</p>
-        <h2>Built for real Costa Rica travel days</h2>
+        <p class="eyebrow">{{ i18n.tx().confidenceSection.eyebrow }}</p>
+        <h2>{{ i18n.tx().confidenceSection.heading }}</h2>
       </div>
       <div class="confidence-grid">
-        <article class="confidence-card" *ngFor="let item of state.confidenceItems">
+        <article class="confidence-card" *ngFor="let item of i18n.tx().confidenceItems">
           <div class="confidence-icon" [ngSwitch]="item.icon">
             <svg *ngSwitchCase="'SAFE'" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22c-4.7-1.4-8-5.8-8-10.7V5l8-3 8 3v6.3c0 4.9-3.3 9.3-8 10.7Zm0-2.1c3.5-1.2 6-4.6 6-8.6V6.4l-6-2.3-6 2.3v4.9c0 4 2.5 7.4 6 8.6Zm-1.1-5.1 5-5-1.4-1.4-3.6 3.6-1.4-1.4-1.4 1.4 2.8 2.8Z"/></svg>
             <svg *ngSwitchCase="'TIME'" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20Zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm1-8.4 3.3 3.3-1.4 1.4-3.9-3.9V6h2v5.6Z"/></svg>
@@ -242,33 +263,30 @@ export class BookingCardComponent {
     </section>
     <section class="fleet-section">
       <div class="section-heading">
-        <p class="eyebrow">Fleet</p>
-        <h2>One modern private shuttle, planned carefully for every route</h2>
+        <p class="eyebrow">{{ i18n.tx().fleetSection.eyebrow }}</p>
+        <h2>{{ i18n.tx().fleetSection.heading }}</h2>
       </div>
       <div class="fleet-grid">
-        <article class="fleet-card" *ngFor="let item of state.fleetHighlights">
+        <article class="fleet-card" *ngFor="let item of i18n.tx().fleetHighlights">
           <img src="assets/images/bus.png" alt="Private shuttle vehicle">
-          <div>
-            <h3>{{ item.title }}</h3>
-            <p>{{ item.text }}</p>
-          </div>
+          <div><h3>{{ item.title }}</h3><p>{{ item.text }}</p></div>
         </article>
       </div>
     </section>
     <section class="trust-band">
       <div class="trust-copy">
-        <p class="eyebrow">Why choose CR Travel Service</p>
-        <h2>Clear transfer planning before the road begins</h2>
-        <p>Compare your route, see the estimated fare, and send one clean booking request for single or multi-transfer itineraries.</p>
+        <p class="eyebrow">{{ i18n.tx().trustSection.eyebrow }}</p>
+        <h2>{{ i18n.tx().trustSection.heading }}</h2>
+        <p>{{ i18n.tx().trustSection.p }}</p>
       </div>
       <div class="trust-grid">
-        <div *ngFor="let item of state.trustItems"><strong>{{ item.value }}</strong><span>{{ item.label }}</span></div>
+        <div *ngFor="let item of i18n.tx().trustItems"><strong>{{ item.value }}</strong><span>{{ item.label }}</span></div>
       </div>
     </section>
     <section class="destinations-section">
       <div class="section-heading">
-        <p class="eyebrow">Popular routes</p>
-        <h2>Costa Rica destinations</h2>
+        <p class="eyebrow">{{ i18n.tx().destSection.eyebrow }}</p>
+        <h2>{{ i18n.tx().destSection.heading }}</h2>
       </div>
       <div class="destination-grid">
         <article class="destination-card" *ngFor="let place of state.places.slice(0, 4)">
@@ -279,24 +297,26 @@ export class BookingCardComponent {
     </section>
     <section class="split-cta">
       <div>
-        <p class="eyebrow">Private routes, simple planning</p>
-        <h2>Airport transfers, beach transfers, and custom travel days in one flow.</h2>
+        <p class="eyebrow">{{ i18n.tx().splitCta.eyebrow }}</p>
+        <h2>{{ i18n.tx().splitCta.heading }}</h2>
       </div>
-      <a routerLink="/reservation" class="cta-button">Reserve now</a>
+      <a routerLink="/reservation" class="cta-button">{{ i18n.tx().splitCta.btn }}</a>
     </section>
     <section class="experience-section">
       <div class="experience-media"><img src="assets/images/bus.png" alt="Private shuttle van"></div>
       <div class="experience-copy">
-        <p class="eyebrow">Ride experience</p>
-        <h2>Private vans, planned stops, smoother handoffs</h2>
-        <p>Long routes in Costa Rica can include mountain roads, ferry timing, beach traffic, and airport deadlines. The booking flow keeps the operational distance visible so pricing is easier to understand.</p>
-        <div class="experience-list"><span>Air-conditioned vehicles</span><span>Hotel and villa pickups</span><span>Custom stops by request</span></div>
+        <p class="eyebrow">{{ i18n.tx().experienceSection.eyebrow }}</p>
+        <h2>{{ i18n.tx().experienceSection.heading }}</h2>
+        <p>{{ i18n.tx().experienceSection.p }}</p>
+        <div class="experience-list">
+          <span *ngFor="let item of i18n.tx().experienceSection.items">{{ item }}</span>
+        </div>
       </div>
     </section>
     <section class="testimonials-section">
       <div class="section-heading centered">
-        <p class="eyebrow">Testimonials</p>
-        <h2>Traveler notes from the road</h2>
+        <p class="eyebrow">{{ i18n.tx().testimonialSection.eyebrow }}</p>
+        <h2>{{ i18n.tx().testimonialSection.heading }}</h2>
       </div>
       <article class="testimonial-card" *ngIf="state.currentTestimonial() as testimonial">
         <div class="stars" aria-label="Five star rating">&starf;&starf;&starf;&starf;&starf;</div>
@@ -313,36 +333,29 @@ export class BookingCardComponent {
     </section>
     <section class="final-cta">
       <div>
-        <p class="eyebrow">Ready when your route is</p>
-        <h2>Build your private transfer request in minutes</h2>
+        <p class="eyebrow">{{ i18n.tx().finalCta.eyebrow }}</p>
+        <h2>{{ i18n.tx().finalCta.heading }}</h2>
       </div>
-      <a class="cta-button" routerLink="/reservation">Start with your route</a>
+      <a class="cta-button" routerLink="/reservation">{{ i18n.tx().finalCta.btn }}</a>
     </section>
   `
 })
 export class HomePageComponent {
-  constructor(public readonly state: TravelStateService) {}
+  constructor(public readonly state: TravelStateService, public readonly i18n: I18nService) {}
 }
 
 @Component({
   standalone: true,
   imports: [CommonModule, PageHeroComponent],
   template: `
-    <app-page-hero title="Services" eyebrow="Private shuttle options" text="Focused transport products for common Costa Rica travel days."></app-page-hero>
+    <app-page-hero [title]="i18n.tx().servicesPage.title" [eyebrow]="i18n.tx().servicesPage.eyebrow" [text]="i18n.tx().servicesPage.text"></app-page-hero>
     <section class="services-section page-content">
       <div class="service-grid">
-        <article class="service-card" *ngFor="let service of state.services">
+        <article class="service-card" *ngFor="let service of i18n.tx().services">
           <div class="service-icon" [ngSwitch]="service.icon">
-            <svg *ngSwitchCase="'AIR'" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M2.5 16.5 21 3.5l-5 17-4.4-7.1-6.8 3.3-2.3-.2Zm4.8-2.8 5.1-2.5 2.3 3.7 2.5-8.6-9.9 7.4Z"/>
-            </svg>
-            <svg *ngSwitchCase="'H2H'" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M4 20V9.7L12 4l8 5.7V20h-5.7v-6.1H9.7V20H4Zm2-2h1.7v-6.1h8.6V18H18v-7.2l-6-4.3-6 4.3V18Z"/>
-            </svg>
-            <svg *ngSwitchCase="'ADD'" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2v-6Z"/>
-              <path d="M4 4h5v2H6v3H4V4Zm11 0h5v5h-2V6h-3V4ZM4 15h2v3h3v2H4v-5Zm14 0h2v5h-5v-2h3v-3Z"/>
-            </svg>
+            <svg *ngSwitchCase="'AIR'" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 16.5 21 3.5l-5 17-4.4-7.1-6.8 3.3-2.3-.2Zm4.8-2.8 5.1-2.5 2.3 3.7 2.5-8.6-9.9 7.4Z"/></svg>
+            <svg *ngSwitchCase="'H2H'" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V9.7L12 4l8 5.7V20h-5.7v-6.1H9.7V20H4Zm2-2h1.7v-6.1h8.6V18H18v-7.2l-6-4.3-6 4.3V18Z"/></svg>
+            <svg *ngSwitchCase="'ADD'" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2v-6Z"/><path d="M4 4h5v2H6v3H4V4Zm11 0h5v5h-2V6h-3V4ZM4 15h2v3h3v2H4v-5Zm14 0h2v5h-5v-2h3v-3Z"/></svg>
           </div>
           <h3>{{ service.title }}</h3>
           <p>{{ service.text }}</p>
@@ -351,47 +364,44 @@ export class HomePageComponent {
     </section>
     <section class="trust-band">
       <div class="trust-copy">
-        <p class="eyebrow">Why choose CR Travel Service</p>
-        <h2>Clear transfer planning before the road begins</h2>
-        <p>Compare your route, see the estimated fare, and send one clean request for single or multi-stop itineraries.</p>
+        <p class="eyebrow">{{ i18n.tx().trustSection.eyebrow }}</p>
+        <h2>{{ i18n.tx().trustSection.heading }}</h2>
+        <p>{{ i18n.tx().trustSection.p }}</p>
       </div>
       <div class="trust-grid">
-        <div *ngFor="let item of state.trustItems"><strong>{{ item.value }}</strong><span>{{ item.label }}</span></div>
+        <div *ngFor="let item of i18n.tx().trustItems"><strong>{{ item.value }}</strong><span>{{ item.label }}</span></div>
       </div>
     </section>
   `
 })
 export class ServicesPageComponent {
-  constructor(public readonly state: TravelStateService) {}
+  constructor(public readonly i18n: I18nService) {}
 }
 
 @Component({
   standalone: true,
   imports: [CommonModule, PageHeroComponent],
   template: `
-    <app-page-hero title="Fleet" eyebrow="Comfort on the road" text="Modern private shuttle transportation planned around passengers, luggage, pickup locations, and long Costa Rica routes."></app-page-hero>
+    <app-page-hero [title]="i18n.tx().fleetPage.title" [eyebrow]="i18n.tx().fleetPage.eyebrow" [text]="i18n.tx().fleetPage.text"></app-page-hero>
     <section class="fleet-section page-content">
       <div class="fleet-grid">
-        <article class="fleet-card" *ngFor="let item of state.fleetHighlights">
+        <article class="fleet-card" *ngFor="let item of i18n.tx().fleetHighlights">
           <img src="assets/images/bus.png" alt="Private shuttle vehicle">
-          <div>
-            <h3>{{ item.title }}</h3>
-            <p>{{ item.text }}</p>
-          </div>
+          <div><h3>{{ item.title }}</h3><p>{{ item.text }}</p></div>
         </article>
       </div>
     </section>
   `
 })
 export class FleetPageComponent {
-  constructor(public readonly state: TravelStateService) {}
+  constructor(public readonly i18n: I18nService) {}
 }
 
 @Component({
   standalone: true,
   imports: [CommonModule, PageHeroComponent],
   template: `
-    <app-page-hero title="Destinations" eyebrow="Popular routes" text="Private transfers to airports, beaches, volcano towns, and cloud forest stays."></app-page-hero>
+    <app-page-hero [title]="i18n.tx().destPage.title" [eyebrow]="i18n.tx().destPage.eyebrow" [text]="i18n.tx().destPage.text"></app-page-hero>
     <section class="destinations-section page-content">
       <div class="destination-grid">
         <article class="destination-card" *ngFor="let place of state.places">
@@ -403,14 +413,14 @@ export class FleetPageComponent {
   `
 })
 export class DestinationsPageComponent {
-  constructor(public readonly state: TravelStateService) {}
+  constructor(public readonly state: TravelStateService, public readonly i18n: I18nService) {}
 }
 
 @Component({
   standalone: true,
   imports: [CommonModule, PageHeroComponent],
   template: `
-    <app-page-hero title="Testimonials" eyebrow="Traveler notes" text="Real feedback shown as route-aware cards from the local API when available."></app-page-hero>
+    <app-page-hero [title]="i18n.tx().testimonialsPage.title" [eyebrow]="i18n.tx().testimonialsPage.eyebrow" [text]="i18n.tx().testimonialsPage.text"></app-page-hero>
     <section class="testimonials-section page-content">
       <article class="testimonial-card" *ngIf="state.currentTestimonial() as testimonial">
         <div class="stars" aria-label="Five star rating">&starf;&starf;&starf;&starf;&starf;</div>
@@ -428,30 +438,30 @@ export class DestinationsPageComponent {
   `
 })
 export class TestimonialsPageComponent {
-  constructor(public readonly state: TravelStateService) {}
+  constructor(public readonly state: TravelStateService, public readonly i18n: I18nService) {}
 }
 
 @Component({
   selector: 'app-reservation-form',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PhoneFieldComponent],
   template: `
     <form class="reservation-form" #reservationForm="ngForm" (ngSubmit)="state.submitReservation()">
-      <input name="name" placeholder="First name" [(ngModel)]="state.customer.name" required>
-      <input name="lastName" placeholder="Last name" [(ngModel)]="state.customer.lastName" required>
-      <input name="phone" placeholder="Phone" [(ngModel)]="state.customer.phone" required>
+      <input name="name" [placeholder]="i18n.tx().reservation.firstName" [(ngModel)]="state.customer.name" required>
+      <input name="lastName" [placeholder]="i18n.tx().reservation.lastName" [(ngModel)]="state.customer.lastName" required>
+      <app-phone-field name="phone" [placeholder]="i18n.tx().signup.phonePlaceholder" [required]="true" [(ngModel)]="state.customer.phone"></app-phone-field>
       <input name="email" type="email" placeholder="Email" [(ngModel)]="state.customer.email" required>
-      <textarea name="notes" placeholder="Trip notes" rows="4" [(ngModel)]="state.customer.notes"></textarea>
+      <textarea name="notes" [placeholder]="i18n.tx().reservation.notes" rows="4" [(ngModel)]="state.customer.notes"></textarea>
       <div class="submit-row">
-        <button type="submit" class="primary-action" [disabled]="reservationForm.invalid || !state.canSubmitReservation()">Send booking request</button>
+        <button type="submit" class="primary-action" [disabled]="reservationForm.invalid || !state.canSubmitReservation()">{{ i18n.tx().reservation.sendBtn }}</button>
       </div>
-      <p class="success" *ngIf="state.reservationSent()">Request sent. We will follow up shortly.</p>
+      <p class="success" *ngIf="state.reservationSent()">{{ i18n.tx().reservation.successMsg }}</p>
       <p class="error" *ngIf="state.reservationError()">{{ state.reservationError() }}</p>
     </form>
   `
 })
 export class ReservationFormComponent {
-  constructor(public readonly state: TravelStateService) {}
+  constructor(public readonly state: TravelStateService, public readonly i18n: I18nService) {}
 }
 
 @Component({
@@ -461,35 +471,31 @@ export class ReservationFormComponent {
     <section class="reservation-page">
       <div class="reservation-shell">
         <div class="reservation-heading">
-          <p class="eyebrow">Booking request</p>
-          <h1>Review your private transfer</h1>
+          <p class="eyebrow">{{ i18n.tx().reservation.eyebrow }}</p>
+          <h1>{{ i18n.tx().reservation.heading }}</h1>
         </div>
 
-        <div class="passenger-alert" *ngIf="hasLargeParty()">
-          Larger parties may require a custom vehicle assignment. We will confirm the best option before payment.
-        </div>
+        <div class="passenger-alert" *ngIf="hasLargeParty()">{{ i18n.tx().reservation.largeParty }}</div>
 
         <div class="transfer-list">
           <div class="transfer-item" *ngFor="let transfer of state.reservationShuttles(); let index = index">
             <app-booking-card [quote]="transfer" [compact]="true" [number]="index + 1"></app-booking-card>
-            <button
-              type="button"
-              class="remove-transfer"
+            <button type="button" class="remove-transfer"
               *ngIf="state.reservationShuttles().length > 1"
               (click)="state.removeReservationShuttle(transfer.uid)">
-              Remove transfer
+              {{ i18n.tx().reservation.removeTransfer }}
             </button>
           </div>
         </div>
 
         <div class="transfer-actions">
-          <button type="button" class="secondary-action" (click)="state.addReservationShuttle()">Add another transfer</button>
+          <button type="button" class="secondary-action" (click)="state.addReservationShuttle()">{{ i18n.tx().reservation.addTransfer }}</button>
         </div>
 
         <section class="details-panel">
           <div class="panel-heading">
-            <p class="eyebrow">Traveler details</p>
-            <h2>Contact information</h2>
+            <p class="eyebrow">{{ i18n.tx().reservation.travelerEyebrow }}</p>
+            <h2>{{ i18n.tx().reservation.travelerHeading }}</h2>
           </div>
           <app-reservation-form></app-reservation-form>
         </section>
@@ -498,7 +504,7 @@ export class ReservationFormComponent {
   `
 })
 export class ReservationPageComponent {
-  constructor(public readonly state: TravelStateService) {
+  constructor(public readonly state: TravelStateService, public readonly i18n: I18nService) {
     if (!this.state.reservationShuttles().length) {
       this.state.startReservationFromQuote();
     }
@@ -511,35 +517,41 @@ export class ReservationPageComponent {
 
 @Component({
   standalone: true,
-  imports: [PageHeroComponent],
+  imports: [CommonModule, PageHeroComponent],
   template: `
-    <app-page-hero title="About" eyebrow="Local operations" text="CR Travel Service is built around private shuttle planning for Costa Rica routes."></app-page-hero>
+    <app-page-hero [title]="i18n.tx().aboutPage.title" [eyebrow]="i18n.tx().aboutPage.eyebrow" [text]="i18n.tx().aboutPage.text"></app-page-hero>
     <section class="experience-section">
       <div class="experience-media"><img src="assets/images/bus.png" alt="Private shuttle van"></div>
       <div class="experience-copy">
-        <p class="eyebrow">Ride experience</p>
-        <h2>Private vans, planned stops, smoother handoffs</h2>
-        <p>Long routes can include mountain roads, beach traffic, ferry timing, and airport deadlines. The quote keeps route and operations distance visible.</p>
-        <div class="experience-list"><span>Air-conditioned vehicles</span><span>Hotel and villa pickups</span><span>Custom stops by request</span></div>
+        <p class="eyebrow">{{ i18n.tx().aboutPage.rideEyebrow }}</p>
+        <h2>{{ i18n.tx().aboutPage.rideHeading }}</h2>
+        <p>{{ i18n.tx().aboutPage.rideP }}</p>
+        <div class="experience-list">
+          <span *ngFor="let item of i18n.tx().aboutPage.rideItems">{{ item }}</span>
+        </div>
       </div>
     </section>
   `
 })
-export class AboutPageComponent {}
+export class AboutPageComponent {
+  constructor(public readonly i18n: I18nService) {}
+}
 
 @Component({
   standalone: true,
-  imports: [PageHeroComponent, ReservationFormComponent],
+  imports: [CommonModule, PageHeroComponent, ReservationFormComponent],
   template: `
-    <app-page-hero title="Contact" eyebrow="Talk to us" text="Share your route, timing, and passenger details so we can confirm availability."></app-page-hero>
+    <app-page-hero [title]="i18n.tx().contactPage.title" [eyebrow]="i18n.tx().contactPage.eyebrow" [text]="i18n.tx().contactPage.text"></app-page-hero>
     <section class="reservation-section page-content-dark">
       <div class="reservation-copy">
-        <p class="eyebrow">Contact</p>
-        <h2>Tell us about your transfer</h2>
-        <p>Use the form and we will confirm vehicle availability, pickup timing, and custom stops.</p>
+        <p class="eyebrow">{{ i18n.tx().contactPage.formEyebrow }}</p>
+        <h2>{{ i18n.tx().contactPage.formHeading }}</h2>
+        <p>{{ i18n.tx().contactPage.formP }}</p>
       </div>
       <app-reservation-form></app-reservation-form>
     </section>
   `
 })
-export class ContactPageComponent {}
+export class ContactPageComponent {
+  constructor(public readonly i18n: I18nService) {}
+}

@@ -1,32 +1,35 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, NgZone, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 import { AccountMessage, AccountReservation, AccountService } from './account.service';
 import { AuthService } from './auth.service';
+import { I18nService } from './i18n.service';
+import { PhoneFieldComponent } from './phone-field.component';
 
-type AccountTab = 'profile' | 'reservations' | 'messages';
+type AccountTab = 'profile' | 'reservations' | 'messages' | 'review';
 
 @Component({
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, PhoneFieldComponent],
   template: `
     <section class="account-page">
       <div class="account-shell">
         <header class="account-header">
           <div>
-            <p class="eyebrow">Customer account</p>
-            <h1>My travel dashboard</h1>
-            <p>Update your details, review booking requests, and read internal trip messages.</p>
+            <p class="eyebrow">{{ i18n.tx().account.eyebrow }}</p>
+            <h1>{{ i18n.tx().account.heading }}</h1>
+            <p>{{ i18n.tx().account.p }}</p>
           </div>
-          <a routerLink="/reservation" class="primary-action">New booking</a>
+          <a routerLink="/reservation" class="primary-action">{{ i18n.tx().account.newBooking }}</a>
         </header>
 
         <nav class="admin-tabs admin-tabs-buttons account-tabs" aria-label="Account sections">
-          <button type="button" [class.active]="activeTab === 'profile'" (click)="activeTab = 'profile'">Profile</button>
-          <button type="button" [class.active]="activeTab === 'reservations'" (click)="activeTab = 'reservations'">Reservations</button>
-          <button type="button" [class.active]="activeTab === 'messages'" (click)="activeTab = 'messages'">Messages</button>
+          <button type="button" [class.active]="activeTab === 'profile'" (click)="activeTab = 'profile'">{{ i18n.tx().account.tabProfile }}</button>
+          <button type="button" [class.active]="activeTab === 'reservations'" (click)="activeTab = 'reservations'">{{ i18n.tx().account.tabReservations }}</button>
+          <button type="button" [class.active]="activeTab === 'messages'" (click)="activeTab = 'messages'">{{ i18n.tx().account.tabMessages }}</button>
+          <button type="button" [class.active]="activeTab === 'review'" [disabled]="!hasCompletedShuttles" [title]="hasCompletedShuttles ? '' : i18n.tx().account.reviewLockedTip" (click)="hasCompletedShuttles && (activeTab = 'review')">{{ i18n.tx().account.tabReview }}</button>
         </nav>
 
         <p class="success" *ngIf="message">{{ message }}</p>
@@ -34,53 +37,53 @@ type AccountTab = 'profile' | 'reservations' | 'messages';
 
         <section class="account-grid" *ngIf="activeTab === 'profile'">
           <article class="account-card account-summary-card">
-            <p class="eyebrow">Signed in as</p>
+            <p class="eyebrow">{{ i18n.tx().account.profileSignedIn }}</p>
             <h2>{{ profile.name }} {{ profile.lastName }}</h2>
             <p>{{ profile.email }}</p>
-            <span>{{ profile.phone || 'No phone saved' }}</span>
+            <span>{{ profile.phone || i18n.tx().account.noPhone }}</span>
           </article>
 
           <article class="account-card">
             <div class="account-card-heading">
-              <p class="eyebrow">Profile</p>
-              <h2>Contact details</h2>
+              <p class="eyebrow">{{ i18n.tx().account.profileEyebrow }}</p>
+              <h2>{{ i18n.tx().account.profileHeading }}</h2>
             </div>
             <form class="account-form" #profileForm="ngForm" (ngSubmit)="saveProfile()">
-              <input name="name" placeholder="First name" [(ngModel)]="profile.name" required>
-              <input name="lastName" placeholder="Last name" [(ngModel)]="profile.lastName" required>
-              <input name="phone" placeholder="Phone" [(ngModel)]="profile.phone">
-              <input type="email" name="email" placeholder="Email" [(ngModel)]="profile.email" disabled>
-              <input type="password" name="password" placeholder="New password optional" [(ngModel)]="profile.password">
-              <button type="submit" class="primary-action" [disabled]="profileForm.invalid || loading">{{ loading ? 'Saving...' : 'Save profile' }}</button>
+              <input name="name" [placeholder]="i18n.tx().account.firstName" [(ngModel)]="profile.name" required>
+              <input name="lastName" [placeholder]="i18n.tx().account.lastName" [(ngModel)]="profile.lastName" required>
+              <app-phone-field name="phone" placeholder="8338 8382" [(ngModel)]="profile.phone"></app-phone-field>
+              <input type="email" name="email" [placeholder]="i18n.tx().account.emailDisabled" [(ngModel)]="profile.email" disabled>
+              <input type="password" name="password" [placeholder]="i18n.tx().account.newPassword" [(ngModel)]="profile.password">
+              <button type="submit" class="primary-action" [disabled]="profileForm.invalid || loading">{{ loading ? i18n.tx().account.saving : i18n.tx().account.saveBtn }}</button>
             </form>
           </article>
         </section>
 
         <section class="account-card" *ngIf="activeTab === 'reservations'">
           <div class="account-card-heading">
-            <p class="eyebrow">Bookings</p>
-            <h2>My reservations</h2>
+            <p class="eyebrow">{{ i18n.tx().account.bookingsEyebrow }}</p>
+            <h2>{{ i18n.tx().account.bookingsHeading }}</h2>
           </div>
 
           <div class="empty-state" *ngIf="!reservations.length">
-            <h3>No reservations yet</h3>
-            <p>Your booking requests will appear here after you send them.</p>
-            <a routerLink="/reservation" class="secondary-action">Create first booking</a>
+            <h3>{{ i18n.tx().account.noReservations }}</h3>
+            <p>{{ i18n.tx().account.noReservationsP }}</p>
+            <a routerLink="/reservation" class="secondary-action">{{ i18n.tx().account.firstBooking }}</a>
           </div>
 
           <div class="account-reservation-list" *ngIf="reservations.length">
             <article class="reservation-record" *ngFor="let reservation of reservations">
               <header>
                 <div>
-                  <span>Reservation #{{ reservation.id }}</span>
+                  <span>{{ i18n.tx().account.reservationLabel }} #{{ reservation.id }}</span>
                   <strong>{{ reservation.createdAt | date:'mediumDate' }}</strong>
                 </div>
-                <small>{{ reservation.shuttles.length }} transfer{{ reservation.shuttles.length === 1 ? '' : 's' }}</small>
+                <small>{{ reservation.shuttles.length }} {{ reservation.shuttles.length === 1 ? i18n.tx().reservation.transfer : i18n.tx().reservation.transfers }}</small>
               </header>
               <div class="reservation-record-transfer" *ngFor="let shuttle of reservation.shuttles">
                 <div>
-                  <strong>{{ shuttle.departing?.name || 'Departing' }} to {{ shuttle.destination?.name || 'Destination' }}</strong>
-                  <span>{{ shuttle.date | date:'medium' }} · {{ shuttle.persons }} passenger{{ shuttle.persons === 1 ? '' : 's' }}</span>
+                  <strong>{{ shuttle.departing?.name || i18n.tx().booking.departing }} → {{ shuttle.destination?.name || i18n.tx().booking.destination }}</strong>
+                  <span>{{ shuttle.date | date:'medium' }} · {{ shuttle.persons }} {{ shuttle.persons === 1 ? i18n.tx().account.passenger : i18n.tx().account.passengers }}</span>
                 </div>
                 <strong class="money">{{ shuttle.rate | currency:'USD':'symbol':'1.2-2' }}</strong>
               </div>
@@ -91,8 +94,8 @@ type AccountTab = 'profile' | 'reservations' | 'messages';
 
         <section class="account-card" *ngIf="activeTab === 'messages'">
           <div class="account-card-heading">
-            <p class="eyebrow">Internal messages</p>
-            <h2>Trip updates</h2>
+            <p class="eyebrow">{{ i18n.tx().account.messagesEyebrow }}</p>
+            <h2>{{ i18n.tx().account.messagesHeading }}</h2>
           </div>
 
           <div class="message-list">
@@ -106,23 +109,102 @@ type AccountTab = 'profile' | 'reservations' | 'messages';
             </article>
           </div>
         </section>
+
+        <section class="account-card" *ngIf="activeTab === 'review'">
+          <div class="account-card-heading">
+            <p class="eyebrow">{{ i18n.tx().account.reviewEyebrow }}</p>
+            <h2>{{ i18n.tx().account.reviewHeading }}</h2>
+            <p>{{ i18n.tx().account.reviewP }}</p>
+          </div>
+
+          <form class="account-form" #reviewForm="ngForm" (ngSubmit)="submitReview()" *ngIf="!reviewSent">
+            <label>
+              <span>{{ i18n.tx().account.reviewName }}</span>
+              <input name="reviewName" placeholder="Mariana G." [(ngModel)]="review.name">
+            </label>
+            <label>
+              <span>{{ i18n.tx().account.reviewLocation }}</span>
+              <input #reviewLocationInput name="reviewLocation" placeholder="New York, USA" [(ngModel)]="review.location" autocomplete="off">
+            </label>
+            <label>
+              <span>{{ i18n.tx().account.reviewRoute }}</span>
+              <select name="reviewRoute" [(ngModel)]="review.route" required>
+                <option value="" disabled>—</option>
+                <option *ngFor="let route of completedRoutes" [value]="route">{{ route }}</option>
+              </select>
+            </label>
+            <label style="grid-column:1/-1">
+              <span>{{ i18n.tx().account.reviewRating }}</span>
+              <div class="star-picker">
+                <button type="button" *ngFor="let star of [1,2,3,4,5]"
+                  [class.star-on]="star <= review.rating"
+                  (click)="review.rating = star"
+                  [attr.aria-label]="star + ' star' + (star > 1 ? 's' : '')">&#9733;</button>
+              </div>
+            </label>
+            <label style="grid-column:1/-1">
+              <span>{{ i18n.tx().account.reviewComment }} <span class="required-mark">*</span></span>
+              <textarea name="reviewComment" placeholder="..." rows="4" [(ngModel)]="review.comment" required></textarea>
+            </label>
+            <button type="submit" class="primary-action" [disabled]="reviewForm.invalid || loading">{{ loading ? i18n.tx().account.reviewLoading : i18n.tx().account.reviewBtn }}</button>
+          </form>
+
+          <div class="review-sent" *ngIf="reviewSent">
+            <p class="eyebrow">{{ i18n.tx().account.reviewSentEyebrow }}</p>
+            <h3>{{ i18n.tx().account.reviewSentHeading }}</h3>
+            <p>{{ i18n.tx().account.reviewSentP }}</p>
+            <button type="button" class="secondary-action" (click)="resetReview()">{{ i18n.tx().account.reviewSentBtn }}</button>
+          </div>
+        </section>
       </div>
     </section>
   `
 })
-export class AccountPageComponent implements OnInit {
+export class AccountPageComponent implements OnInit, AfterViewInit {
+  @ViewChild('reviewLocationInput') reviewLocationInput?: ElementRef<HTMLInputElement>;
+
   activeTab: AccountTab = 'profile';
   reservations: AccountReservation[] = [];
   messages: AccountMessage[] = [];
   profile = { name: '', lastName: '', phone: '', email: '', password: '' };
+  review = { name: '', location: '', route: '', rating: 5, comment: '' };
+  reviewSent = false;
   loading = false;
   message = '';
   error = '';
 
   constructor(
     private readonly account: AccountService,
-    private readonly auth: AuthService
+    private readonly auth: AuthService,
+    public readonly i18n: I18nService,
+    private readonly zone: NgZone,
   ) {}
+
+  ngAfterViewInit(): void {
+    this.attachLocationAutocomplete(0);
+  }
+
+  private attachLocationAutocomplete(attempts: number): void {
+    const maps = (globalThis as any).google?.maps;
+    if (!this.reviewLocationInput || !maps?.places?.Autocomplete) {
+      if (attempts < 12) {
+        window.setTimeout(() => this.attachLocationAutocomplete(attempts + 1), 500);
+      }
+      return;
+    }
+
+    const ac = new (globalThis as any).google.maps.places.Autocomplete(this.reviewLocationInput.nativeElement, {
+      types: ['(cities)'],
+      fields: ['formatted_address', 'name'],
+    });
+
+    ac.addListener('place_changed', () => {
+      this.zone.run(() => {
+        const place = ac.getPlace();
+        this.review.location = place.formatted_address || place.name || this.review.location;
+      });
+    });
+  }
 
   ngOnInit(): void {
     const user = this.auth.currentUser();
@@ -134,6 +216,7 @@ export class AccountPageComponent implements OnInit {
         email: user.email || '',
         password: ''
       };
+      this.review.name = `${user.name || ''} ${user.lastName || ''}`.trim();
     }
 
     this.loadReservations();
@@ -158,9 +241,65 @@ export class AccountPageComponent implements OnInit {
     });
   }
 
+  submitReview(): void {
+    this.loading = true;
+    this.error = '';
+
+    this.account.submitReview(this.review).subscribe({
+      next: () => {
+        this.loading = false;
+        this.reviewSent = true;
+      },
+      error: (error) => {
+        this.loading = false;
+        this.error = error.error?.message || 'Could not submit your review. Please try again.';
+      }
+    });
+  }
+
+  resetReview(): void {
+    const user = this.auth.currentUser();
+    this.review = {
+      name: user ? `${user.name || ''} ${user.lastName || ''}`.trim() : '',
+      location: '',
+      route: this.completedRoutes[0] || '',
+      rating: 5,
+      comment: ''
+    };
+    this.reviewSent = false;
+  }
+
+  get hasCompletedShuttles(): boolean {
+    const now = Date.now();
+    return this.reservations.some((r) =>
+      r.shuttles.some((s) => new Date(s.date).getTime() < now)
+    );
+  }
+
+  get completedRoutes(): string[] {
+    const now = Date.now();
+    const routes: string[] = [];
+    for (const r of this.reservations) {
+      for (const s of r.shuttles) {
+        if (new Date(s.date).getTime() < now && s.departing && s.destination) {
+          const label = `${s.departing.name} → ${s.destination.name}`;
+          if (!routes.includes(label)) {
+            routes.push(label);
+          }
+        }
+      }
+    }
+    return routes;
+  }
+
   private loadReservations(): void {
     this.account.getReservations().subscribe({
-      next: (reservations) => this.reservations = reservations,
+      next: (reservations) => {
+        this.reservations = reservations;
+        if (!this.review.route) {
+          this.review.route = this.completedRoutes[0] || '';
+        }
+      },
       error: (error) => this.error = error.error?.message || 'Could not load reservations.'
     });
   }

@@ -4,6 +4,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 import { TravelStateService } from './travel-state.service';
 import { AuthService } from './auth.service';
+import { I18nService } from './i18n.service';
 
 @Component({
   selector: 'app-root',
@@ -14,5 +15,9 @@ import { AuthService } from './auth.service';
   encapsulation: ViewEncapsulation.None
 })
 export class AppComponent {
-  constructor(public readonly state: TravelStateService, public readonly stateAuth: AuthService) {}
+  constructor(
+    public readonly state: TravelStateService,
+    public readonly stateAuth: AuthService,
+    public readonly i18n: I18nService,
+  ) {}
 }

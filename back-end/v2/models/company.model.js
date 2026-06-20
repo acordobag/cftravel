@@ -10,6 +10,7 @@ const model = () => {
       tagline: Sequelize.STRING,
       address: Sequelize.STRING,
       website: Sequelize.STRING,
+      logo: Sequelize.STRING,
       isDefault: {
         type: Sequelize.BOOLEAN,
         defaultValue: false

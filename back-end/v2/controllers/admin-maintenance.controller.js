@@ -144,6 +144,7 @@ const AdminMaintenance = {
         tagline: req.body.tagline,
         address: req.body.address,
         website: req.body.website,
+        logo: req.body.logo,
         isDefault: req.body.isDefault === true || req.body.isDefault === 'true'
       })
 
@@ -185,6 +186,7 @@ const AdminMaintenance = {
       company.tagline = req.body.tagline
       company.address = req.body.address
       company.website = req.body.website
+      company.logo = req.body.logo
       company.isDefault = req.body.isDefault === true || req.body.isDefault === 'true'
       await company.save()
 

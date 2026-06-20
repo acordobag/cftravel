@@ -3,6 +3,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
+import { PhoneFieldComponent } from './phone-field.component';
+
 import {
   AdminCompany,
   AdminMessage,
@@ -11,7 +13,9 @@ import {
   AdminReservation,
   AdminService,
   AdminShuttle,
-  HeroImage
+  CONTACT_TYPE_OPTIONS,
+  HeroImage,
+  USER_ROLE_OPTIONS
 } from './admin.service';
 import { AuthService, AuthUser } from './auth.service';
 import { Testimonial } from './models';
@@ -31,7 +35,7 @@ type AdminCompanyDraft = AdminCompany & {
 
 @Component({
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, PhoneFieldComponent],
   template: `
     <section class="admin-page">
       <div class="admin-shell admin-dashboard">
@@ -69,19 +73,31 @@ type AdminCompanyDraft = AdminCompany & {
             </div>
           </div>
 
-          <form class="admin-form admin-create-form destination-create-form" #placeForm="ngForm" (ngSubmit)="createPlace()">
-            <input name="newPlaceName" placeholder="Destination name" [(ngModel)]="newPlace.name" required>
-            <label class="admin-file-control">
-              <span class="file-label">Image</span>
-              <span class="file-picker-shell">
-                <span class="file-picker-button">Choose image</span>
-                <span class="file-picker-name">{{ newPlace.image ? 'Image selected' : 'No image selected' }}</span>
-              </span>
-              <input type="file" accept="image/*" (change)="handleImageFile($event, 'newPlace')">
-            </label>
-            <img class="admin-image-preview" *ngIf="newPlace.image" [src]="newPlace.image" alt="Destination preview">
-            <button type="submit" class="primary-action" [disabled]="placeForm.invalid || uploadBusy">Add destination</button>
-            <textarea class="destination-description-field" name="newPlaceDescription" placeholder="Description" rows="2" [(ngModel)]="newPlace.description" required></textarea>
+          <form class="admin-form" #placeForm="ngForm" (ngSubmit)="createPlace()">
+            <div class="admin-form-row">
+              <div class="admin-field admin-field-wide">
+                <label for="newPlaceName">Destination name <span class="required-mark">*</span></label>
+                <input id="newPlaceName" name="newPlaceName" placeholder="e.g. La Fortuna / Arenal" [(ngModel)]="newPlace.name" required>
+              </div>
+              <label class="admin-file-control">
+                <span class="file-label">Image</span>
+                <span class="file-picker-shell">
+                  <span class="file-picker-button">Choose image</span>
+                  <span class="file-picker-name">{{ newPlace.image ? 'Image selected' : 'No image selected' }}</span>
+                </span>
+                <input type="file" accept="image/*" (change)="handleImageFile($event, 'newPlace')">
+              </label>
+              <img class="admin-image-preview" *ngIf="newPlace.image" [src]="newPlace.image" alt="Destination preview">
+            </div>
+            <div class="admin-form-row">
+              <div class="admin-field admin-field-full">
+                <label for="newPlaceDescription">Description <span class="required-mark">*</span></label>
+                <textarea id="newPlaceDescription" name="newPlaceDescription" placeholder="What makes this destination notable?" rows="3" [(ngModel)]="newPlace.description" required></textarea>
+              </div>
+            </div>
+            <div class="admin-form-footer">
+              <button type="submit" class="primary-action" [disabled]="placeForm.invalid || uploadBusy">Add destination</button>
+            </div>
           </form>
 
           <div class="admin-table-wrap">
@@ -110,17 +126,21 @@ type AdminCompanyDraft = AdminCompany & {
             </div>
           </div>
 
-          <form class="admin-form admin-create-form compact-upload hero-create-form" #heroForm="ngForm" (ngSubmit)="createHeroImage()">
-            <label class="admin-file-control">
-              <span class="file-label">Image</span>
-              <span class="file-picker-shell">
-                <span class="file-picker-button">Choose image</span>
-                <span class="file-picker-name">{{ newHeroImage.src ? 'Image selected' : 'No image selected' }}</span>
-              </span>
-              <input type="file" accept="image/*" (change)="handleImageFile($event, 'newHero')">
-            </label>
-            <img class="admin-image-preview wide" *ngIf="newHeroImage.src" [src]="newHeroImage.src" alt="Hero preview">
-            <button type="submit" class="primary-action" [disabled]="!newHeroImage.src || uploadBusy">Add image</button>
+          <form class="admin-form" #heroForm="ngForm" (ngSubmit)="createHeroImage()">
+            <div class="admin-form-row">
+              <label class="admin-file-control">
+                <span class="file-label">Image</span>
+                <span class="file-picker-shell">
+                  <span class="file-picker-button">Choose image</span>
+                  <span class="file-picker-name">{{ newHeroImage.src ? 'Image selected' : 'No image selected' }}</span>
+                </span>
+                <input type="file" accept="image/*" (change)="handleImageFile($event, 'newHero')">
+              </label>
+              <img class="admin-image-preview wide" *ngIf="newHeroImage.src" [src]="newHeroImage.src" alt="Hero preview">
+            </div>
+            <div class="admin-form-footer">
+              <button type="submit" class="primary-action" [disabled]="!newHeroImage.src || uploadBusy">Add image</button>
+            </div>
           </form>
 
           <div class="admin-table-wrap">
@@ -148,14 +168,35 @@ type AdminCompanyDraft = AdminCompany & {
             </div>
           </div>
 
-          <form class="admin-form admin-create-form" #testimonialForm="ngForm" (ngSubmit)="createTestimonial()">
-            <input name="newTestimonialName" placeholder="Name" [(ngModel)]="newTestimonial.name" required>
-            <input name="newTestimonialLocation" placeholder="Location" [(ngModel)]="newTestimonial.location" required>
-            <input name="newTestimonialRoute" placeholder="Route" [(ngModel)]="newTestimonial.route" required>
-            <input type="number" name="newTestimonialRating" min="1" max="5" placeholder="Rating" [(ngModel)]="newTestimonial.rating" required>
-            <textarea name="newTestimonialComment" placeholder="Comment" rows="2" [(ngModel)]="newTestimonial.comment" required></textarea>
-            <label class="admin-check"><input type="checkbox" name="newTestimonialActive" [(ngModel)]="newTestimonial.active"> Active</label>
-            <button type="submit" class="primary-action" [disabled]="testimonialForm.invalid">Add testimonial</button>
+          <form class="admin-form" #testimonialForm="ngForm" (ngSubmit)="createTestimonial()">
+            <div class="admin-form-row">
+              <div class="admin-field">
+                <label for="newTestimonialName">Traveler name <span class="required-mark">*</span></label>
+                <input id="newTestimonialName" name="newTestimonialName" placeholder="e.g. Mariana G." [(ngModel)]="newTestimonial.name" required>
+              </div>
+              <div class="admin-field">
+                <label for="newTestimonialLocation">Location <span class="required-mark">*</span></label>
+                <input id="newTestimonialLocation" name="newTestimonialLocation" placeholder="e.g. New York, USA" [(ngModel)]="newTestimonial.location" required>
+              </div>
+              <div class="admin-field admin-field-wide">
+                <label for="newTestimonialRoute">Route <span class="required-mark">*</span></label>
+                <input id="newTestimonialRoute" name="newTestimonialRoute" placeholder="e.g. SJO Airport to La Fortuna" [(ngModel)]="newTestimonial.route" required>
+              </div>
+              <div class="admin-field admin-field-narrow">
+                <label for="newTestimonialRating">Rating (1–5) <span class="required-mark">*</span></label>
+                <input id="newTestimonialRating" type="number" name="newTestimonialRating" min="1" max="5" placeholder="5" [(ngModel)]="newTestimonial.rating" required>
+              </div>
+            </div>
+            <div class="admin-form-row">
+              <div class="admin-field admin-field-full">
+                <label for="newTestimonialComment">What did the traveler say? <span class="required-mark">*</span></label>
+                <textarea id="newTestimonialComment" name="newTestimonialComment" placeholder="In their own words..." rows="3" [(ngModel)]="newTestimonial.comment" required></textarea>
+              </div>
+            </div>
+            <div class="admin-form-footer">
+              <label class="admin-check"><input type="checkbox" name="newTestimonialActive" [(ngModel)]="newTestimonial.active"> Visible on site</label>
+              <button type="submit" class="primary-action" [disabled]="testimonialForm.invalid">Add testimonial</button>
+            </div>
           </form>
 
           <div class="admin-table-wrap">
@@ -208,20 +249,41 @@ type AdminCompanyDraft = AdminCompany & {
                 <h3>Exact prices by route</h3>
               </div>
             </div>
-            <form class="admin-form admin-create-form pricing-create-form" #fixedRouteForm="ngForm" (ngSubmit)="createFixedRoutePrice()">
-              <select name="fixedDeparting" [(ngModel)]="newFixedRoutePrice.departingId" required>
-                <option [ngValue]="0">Departing</option>
-                <option *ngFor="let place of places" [ngValue]="place.id">{{ place.name }}</option>
-              </select>
-              <select name="fixedDestination" [(ngModel)]="newFixedRoutePrice.destinationId" required>
-                <option [ngValue]="0">Going to</option>
-                <option *ngFor="let place of places" [ngValue]="place.id">{{ place.name }}</option>
-              </select>
-              <input type="number" min="0" step="0.01" name="fixedPrice" placeholder="Fixed price" [(ngModel)]="newFixedRoutePrice.price" required>
-              <input name="fixedLabel" placeholder="Label, e.g. SJO to Arenal" [(ngModel)]="newFixedRoutePrice.label">
-              <textarea name="fixedNotes" rows="2" placeholder="Specific service notes for this route" [(ngModel)]="newFixedRoutePrice.notes"></textarea>
-              <label class="admin-check"><input type="checkbox" name="fixedActive" [(ngModel)]="newFixedRoutePrice.active"> Active</label>
-              <button type="submit" class="primary-action" [disabled]="fixedRouteForm.invalid || !newFixedRoutePrice.departingId || !newFixedRoutePrice.destinationId">Add fixed price</button>
+            <form class="admin-form admin-create-form" #fixedRouteForm="ngForm" (ngSubmit)="createFixedRoutePrice()">
+              <div class="admin-form-row">
+                <div class="admin-field">
+                  <label for="fixedDeparting">Departing from <span class="required-mark">*</span></label>
+                  <select id="fixedDeparting" name="fixedDeparting" [(ngModel)]="newFixedRoutePrice.departingId" required>
+                    <option [ngValue]="0">Select origin</option>
+                    <option *ngFor="let place of places" [ngValue]="place.id">{{ place.name }}</option>
+                  </select>
+                </div>
+                <div class="admin-field">
+                  <label for="fixedDestination">Going to <span class="required-mark">*</span></label>
+                  <select id="fixedDestination" name="fixedDestination" [(ngModel)]="newFixedRoutePrice.destinationId" required>
+                    <option [ngValue]="0">Select destination</option>
+                    <option *ngFor="let place of places" [ngValue]="place.id">{{ place.name }}</option>
+                  </select>
+                </div>
+                <div class="admin-field admin-field-narrow">
+                  <label for="fixedPrice">Price (USD) <span class="required-mark">*</span></label>
+                  <input id="fixedPrice" type="number" min="0" step="0.01" name="fixedPrice" placeholder="0.00" [(ngModel)]="newFixedRoutePrice.price" required>
+                </div>
+                <div class="admin-field">
+                  <label for="fixedLabel">Short label</label>
+                  <input id="fixedLabel" name="fixedLabel" placeholder="e.g. Jaco" [(ngModel)]="newFixedRoutePrice.label">
+                </div>
+              </div>
+              <div class="admin-form-row">
+                <div class="admin-field admin-field-full">
+                  <label for="fixedNotes">Service notes for this route</label>
+                  <textarea id="fixedNotes" name="fixedNotes" rows="2" placeholder="Operational notes visible only to admins — parking tips, pickup points, special instructions..." [(ngModel)]="newFixedRoutePrice.notes"></textarea>
+                </div>
+              </div>
+              <div class="admin-form-footer">
+                <label class="admin-check"><input type="checkbox" name="fixedActive" [(ngModel)]="newFixedRoutePrice.active"> Active (price applies immediately)</label>
+                <button type="submit" class="primary-action" [disabled]="fixedRouteForm.invalid || !newFixedRoutePrice.departingId || !newFixedRoutePrice.destinationId">Add fixed price</button>
+              </div>
             </form>
 
             <div class="admin-table-wrap">
@@ -250,15 +312,39 @@ type AdminCompanyDraft = AdminCompany & {
                 <h3>Fallback rules by kilometer band</h3>
               </div>
             </div>
-            <form class="admin-form admin-create-form pricing-rule-form" #pricingRuleForm="ngForm" (ngSubmit)="createPricingRule()">
-              <input name="ruleName" placeholder="Rule name" [(ngModel)]="newPricingRule.name" required>
-              <input type="number" step="0.1" min="0" name="ruleMin" placeholder="Min km" [(ngModel)]="newPricingRule.minDistance" required>
-              <input type="number" step="0.1" min="0" name="ruleMax" placeholder="Max km" [(ngModel)]="newPricingRule.maxDistance" required>
-              <input type="number" step="0.01" min="0" name="rulePrice" placeholder="Price/km" [(ngModel)]="newPricingRule.pricePerKm" required>
-              <input type="number" step="0.01" min="0" name="ruleDiscount" placeholder="Discount" [(ngModel)]="newPricingRule.discount" required>
-              <input type="number" step="1" min="0" name="ruleOrder" placeholder="Order" [(ngModel)]="newPricingRule.sortOrder" required>
-              <label class="admin-check"><input type="checkbox" name="ruleActive" [(ngModel)]="newPricingRule.active"> Active</label>
-              <button type="submit" class="primary-action" [disabled]="pricingRuleForm.invalid">Add rule</button>
+            <form class="admin-form admin-create-form" #pricingRuleForm="ngForm" (ngSubmit)="createPricingRule()">
+              <div class="admin-form-row">
+                <div class="admin-field admin-field-wide">
+                  <label for="ruleName">Rule name <span class="required-mark">*</span></label>
+                  <input id="ruleName" name="ruleName" placeholder="e.g. Mid routes (75 – 100 km)" [(ngModel)]="newPricingRule.name" required>
+                </div>
+                <div class="admin-field admin-field-narrow">
+                  <label for="ruleOrder">Sort order <span class="required-mark">*</span></label>
+                  <input id="ruleOrder" type="number" step="1" min="0" name="ruleOrder" placeholder="1" [(ngModel)]="newPricingRule.sortOrder" required>
+                </div>
+              </div>
+              <div class="admin-form-row">
+                <div class="admin-field admin-field-narrow">
+                  <label for="ruleMin">Min distance (km) <span class="required-mark">*</span></label>
+                  <input id="ruleMin" type="number" step="0.1" min="0" name="ruleMin" placeholder="0" [(ngModel)]="newPricingRule.minDistance" required>
+                </div>
+                <div class="admin-field admin-field-narrow">
+                  <label for="ruleMax">Max distance (km) <span class="required-mark">*</span></label>
+                  <input id="ruleMax" type="number" step="0.1" min="0" name="ruleMax" placeholder="100" [(ngModel)]="newPricingRule.maxDistance" required>
+                </div>
+                <div class="admin-field admin-field-narrow">
+                  <label for="rulePrice">Rate per km (USD) <span class="required-mark">*</span></label>
+                  <input id="rulePrice" type="number" step="0.01" min="0" name="rulePrice" placeholder="1.68" [(ngModel)]="newPricingRule.pricePerKm" required>
+                </div>
+                <div class="admin-field admin-field-narrow">
+                  <label for="ruleDiscount">Discount factor (0 – 1)</label>
+                  <input id="ruleDiscount" type="number" step="0.01" min="0" max="1" name="ruleDiscount" placeholder="0.00" [(ngModel)]="newPricingRule.discount" required>
+                </div>
+              </div>
+              <div class="admin-form-footer">
+                <label class="admin-check"><input type="checkbox" name="ruleActive" [(ngModel)]="newPricingRule.active"> Active</label>
+                <button type="submit" class="primary-action" [disabled]="pricingRuleForm.invalid">Add rule</button>
+              </div>
             </form>
 
             <div class="admin-table-wrap">
@@ -288,12 +374,27 @@ type AdminCompanyDraft = AdminCompany & {
                 <h3>Operational notes for quoting</h3>
               </div>
             </div>
-            <form class="admin-form admin-create-form service-rule-form" #serviceRuleForm="ngForm" (ngSubmit)="createServicePricingRule()">
-              <input name="serviceRuleTitle" placeholder="Rule title" [(ngModel)]="newServiceRule.title" required>
-              <input type="number" min="0" name="serviceRuleOrder" placeholder="Order" [(ngModel)]="newServiceRule.sortOrder" required>
-              <label class="admin-check"><input type="checkbox" name="serviceRuleActive" [(ngModel)]="newServiceRule.active"> Active</label>
-              <textarea name="serviceRuleDescription" rows="2" placeholder="What should the team know?" [(ngModel)]="newServiceRule.description" required></textarea>
-              <button type="submit" class="primary-action" [disabled]="serviceRuleForm.invalid">Add service rule</button>
+            <form class="admin-form admin-create-form" #serviceRuleForm="ngForm" (ngSubmit)="createServicePricingRule()">
+              <div class="admin-form-row">
+                <div class="admin-field admin-field-wide">
+                  <label for="serviceRuleTitle">Rule title <span class="required-mark">*</span></label>
+                  <input id="serviceRuleTitle" name="serviceRuleTitle" placeholder="e.g. Fixed route prices always win" [(ngModel)]="newServiceRule.title" required>
+                </div>
+                <div class="admin-field admin-field-narrow">
+                  <label for="serviceRuleOrder">Sort order <span class="required-mark">*</span></label>
+                  <input id="serviceRuleOrder" type="number" min="0" name="serviceRuleOrder" placeholder="1" [(ngModel)]="newServiceRule.sortOrder" required>
+                </div>
+              </div>
+              <div class="admin-form-row">
+                <div class="admin-field admin-field-full">
+                  <label for="serviceRuleDescription">What should the team know? <span class="required-mark">*</span></label>
+                  <textarea id="serviceRuleDescription" name="serviceRuleDescription" rows="3" placeholder="Operational guidance visible only to admins — when to override, what to check, edge cases..." [(ngModel)]="newServiceRule.description" required></textarea>
+                </div>
+              </div>
+              <div class="admin-form-footer">
+                <label class="admin-check"><input type="checkbox" name="serviceRuleActive" [(ngModel)]="newServiceRule.active"> Active</label>
+                <button type="submit" class="primary-action" [disabled]="serviceRuleForm.invalid">Add service rule</button>
+              </div>
             </form>
 
             <div class="admin-table-wrap">
@@ -346,31 +447,82 @@ type AdminCompanyDraft = AdminCompany & {
           <div class="admin-panel-heading">
             <div>
               <p class="eyebrow">Company data</p>
-              <h2>Default business profile and contact methods</h2>
+              <h2>Business profile and contact methods</h2>
+              <p class="admin-helper">Everything shown on the public site — logo, name, tagline, address, and contact links — comes from the company marked as default. Switch the default to reuse this site for a different brand.</p>
             </div>
           </div>
 
-          <form class="admin-form admin-create-form company-create-form" #companyForm="ngForm" (ngSubmit)="createCompany()" *ngIf="!companies.length">
-            <input name="newCompanyName" placeholder="Company name" [(ngModel)]="newCompany.name" required>
-            <input type="email" name="newCompanyEmail" placeholder="Email" [(ngModel)]="newCompany.email" required>
-            <input name="newCompanyTagline" placeholder="Tagline" [(ngModel)]="newCompany.tagline">
-            <input name="newCompanyWebsite" placeholder="Website" [(ngModel)]="newCompany.website">
-            <input name="newCompanyAddress" placeholder="Address" [(ngModel)]="newCompany.address">
-            <select name="newCompanyPhoneType" [(ngModel)]="newCompanyPhone.type">
-              <option value="phone">Phone</option>
-              <option value="whatsapp">WhatsApp</option>
-              <option value="email">Email</option>
-              <option value="social">Social</option>
-            </select>
-            <input name="newCompanyPhoneLabel" placeholder="Contact label" [(ngModel)]="newCompanyPhone.label">
-            <input name="newCompanyPhoneNumber" placeholder="Contact value" [(ngModel)]="newCompanyPhone.number">
-            <input name="newCompanyPhoneHref" placeholder="Link / href" [(ngModel)]="newCompanyPhone.href">
-            <button type="submit" class="primary-action" [disabled]="companyForm.invalid">Create default company</button>
+          <form class="admin-form admin-create-form" #companyForm="ngForm" (ngSubmit)="createCompany()">
+            <p class="admin-form-section-label">Identity</p>
+            <div class="admin-form-row">
+              <div class="admin-field">
+                <label for="newCompanyName">Company name <span class="required-mark">*</span></label>
+                <input id="newCompanyName" name="newCompanyName" placeholder="e.g. CR Travel Service" [(ngModel)]="newCompany.name" required>
+              </div>
+              <div class="admin-field">
+                <label for="newCompanyEmail">Reservations email <span class="required-mark">*</span></label>
+                <input id="newCompanyEmail" type="email" name="newCompanyEmail" placeholder="reservations@yourcompany.com" [(ngModel)]="newCompany.email" required>
+              </div>
+            </div>
+            <div class="admin-form-row">
+              <div class="admin-field">
+                <label for="newCompanyTagline">Tagline</label>
+                <input id="newCompanyTagline" name="newCompanyTagline" placeholder="Short line shown under the logo" [(ngModel)]="newCompany.tagline">
+              </div>
+              <div class="admin-field">
+                <label for="newCompanyWebsite">Website URL</label>
+                <input id="newCompanyWebsite" name="newCompanyWebsite" placeholder="https://yourcompany.com" [(ngModel)]="newCompany.website">
+              </div>
+              <div class="admin-field">
+                <label for="newCompanyAddress">Address</label>
+                <input id="newCompanyAddress" name="newCompanyAddress" placeholder="Physical address shown in the footer" [(ngModel)]="newCompany.address">
+              </div>
+            </div>
+            <div class="admin-form-row admin-form-row-logo">
+              <label class="admin-file-control">
+                <span class="file-label">Logo</span>
+                <span class="file-picker-shell">
+                  <span class="file-picker-button">Choose logo</span>
+                  <span class="file-picker-name">{{ newCompany.logo ? 'Logo selected' : 'No logo selected' }}</span>
+                </span>
+                <input type="file" accept="image/*" (change)="handleImageFile($event, 'newCompanyLogo')">
+              </label>
+              <img class="admin-image-preview" *ngIf="newCompany.logo" [src]="newCompany.logo" alt="Logo preview">
+            </div>
+
+            <p class="admin-form-section-label">First contact method <span class="admin-form-section-hint">You can add more after creating the company</span></p>
+            <div class="admin-form-row">
+              <div class="admin-field admin-field-narrow">
+                <label for="newCompanyPhoneType">Type</label>
+                <select id="newCompanyPhoneType" name="newCompanyPhoneType" [(ngModel)]="newCompanyPhone.type">
+                  <option *ngFor="let option of contactTypeOptions" [value]="option.value">{{ option.label }}</option>
+                </select>
+              </div>
+              <div class="admin-field">
+                <label for="newCompanyPhoneLabel">Display label</label>
+                <input id="newCompanyPhoneLabel" name="newCompanyPhoneLabel" placeholder="e.g. Costa Rica office" [(ngModel)]="newCompanyPhone.label">
+              </div>
+              <div class="admin-field">
+                <label for="newCompanyPhoneNumber">Value (number or handle)</label>
+                <input id="newCompanyPhoneNumber" name="newCompanyPhoneNumber" placeholder="+506 8338 8382 or @crtravelservice" [(ngModel)]="newCompanyPhone.number">
+              </div>
+            </div>
+            <div class="admin-form-row">
+              <div class="admin-field admin-field-wide">
+                <label for="newCompanyPhoneHref">Link href</label>
+                <input id="newCompanyPhoneHref" name="newCompanyPhoneHref" placeholder="tel:+50683388382  /  https://wa.me/50683388382  /  mailto:res@co.com" [(ngModel)]="newCompanyPhone.href">
+              </div>
+            </div>
+
+            <div class="admin-form-footer">
+              <label class="admin-check"><input type="checkbox" name="newCompanyIsDefault" [(ngModel)]="newCompany.isDefault"> Set as the default company shown on the public site</label>
+              <button type="submit" class="primary-action" [disabled]="companyForm.invalid">Create company</button>
+            </div>
           </form>
 
           <div class="admin-table-wrap">
             <table class="admin-table">
-              <thead><tr><th>Company</th><th>Email</th><th>Contact methods</th><th>Actions</th></tr></thead>
+              <thead><tr><th>Company</th><th>Email</th><th>Contact methods</th><th>Status</th><th>Actions</th></tr></thead>
               <tbody>
                 <tr *ngFor="let company of companies">
                   <td>{{ company.name }}<small>{{ company.tagline }}</small></td>
@@ -378,6 +530,7 @@ type AdminCompanyDraft = AdminCompany & {
                   <td>
                     <span class="admin-chip" *ngFor="let phone of company.phones">{{ phone.label || phone.code }}: {{ phone.number }}</span>
                   </td>
+                  <td><span class="admin-badge" *ngIf="company.isDefault">Active on site</span></td>
                   <td class="table-actions">
                     <button type="button" class="secondary-action" (click)="openEdit('company', company)">Edit</button>
                     <button type="button" class="remove-transfer" (click)="deleteCompany(company)" *ngIf="!company.isDefault">Delete</button>
@@ -396,12 +549,30 @@ type AdminCompanyDraft = AdminCompany & {
             </div>
           </div>
 
-          <form class="admin-form admin-create-form" #messageForm="ngForm" (ngSubmit)="createMessage()">
-            <input name="newMessageName" placeholder="Name" [(ngModel)]="newMessage.name" required>
-            <input name="newMessagePhone" placeholder="Phone" [(ngModel)]="newMessage.phone">
-            <input type="email" name="newMessageEmail" placeholder="Email" [(ngModel)]="newMessage.email" required>
-            <textarea name="newMessageText" rows="2" placeholder="Message" [(ngModel)]="newMessage.text" required></textarea>
-            <button type="submit" class="primary-action" [disabled]="messageForm.invalid">Add message</button>
+          <form class="admin-form" #messageForm="ngForm" (ngSubmit)="createMessage()">
+            <div class="admin-form-row">
+              <div class="admin-field">
+                <label for="newMessageName">Sender name <span class="required-mark">*</span></label>
+                <input id="newMessageName" name="newMessageName" placeholder="e.g. John Smith" [(ngModel)]="newMessage.name" required>
+              </div>
+              <div class="admin-field">
+                <label for="newMessageEmail">Email <span class="required-mark">*</span></label>
+                <input id="newMessageEmail" type="email" name="newMessageEmail" placeholder="sender@email.com" [(ngModel)]="newMessage.email" required>
+              </div>
+              <div class="admin-field">
+                <label for="newMessagePhone">Phone</label>
+                <app-phone-field name="newMessagePhone" placeholder="555 000 0000" [(ngModel)]="newMessage.phone"></app-phone-field>
+              </div>
+            </div>
+            <div class="admin-form-row">
+              <div class="admin-field admin-field-full">
+                <label for="newMessageText">Message <span class="required-mark">*</span></label>
+                <textarea id="newMessageText" name="newMessageText" rows="3" placeholder="Message content" [(ngModel)]="newMessage.text" required></textarea>
+              </div>
+            </div>
+            <div class="admin-form-footer">
+              <button type="submit" class="primary-action" [disabled]="messageForm.invalid">Add message</button>
+            </div>
           </form>
 
           <div class="admin-table-wrap">
@@ -430,17 +601,40 @@ type AdminCompanyDraft = AdminCompany & {
             </div>
           </div>
 
-          <form class="admin-form admin-create-form" #userForm="ngForm" (ngSubmit)="createPrivilegedUser()">
-            <input name="privName" placeholder="First name" [(ngModel)]="newUser.name" required>
-            <input name="privLastName" placeholder="Last name" [(ngModel)]="newUser.lastName" required>
-            <input name="privPhone" placeholder="Phone" [(ngModel)]="newUser.phone">
-            <input type="email" name="privEmail" placeholder="Email" [(ngModel)]="newUser.email" required>
-            <input type="password" name="privPassword" placeholder="Password" [(ngModel)]="newUser.password" required>
-            <select name="privRole" [(ngModel)]="newUser.role">
-              <option value="ADMIN">ADMIN</option>
-              <option value="SUPER">SUPER</option>
-            </select>
-            <button type="submit" class="primary-action" [disabled]="userForm.invalid">Create privileged user</button>
+          <form class="admin-form" #userForm="ngForm" (ngSubmit)="createPrivilegedUser()">
+            <div class="admin-form-row">
+              <div class="admin-field">
+                <label for="privName">First name <span class="required-mark">*</span></label>
+                <input id="privName" name="privName" placeholder="e.g. Ana" [(ngModel)]="newUser.name" required>
+              </div>
+              <div class="admin-field">
+                <label for="privLastName">Last name <span class="required-mark">*</span></label>
+                <input id="privLastName" name="privLastName" placeholder="e.g. García" [(ngModel)]="newUser.lastName" required>
+              </div>
+              <div class="admin-field">
+                <label for="privPhone">Phone</label>
+                <app-phone-field name="privPhone" placeholder="8338 8382" [(ngModel)]="newUser.phone"></app-phone-field>
+              </div>
+            </div>
+            <div class="admin-form-row">
+              <div class="admin-field">
+                <label for="privEmail">Email <span class="required-mark">*</span></label>
+                <input id="privEmail" type="email" name="privEmail" placeholder="name@company.com" [(ngModel)]="newUser.email" required>
+              </div>
+              <div class="admin-field">
+                <label for="privPassword">Temporary password <span class="required-mark">*</span></label>
+                <input id="privPassword" type="password" name="privPassword" placeholder="They can change it after login" [(ngModel)]="newUser.password" required>
+              </div>
+              <div class="admin-field admin-field-narrow">
+                <label for="privRole">Role <span class="required-mark">*</span></label>
+                <select id="privRole" name="privRole" [(ngModel)]="newUser.role">
+                  <option *ngFor="let option of userRoleOptions" [value]="option.value" [hidden]="option.value === 'USER'">{{ option.label }}</option>
+                </select>
+              </div>
+            </div>
+            <div class="admin-form-footer">
+              <button type="submit" class="primary-action" [disabled]="userForm.invalid">Create privileged user</button>
+            </div>
           </form>
 
           <div class="admin-table-wrap">
@@ -476,8 +670,14 @@ type AdminCompanyDraft = AdminCompany & {
         <form class="admin-modal-form" (ngSubmit)="saveEdit()">
           <ng-container [ngSwitch]="editModal.type">
             <ng-container *ngSwitchCase="'place'">
-              <input name="editPlaceName" placeholder="Destination name" [(ngModel)]="editModal.data.name" required>
-              <textarea name="editPlaceDescription" rows="4" placeholder="Description" [(ngModel)]="editModal.data.description" required></textarea>
+              <div class="admin-field">
+                <label for="editPlaceName">Destination name</label>
+                <input id="editPlaceName" name="editPlaceName" placeholder="Destination name" [(ngModel)]="editModal.data.name" required>
+              </div>
+              <div class="admin-field">
+                <label for="editPlaceDescription">Description</label>
+                <textarea id="editPlaceDescription" name="editPlaceDescription" rows="4" placeholder="Description" [(ngModel)]="editModal.data.description" required></textarea>
+              </div>
               <label class="admin-file-control">
                 <span class="file-label">Image</span>
                 <span class="file-picker-shell">
@@ -502,118 +702,288 @@ type AdminCompanyDraft = AdminCompany & {
             </ng-container>
 
             <ng-container *ngSwitchCase="'testimonial'">
-              <input name="editTestimonialName" placeholder="Name" [(ngModel)]="editModal.data.name" required>
-              <input name="editTestimonialLocation" placeholder="Location" [(ngModel)]="editModal.data.location" required>
-              <input name="editTestimonialRoute" placeholder="Route" [(ngModel)]="editModal.data.route" required>
-              <input type="number" min="1" max="5" name="editTestimonialRating" placeholder="Rating" [(ngModel)]="editModal.data.rating" required>
-              <textarea name="editTestimonialComment" rows="4" placeholder="Comment" [(ngModel)]="editModal.data.comment" required></textarea>
-              <label class="admin-check"><input type="checkbox" name="editTestimonialActive" [(ngModel)]="editModal.data.active"> Active</label>
+              <div class="admin-field">
+                <label for="editTestimonialName">Traveler name</label>
+                <input id="editTestimonialName" name="editTestimonialName" placeholder="Name" [(ngModel)]="editModal.data.name" required>
+              </div>
+              <div class="admin-field">
+                <label for="editTestimonialLocation">Location</label>
+                <input id="editTestimonialLocation" name="editTestimonialLocation" placeholder="Location" [(ngModel)]="editModal.data.location" required>
+              </div>
+              <div class="admin-field">
+                <label for="editTestimonialRoute">Route</label>
+                <input id="editTestimonialRoute" name="editTestimonialRoute" placeholder="Route" [(ngModel)]="editModal.data.route" required>
+              </div>
+              <div class="admin-field">
+                <label for="editTestimonialRating">Rating (1-5)</label>
+                <input id="editTestimonialRating" type="number" min="1" max="5" name="editTestimonialRating" placeholder="Rating" [(ngModel)]="editModal.data.rating" required>
+              </div>
+              <div class="admin-field">
+                <label for="editTestimonialComment">Comment</label>
+                <textarea id="editTestimonialComment" name="editTestimonialComment" rows="4" placeholder="Comment" [(ngModel)]="editModal.data.comment" required></textarea>
+              </div>
+              <label class="admin-check"><input type="checkbox" name="editTestimonialActive" [(ngModel)]="editModal.data.active"> Visible on site</label>
             </ng-container>
 
             <ng-container *ngSwitchCase="'fixedRoute'">
-              <select name="editFixedDeparting" [(ngModel)]="editModal.data.departingId" required>
-                <option [ngValue]="0">Departing</option>
-                <option *ngFor="let place of places" [ngValue]="place.id">{{ place.name }}</option>
-              </select>
-              <select name="editFixedDestination" [(ngModel)]="editModal.data.destinationId" required>
-                <option [ngValue]="0">Going to</option>
-                <option *ngFor="let place of places" [ngValue]="place.id">{{ place.name }}</option>
-              </select>
-              <input type="number" min="0" step="0.01" name="editFixedPrice" placeholder="Fixed price" [(ngModel)]="editModal.data.price" required>
-              <input name="editFixedLabel" placeholder="Label" [(ngModel)]="editModal.data.label">
-              <textarea name="editFixedNotes" rows="4" placeholder="Specific service notes" [(ngModel)]="editModal.data.notes"></textarea>
-              <label class="admin-check"><input type="checkbox" name="editFixedActive" [(ngModel)]="editModal.data.active"> Active</label>
+              <div class="admin-form-row">
+                <div class="admin-field">
+                  <label for="editFixedDeparting">Departing from <span class="required-mark">*</span></label>
+                  <select id="editFixedDeparting" name="editFixedDeparting" [(ngModel)]="editModal.data.departingId" required>
+                    <option [ngValue]="0">Select origin</option>
+                    <option *ngFor="let place of places" [ngValue]="place.id">{{ place.name }}</option>
+                  </select>
+                </div>
+                <div class="admin-field">
+                  <label for="editFixedDestination">Going to <span class="required-mark">*</span></label>
+                  <select id="editFixedDestination" name="editFixedDestination" [(ngModel)]="editModal.data.destinationId" required>
+                    <option [ngValue]="0">Select destination</option>
+                    <option *ngFor="let place of places" [ngValue]="place.id">{{ place.name }}</option>
+                  </select>
+                </div>
+                <div class="admin-field admin-field-narrow">
+                  <label for="editFixedPrice">Price (USD) <span class="required-mark">*</span></label>
+                  <input id="editFixedPrice" type="number" min="0" step="0.01" name="editFixedPrice" placeholder="0.00" [(ngModel)]="editModal.data.price" required>
+                </div>
+                <div class="admin-field">
+                  <label for="editFixedLabel">Short label</label>
+                  <input id="editFixedLabel" name="editFixedLabel" placeholder="e.g. Jaco" [(ngModel)]="editModal.data.label">
+                </div>
+              </div>
+              <div class="admin-form-row">
+                <div class="admin-field admin-field-full">
+                  <label for="editFixedNotes">Service notes for this route</label>
+                  <textarea id="editFixedNotes" name="editFixedNotes" rows="3" placeholder="Operational notes visible only to admins..." [(ngModel)]="editModal.data.notes"></textarea>
+                </div>
+              </div>
+              <label class="admin-check"><input type="checkbox" name="editFixedActive" [(ngModel)]="editModal.data.active"> Active (price applies immediately)</label>
             </ng-container>
 
             <ng-container *ngSwitchCase="'pricingRule'">
-              <input name="editRuleName" placeholder="Rule name" [(ngModel)]="editModal.data.name" required>
+              <div class="admin-field">
+                <label for="editRuleName">Rule name</label>
+                <input id="editRuleName" name="editRuleName" placeholder="Rule name" [(ngModel)]="editModal.data.name" required>
+              </div>
               <div class="admin-modal-sublist compact-fields">
-                <input type="number" step="0.1" min="0" name="editRuleMin" placeholder="Min km" [(ngModel)]="editModal.data.minDistance" required>
-                <input type="number" step="0.1" min="0" name="editRuleMax" placeholder="Max km" [(ngModel)]="editModal.data.maxDistance" required>
-                <input type="number" step="0.01" min="0" name="editRulePrice" placeholder="Price/km" [(ngModel)]="editModal.data.pricePerKm" required>
-                <input type="number" step="0.01" min="0" name="editRuleDiscount" placeholder="Discount" [(ngModel)]="editModal.data.discount" required>
-                <input type="number" step="1" min="0" name="editRuleOrder" placeholder="Order" [(ngModel)]="editModal.data.sortOrder" required>
+                <div class="admin-field">
+                  <label for="editRuleMin">Min distance (km)</label>
+                  <input id="editRuleMin" type="number" step="0.1" min="0" name="editRuleMin" placeholder="Min km" [(ngModel)]="editModal.data.minDistance" required>
+                </div>
+                <div class="admin-field">
+                  <label for="editRuleMax">Max distance (km)</label>
+                  <input id="editRuleMax" type="number" step="0.1" min="0" name="editRuleMax" placeholder="Max km" [(ngModel)]="editModal.data.maxDistance" required>
+                </div>
+                <div class="admin-field">
+                  <label for="editRulePrice">Price per km (USD)</label>
+                  <input id="editRulePrice" type="number" step="0.01" min="0" name="editRulePrice" placeholder="Price/km" [(ngModel)]="editModal.data.pricePerKm" required>
+                </div>
+                <div class="admin-field">
+                  <label for="editRuleDiscount">Discount (0-1)</label>
+                  <input id="editRuleDiscount" type="number" step="0.01" min="0" name="editRuleDiscount" placeholder="Discount" [(ngModel)]="editModal.data.discount" required>
+                </div>
+                <div class="admin-field">
+                  <label for="editRuleOrder">Order</label>
+                  <input id="editRuleOrder" type="number" step="1" min="0" name="editRuleOrder" placeholder="Order" [(ngModel)]="editModal.data.sortOrder" required>
+                </div>
                 <label class="admin-check"><input type="checkbox" name="editRuleActive" [(ngModel)]="editModal.data.active"> Active</label>
               </div>
             </ng-container>
 
             <ng-container *ngSwitchCase="'serviceRule'">
-              <input name="editServiceTitle" placeholder="Rule title" [(ngModel)]="editModal.data.title" required>
-              <input type="number" min="0" name="editServiceOrder" placeholder="Order" [(ngModel)]="editModal.data.sortOrder" required>
-              <textarea name="editServiceDescription" rows="4" placeholder="What should the team know?" [(ngModel)]="editModal.data.description" required></textarea>
+              <div class="admin-field">
+                <label for="editServiceTitle">Rule title</label>
+                <input id="editServiceTitle" name="editServiceTitle" placeholder="Rule title" [(ngModel)]="editModal.data.title" required>
+              </div>
+              <div class="admin-field">
+                <label for="editServiceOrder">Order</label>
+                <input id="editServiceOrder" type="number" min="0" name="editServiceOrder" placeholder="Order" [(ngModel)]="editModal.data.sortOrder" required>
+              </div>
+              <div class="admin-field">
+                <label for="editServiceDescription">What should the team know?</label>
+                <textarea id="editServiceDescription" name="editServiceDescription" rows="4" placeholder="What should the team know?" [(ngModel)]="editModal.data.description" required></textarea>
+              </div>
               <label class="admin-check"><input type="checkbox" name="editServiceActive" [(ngModel)]="editModal.data.active"> Active</label>
             </ng-container>
 
             <ng-container *ngSwitchCase="'reservation'">
-              <textarea name="editReservationMessage" rows="4" placeholder="Reservation notes" [(ngModel)]="editModal.data.message"></textarea>
+              <div class="admin-field">
+                <label for="editReservationMessage">Reservation notes</label>
+                <textarea id="editReservationMessage" name="editReservationMessage" rows="4" placeholder="Reservation notes" [(ngModel)]="editModal.data.message"></textarea>
+              </div>
               <div class="admin-modal-sublist" *ngFor="let shuttle of editModal.data.shuttles; let i = index">
-                <select name="editShuttleDeparting{{ i }}" [(ngModel)]="shuttle.departingId">
-                  <option [ngValue]="undefined">Departing</option>
-                  <option *ngFor="let place of places" [ngValue]="place.id">{{ place.name }}</option>
-                </select>
-                <select name="editShuttleDestination{{ i }}" [(ngModel)]="shuttle.destinationId">
-                  <option [ngValue]="undefined">Going to</option>
-                  <option *ngFor="let place of places" [ngValue]="place.id">{{ place.name }}</option>
-                </select>
-                <input type="datetime-local" name="editShuttleDate{{ i }}" [(ngModel)]="shuttle.date">
-                <input type="number" min="1" name="editShuttlePersons{{ i }}" [(ngModel)]="shuttle.persons">
+                <div class="admin-field">
+                  <label for="editShuttleDeparting{{ i }}">Departing from</label>
+                  <select id="editShuttleDeparting{{ i }}" name="editShuttleDeparting{{ i }}" [(ngModel)]="shuttle.departingId">
+                    <option [ngValue]="undefined">Select departing place</option>
+                    <option *ngFor="let place of places" [ngValue]="place.id">{{ place.name }}</option>
+                  </select>
+                </div>
+                <div class="admin-field">
+                  <label for="editShuttleDestination{{ i }}">Going to</label>
+                  <select id="editShuttleDestination{{ i }}" name="editShuttleDestination{{ i }}" [(ngModel)]="shuttle.destinationId">
+                    <option [ngValue]="undefined">Select destination</option>
+                    <option *ngFor="let place of places" [ngValue]="place.id">{{ place.name }}</option>
+                  </select>
+                </div>
+                <div class="admin-field">
+                  <label for="editShuttleDate{{ i }}">Date &amp; time</label>
+                  <input id="editShuttleDate{{ i }}" type="datetime-local" name="editShuttleDate{{ i }}" [(ngModel)]="shuttle.date">
+                </div>
+                <div class="admin-field">
+                  <label for="editShuttlePersons{{ i }}">Passengers</label>
+                  <input id="editShuttlePersons{{ i }}" type="number" min="1" name="editShuttlePersons{{ i }}" [(ngModel)]="shuttle.persons">
+                </div>
                 <button type="button" class="remove-transfer" (click)="deleteShuttleFromModal(shuttle)">Delete transfer</button>
               </div>
             </ng-container>
 
             <ng-container *ngSwitchCase="'company'">
-              <input name="editCompanyName" placeholder="Company name" [(ngModel)]="editModal.data.name" required>
-              <input type="email" name="editCompanyEmail" placeholder="Email" [(ngModel)]="editModal.data.email" required>
-              <input name="editCompanyTagline" placeholder="Tagline" [(ngModel)]="editModal.data.tagline">
-              <input name="editCompanyWebsite" placeholder="Website" [(ngModel)]="editModal.data.website">
-              <input name="editCompanyAddress" placeholder="Address" [(ngModel)]="editModal.data.address">
-              <label class="admin-check"><input type="checkbox" name="editCompanyDefault" [(ngModel)]="editModal.data.isDefault"> Default company</label>
-              <div class="admin-modal-sublist" *ngFor="let phone of editModal.data.phones; let i = index">
-                <select name="editPhoneType{{ i }}" [(ngModel)]="phone.type">
-                  <option value="phone">Phone</option>
-                  <option value="whatsapp">WhatsApp</option>
-                  <option value="email">Email</option>
-                  <option value="social">Social</option>
-                </select>
-                <input name="editPhoneLabel{{ i }}" placeholder="Label" [(ngModel)]="phone.label">
-                <input name="editPhoneNumber{{ i }}" placeholder="Value" [(ngModel)]="phone.number">
-                <input name="editPhoneHref{{ i }}" placeholder="Link / href" [(ngModel)]="phone.href">
-                <input type="number" name="editPhoneOrder{{ i }}" placeholder="Order" [(ngModel)]="phone.sortOrder">
-                <label class="admin-check"><input type="checkbox" name="editPhoneActive{{ i }}" [(ngModel)]="phone.active"> Active</label>
-                <button type="button" class="remove-transfer" (click)="deletePhoneFromModal(phone)">Delete phone</button>
+              <p class="admin-form-section-label">Identity</p>
+              <div class="admin-form-row">
+                <div class="admin-field">
+                  <label for="editCompanyName">Company name <span class="required-mark">*</span></label>
+                  <input id="editCompanyName" name="editCompanyName" placeholder="e.g. CR Travel Service" [(ngModel)]="editModal.data.name" required>
+                </div>
+                <div class="admin-field">
+                  <label for="editCompanyEmail">Reservations email <span class="required-mark">*</span></label>
+                  <input id="editCompanyEmail" type="email" name="editCompanyEmail" placeholder="reservations@yourcompany.com" [(ngModel)]="editModal.data.email" required>
+                </div>
               </div>
-              <div class="admin-modal-sublist">
-                <select name="modalPhoneType" [(ngModel)]="editModal.data.newPhoneType">
-                  <option value="phone">Phone</option>
-                  <option value="whatsapp">WhatsApp</option>
-                  <option value="email">Email</option>
-                  <option value="social">Social</option>
-                </select>
-                <input name="modalPhoneLabel" placeholder="New label" [(ngModel)]="editModal.data.newPhoneLabel">
-                <input name="modalPhoneNumber" placeholder="New value" [(ngModel)]="editModal.data.newPhoneNumber">
-                <input name="modalPhoneHref" placeholder="New link / href" [(ngModel)]="editModal.data.newPhoneHref">
-                <input type="number" name="modalPhoneOrder" placeholder="Order" [(ngModel)]="editModal.data.newPhoneSortOrder">
-                <button type="button" class="secondary-action" (click)="createPhoneFromModal()">Add contact</button>
+              <div class="admin-form-row">
+                <div class="admin-field">
+                  <label for="editCompanyTagline">Tagline</label>
+                  <input id="editCompanyTagline" name="editCompanyTagline" placeholder="Short line shown under the logo" [(ngModel)]="editModal.data.tagline">
+                </div>
+                <div class="admin-field">
+                  <label for="editCompanyWebsite">Website URL</label>
+                  <input id="editCompanyWebsite" name="editCompanyWebsite" placeholder="https://yourcompany.com" [(ngModel)]="editModal.data.website">
+                </div>
+                <div class="admin-field">
+                  <label for="editCompanyAddress">Address</label>
+                  <input id="editCompanyAddress" name="editCompanyAddress" placeholder="Physical address shown in the footer" [(ngModel)]="editModal.data.address">
+                </div>
+              </div>
+              <div class="admin-form-row admin-form-row-logo">
+                <label class="admin-file-control">
+                  <span class="file-label">Logo</span>
+                  <span class="file-picker-shell">
+                    <span class="file-picker-button">Choose logo</span>
+                    <span class="file-picker-name">{{ editModal.data.logo ? 'Logo selected' : 'No logo selected' }}</span>
+                  </span>
+                  <input type="file" accept="image/*" (change)="handleImageFile($event, 'modalCompanyLogo')">
+                </label>
+                <img class="admin-image-preview" *ngIf="editModal.data.logo" [src]="editModal.data.logo" alt="Logo preview">
+              </div>
+              <label class="admin-check"><input type="checkbox" name="editCompanyDefault" [(ngModel)]="editModal.data.isDefault"> Set as the default company shown on the public site</label>
+
+              <p class="admin-form-section-label" style="margin-top:1.5rem">Contact methods</p>
+              <div class="admin-modal-sublist" *ngFor="let phone of editModal.data.phones; let i = index">
+                <div class="admin-form-row">
+                  <div class="admin-field admin-field-narrow">
+                    <label for="editPhoneType{{ i }}">Type</label>
+                    <select id="editPhoneType{{ i }}" name="editPhoneType{{ i }}" [(ngModel)]="phone.type">
+                      <option *ngFor="let option of contactTypeOptions" [value]="option.value">{{ option.label }}</option>
+                    </select>
+                  </div>
+                  <div class="admin-field">
+                    <label for="editPhoneLabel{{ i }}">Display label</label>
+                    <input id="editPhoneLabel{{ i }}" name="editPhoneLabel{{ i }}" placeholder="e.g. Costa Rica office" [(ngModel)]="phone.label">
+                  </div>
+                  <div class="admin-field">
+                    <label for="editPhoneNumber{{ i }}">Value</label>
+                    <input id="editPhoneNumber{{ i }}" name="editPhoneNumber{{ i }}" placeholder="Number or handle" [(ngModel)]="phone.number">
+                  </div>
+                  <div class="admin-field admin-field-narrow">
+                    <label for="editPhoneOrder{{ i }}">Order</label>
+                    <input id="editPhoneOrder{{ i }}" type="number" name="editPhoneOrder{{ i }}" placeholder="0" [(ngModel)]="phone.sortOrder">
+                  </div>
+                </div>
+                <div class="admin-form-row">
+                  <div class="admin-field admin-field-wide">
+                    <label for="editPhoneHref{{ i }}">Link href</label>
+                    <input id="editPhoneHref{{ i }}" name="editPhoneHref{{ i }}" placeholder="tel:+506...  /  https://wa.me/...  /  mailto:..." [(ngModel)]="phone.href">
+                  </div>
+                  <div class="admin-field-inline-actions">
+                    <label class="admin-check"><input type="checkbox" name="editPhoneActive{{ i }}" [(ngModel)]="phone.active"> Active</label>
+                    <button type="button" class="remove-transfer" (click)="deletePhoneFromModal(phone)">Remove</button>
+                  </div>
+                </div>
+              </div>
+
+              <p class="admin-form-section-label" style="margin-top:1rem">Add contact method</p>
+              <div class="admin-form-row">
+                <div class="admin-field admin-field-narrow">
+                  <label for="modalPhoneType">Type</label>
+                  <select id="modalPhoneType" name="modalPhoneType" [(ngModel)]="editModal.data.newPhoneType">
+                    <option *ngFor="let option of contactTypeOptions" [value]="option.value">{{ option.label }}</option>
+                  </select>
+                </div>
+                <div class="admin-field">
+                  <label for="modalPhoneLabel">Display label</label>
+                  <input id="modalPhoneLabel" name="modalPhoneLabel" placeholder="e.g. WhatsApp US" [(ngModel)]="editModal.data.newPhoneLabel">
+                </div>
+                <div class="admin-field">
+                  <label for="modalPhoneNumber">Value</label>
+                  <input id="modalPhoneNumber" name="modalPhoneNumber" placeholder="Number or handle" [(ngModel)]="editModal.data.newPhoneNumber">
+                </div>
+                <div class="admin-field admin-field-narrow">
+                  <label for="modalPhoneOrder">Order</label>
+                  <input id="modalPhoneOrder" type="number" name="modalPhoneOrder" placeholder="0" [(ngModel)]="editModal.data.newPhoneSortOrder">
+                </div>
+              </div>
+              <div class="admin-form-row">
+                <div class="admin-field admin-field-wide">
+                  <label for="modalPhoneHref">Link href</label>
+                  <input id="modalPhoneHref" name="modalPhoneHref" placeholder="tel:+506...  /  https://wa.me/...  /  mailto:..." [(ngModel)]="editModal.data.newPhoneHref">
+                </div>
+                <div class="admin-field-inline-actions">
+                  <button type="button" class="secondary-action" (click)="createPhoneFromModal()">Add contact</button>
+                </div>
               </div>
             </ng-container>
 
             <ng-container *ngSwitchCase="'message'">
-              <input name="editMessageName" placeholder="Name" [(ngModel)]="editModal.data.name" required>
-              <input name="editMessagePhone" placeholder="Phone" [(ngModel)]="editModal.data.phone">
-              <input type="email" name="editMessageEmail" placeholder="Email" [(ngModel)]="editModal.data.email" required>
-              <textarea name="editMessageText" rows="4" placeholder="Message" [(ngModel)]="editModal.data.text" required></textarea>
+              <div class="admin-field">
+                <label for="editMessageName">Name</label>
+                <input id="editMessageName" name="editMessageName" placeholder="Name" [(ngModel)]="editModal.data.name" required>
+              </div>
+              <div class="admin-field">
+                <label for="editMessagePhone">Phone</label>
+                <app-phone-field name="editMessagePhone" placeholder="555 000 0000" [(ngModel)]="editModal.data.phone"></app-phone-field>
+              </div>
+              <div class="admin-field">
+                <label for="editMessageEmail">Email</label>
+                <input id="editMessageEmail" type="email" name="editMessageEmail" placeholder="Email" [(ngModel)]="editModal.data.email" required>
+              </div>
+              <div class="admin-field">
+                <label for="editMessageText">Message</label>
+                <textarea id="editMessageText" name="editMessageText" rows="4" placeholder="Message" [(ngModel)]="editModal.data.text" required></textarea>
+              </div>
             </ng-container>
 
             <ng-container *ngSwitchCase="'user'">
-              <input name="editUserName" placeholder="First name" [(ngModel)]="editModal.data.name" required>
-              <input name="editUserLastName" placeholder="Last name" [(ngModel)]="editModal.data.lastName" required>
-              <input name="editUserPhone" placeholder="Phone" [(ngModel)]="editModal.data.phone">
-              <input name="editUserEmail" placeholder="Email" [(ngModel)]="editModal.data.email" disabled>
-              <select name="editUserRole" [(ngModel)]="editModal.data.role">
-                <option value="USER">USER</option>
-                <option value="ADMIN">ADMIN</option>
-                <option value="SUPER">SUPER</option>
-              </select>
+              <div class="admin-field">
+                <label for="editUserName">First name</label>
+                <input id="editUserName" name="editUserName" placeholder="First name" [(ngModel)]="editModal.data.name" required>
+              </div>
+              <div class="admin-field">
+                <label for="editUserLastName">Last name</label>
+                <input id="editUserLastName" name="editUserLastName" placeholder="Last name" [(ngModel)]="editModal.data.lastName" required>
+              </div>
+              <div class="admin-field">
+                <label for="editUserPhone">Phone</label>
+                <app-phone-field name="editUserPhone" placeholder="8338 8382" [(ngModel)]="editModal.data.phone"></app-phone-field>
+              </div>
+              <div class="admin-field">
+                <label for="editUserEmail">Email</label>
+                <input id="editUserEmail" name="editUserEmail" placeholder="Email" [(ngModel)]="editModal.data.email" disabled>
+              </div>
+              <div class="admin-field">
+                <label for="editUserRole">Role</label>
+                <select id="editUserRole" name="editUserRole" [(ngModel)]="editModal.data.role">
+                  <option *ngFor="let option of userRoleOptions" [value]="option.value">{{ option.label }}</option>
+                </select>
+              </div>
               <label class="admin-check"><input type="checkbox" name="editUserActive" [(ngModel)]="editModal.data.active"> Active</label>
             </ng-container>
           </ng-container>
@@ -643,8 +1013,10 @@ export class AdminPageComponent implements OnInit {
   newPlace: AdminPlace = { name: '', description: '', image: '' };
   newHeroImage: HeroImage = { src: '' };
   newTestimonial: Testimonial = { id: 0, name: '', location: '', route: '', rating: 5, comment: '', active: true };
-  newCompany: AdminCompany = { name: 'CR Travel Service', email: 'reservations@crtravelservice.com', tagline: 'Private shuttle transportation in Costa Rica', address: 'Costa Rica', website: 'https://crtravelservice.com', isDefault: true };
-  newCompanyPhone: AdminPhone = { type: 'phone', label: 'Costa Rica', code: 'Costa Rica', number: '', href: '', active: true, sortOrder: 1 };
+  newCompany: AdminCompany = this.emptyCompany();
+  newCompanyPhone: AdminPhone = this.emptyCompanyPhone();
+  contactTypeOptions = CONTACT_TYPE_OPTIONS;
+  userRoleOptions = USER_ROLE_OPTIONS;
   newMessage: AdminMessage = { name: '', phone: '', email: '', text: '' };
   newUser = { name: '', lastName: '', phone: '', email: '', password: '', role: 'ADMIN' as 'ADMIN' | 'SUPER' };
   newFixedRoutePrice: FixedRoutePrice = this.emptyFixedRoutePrice();
@@ -738,7 +1110,7 @@ export class AdminPageComponent implements OnInit {
     this.closeEdit();
   }
 
-  handleImageFile(event: Event, target: 'newPlace' | 'newHero' | 'modal'): void {
+  handleImageFile(event: Event, target: 'newPlace' | 'newHero' | 'newCompanyLogo' | 'modal' | 'modalCompanyLogo'): void {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) {
       return;
@@ -1038,13 +1410,21 @@ export class AdminPageComponent implements OnInit {
 
     this.admin.createCompany({ ...this.newCompany, phones }).subscribe({
       next: () => {
-        this.newCompany = { name: 'CR Travel Service', email: 'reservations@crtravelservice.com', tagline: 'Private shuttle transportation in Costa Rica', address: 'Costa Rica', website: 'https://crtravelservice.com', isDefault: true };
-        this.newCompanyPhone = { type: 'phone', label: 'Costa Rica', code: 'Costa Rica', number: '', href: '', active: true, sortOrder: 1 };
+        this.newCompany = this.emptyCompany();
+        this.newCompanyPhone = this.emptyCompanyPhone();
         this.done('Company created.');
         this.loadCompanies();
       },
       error: (error) => this.fail(error)
     });
+  }
+
+  private emptyCompany(): AdminCompany {
+    return { name: '', email: '', tagline: '', address: '', website: '', logo: '', isDefault: !this.companies.length };
+  }
+
+  private emptyCompanyPhone(): AdminPhone {
+    return { type: 'phone', label: '', code: '', number: '', href: '', active: true, sortOrder: 1 };
   }
 
   updateCompany(company: AdminCompanyDraft): void {
@@ -1222,11 +1602,15 @@ export class AdminPageComponent implements OnInit {
     });
   }
 
-  private setImageTarget(target: 'newPlace' | 'newHero' | 'modal', src: string): void {
+  private setImageTarget(target: 'newPlace' | 'newHero' | 'newCompanyLogo' | 'modal' | 'modalCompanyLogo', src: string): void {
     if (target === 'newPlace') {
       this.newPlace.image = src;
     } else if (target === 'newHero') {
       this.newHeroImage.src = src;
+    } else if (target === 'newCompanyLogo') {
+      this.newCompany.logo = src;
+    } else if (target === 'modalCompanyLogo' && this.editModal?.type === 'company') {
+      this.editModal.data.logo = src;
     } else if (this.editModal?.type === 'place') {
       this.editModal.data.image = src;
     } else if (this.editModal?.type === 'hero') {

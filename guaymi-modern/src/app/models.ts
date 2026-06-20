@@ -74,6 +74,7 @@ export interface CompanyProfile {
   tagline?: string;
   address?: string;
   website?: string;
+  logo?: string;
   isDefault?: boolean;
   phones: ContactMethod[];
 }

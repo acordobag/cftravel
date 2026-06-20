@@ -51,6 +51,9 @@ router.route('/hero-image')
 router.route('/testimonial')
     .get(function (req, res, next) {
         Testimonial.findAll(req, res, next);
+    })
+    .post(requireAuth, function (req, res, next) {
+        Testimonial.submitReview(req, res, next);
     });
 
 router.route('/pricing')

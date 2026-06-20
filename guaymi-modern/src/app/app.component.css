@@ -109,6 +109,25 @@
   text-decoration: none;
 }
 
+.nav-lang-toggle {
+  background: none;
+  border: 1.5px solid #c8d5e2;
+  border-radius: 6px;
+  color: #4f5f72;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  padding: 4px 10px;
+  text-transform: uppercase;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.nav-lang-toggle:hover {
+  border-color: #0b8f6a;
+  color: #0b8f6a;
+}
+
 .nav-links a:hover,
 .nav-links a.active {
   color: #0b8f6a;
@@ -350,6 +369,49 @@ app-page-hero + app-booking-card .booking-card {
   margin-top: 4px;
 }
 
+.fare-pill-calculating {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.fare-spinner {
+  animation: spin 0.75s linear infinite;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  display: inline-block;
+  height: 22px;
+  width: 22px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.field-loading {
+  position: relative;
+}
+
+.field-loading input {
+  padding-right: 36px;
+}
+
+.field-spinner {
+  animation: spin 0.75s linear infinite;
+  border: 2px solid rgba(20, 90, 60, 0.25);
+  border-top-color: #0b6f54;
+  border-radius: 50%;
+  display: block;
+  height: 16px;
+  pointer-events: none;
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  width: 16px;
+}
+
 .booking-form {
   display: grid;
   gap: 18px;
@@ -359,6 +421,7 @@ app-page-hero + app-booking-card .booking-card {
 
 .field {
   grid-column: span 4;
+  position: relative;
 }
 
 .field-wide {
@@ -629,23 +692,34 @@ textarea {
   margin-top: 10px;
 }
 
-.rate-status,
 .rate-error {
   border-radius: 8px;
   font-size: 14px;
   font-weight: 800;
   margin-top: 18px;
   padding: 12px 14px;
-}
-
-.rate-status {
-  background: #edf7f4;
-  color: #0b6f54;
-}
-
-.rate-error {
   background: #fff0ed;
   color: #b4442f;
+}
+
+.rate-breakdown-skeleton {
+  opacity: 0.5;
+}
+
+.skeleton-bar {
+  animation: skeleton-pulse 1.2s ease-in-out infinite;
+  background: linear-gradient(90deg, #e2e8f0 25%, #cdd5e0 50%, #e2e8f0 75%);
+  background-size: 200% 100%;
+  border-radius: 4px;
+  display: inline-block;
+  height: 14px;
+  min-width: 60px;
+  width: 80px;
+}
+
+@keyframes skeleton-pulse {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
 .quick-grid {
@@ -1121,6 +1195,12 @@ textarea {
   color: #ffffff;
 }
 
+.admin-tabs-buttons button:disabled {
+  color: #b0bec9;
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 .admin-panel {
   background: #ffffff;
   border: 1px solid rgba(18, 28, 45, 0.08);
@@ -1142,41 +1222,43 @@ textarea {
   background: #f7f9fc;
   border: 1px solid #e3eaf2;
   border-radius: 8px;
-  grid-template-columns: repeat(2, 1fr);
-  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
 }
 
-.admin-form textarea,
-.admin-form button,
-.admin-form .admin-check {
-  grid-column: span 2;
+.admin-field {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
 }
 
-.admin-form.compact {
-  grid-template-columns: 1fr auto;
+.admin-field-label {
+  color: #4f5f72;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
 }
 
-.admin-form.compact button {
-  grid-column: span 1;
+.admin-field-hint {
+  color: #8493a6;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  margin: 0;
 }
 
-.admin-create-form {
-  align-items: end;
-  grid-template-columns: minmax(180px, 0.8fr) minmax(240px, 1.2fr) minmax(160px, 0.8fr) auto auto;
-}
-
-.admin-create-form.destination-create-form {
-  grid-template-columns: minmax(190px, 0.95fr) minmax(280px, 1.25fr) 86px minmax(170px, auto);
-}
-
-.admin-create-form textarea,
-.admin-create-form button,
-.admin-create-form .admin-check {
-  grid-column: span 1;
-}
-
-.admin-create-form.compact-upload {
-  grid-template-columns: minmax(360px, 0.9fr) 112px minmax(220px, auto);
+.admin-badge {
+  background: rgba(11, 143, 106, 0.12);
+  border-radius: 999px;
+  color: var(--brand-teal);
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 900;
+  padding: 4px 10px;
+  text-transform: uppercase;
 }
 
 .admin-file-control {
@@ -1255,18 +1337,6 @@ textarea {
   min-height: 50px;
 }
 
-.destination-create-form textarea {
-  height: 78px;
-  resize: vertical;
-}
-
-.destination-create-form .destination-description-field {
-  grid-column: 1 / -1;
-}
-
-.compact-upload .admin-file-control {
-  max-width: 520px;
-}
 
 .pricing-guidance-grid {
   display: grid;
@@ -1318,53 +1388,11 @@ textarea {
   margin: 0;
 }
 
-.pricing-create-form {
-  grid-template-columns: minmax(150px, 1fr) minmax(150px, 1fr) minmax(120px, 0.6fr) minmax(180px, 1fr) minmax(220px, 1.1fr) auto minmax(160px, auto);
+.admin-form textarea {
+  min-height: 80px;
+  resize: vertical;
 }
 
-.pricing-rule-form {
-  grid-template-columns: minmax(180px, 1.2fr) repeat(5, minmax(92px, 0.6fr)) auto minmax(130px, auto);
-}
-
-.service-rule-form {
-  grid-template-columns: minmax(220px, 1fr) minmax(90px, 0.35fr) auto minmax(320px, 1.4fr) minmax(150px, auto);
-}
-
-.service-rule-form textarea {
-  grid-column: span 1;
-}
-
-.pricing-create-form textarea,
-.pricing-rule-form textarea,
-.service-rule-form textarea {
-  min-height: 50px;
-}
-
-.admin-create-form .primary-action {
-  align-self: end;
-  height: 50px;
-  min-height: 50px;
-  min-width: 170px;
-}
-
-.compact-upload .primary-action {
-  min-width: 220px;
-}
-
-.admin-create-form .primary-action:disabled {
-  opacity: 0.78;
-}
-
-.admin-create-form .admin-image-preview {
-  align-self: end;
-  height: 50px;
-  width: 86px;
-}
-
-.compact-upload .admin-image-preview {
-  height: 50px;
-  width: 112px;
-}
 
 .admin-image-preview {
   background: #edf3f6;
@@ -1643,20 +1671,6 @@ textarea {
   gap: 14px;
 }
 
-.admin-modal-sublist {
-  background: #f7f9fc;
-  border: 1px solid #e3eaf2;
-  border-radius: 8px;
-  display: grid;
-  gap: 10px;
-  grid-template-columns: repeat(2, 1fr);
-  padding: 12px;
-}
-
-.admin-modal-sublist.compact-fields {
-  grid-template-columns: repeat(3, 1fr);
-}
-
 .admin-modal-sublist .remove-transfer,
 .admin-modal-sublist .secondary-action {
   justify-self: end;
@@ -1668,6 +1682,99 @@ textarea {
   gap: 10px;
   justify-content: flex-end;
   margin-top: 8px;
+}
+
+/* ── Admin form rows (new structured layout) ──────────────────── */
+.admin-form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.admin-form-row .admin-field {
+  flex: 1 1 180px;
+  min-width: 0;
+}
+
+.admin-form-row .admin-field.admin-field-narrow {
+  flex: 0 1 120px;
+  min-width: 100px;
+}
+
+.admin-form-row .admin-field.admin-field-wide {
+  flex: 2 1 280px;
+}
+
+.admin-form-row .admin-field.admin-field-full {
+  flex: 1 1 100%;
+}
+
+.admin-form-row .admin-file-control {
+  flex: 0 0 auto;
+  min-width: 240px;
+}
+
+.admin-form-row-logo {
+  align-items: center;
+  gap: 16px;
+}
+
+.admin-form-row-logo .admin-image-preview {
+  height: 60px;
+  width: 90px;
+}
+
+.admin-form-section-label {
+  color: #4f5f72;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  margin: 8px 0 0;
+  text-transform: uppercase;
+}
+
+.admin-form-section-hint {
+  color: #94a3b6;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0;
+  margin-left: 8px;
+  text-transform: none;
+}
+
+.admin-form-footer {
+  align-items: center;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+
+.admin-form-footer .primary-action {
+  min-width: 160px;
+}
+
+.admin-field-inline-actions {
+  align-items: center;
+  display: flex;
+  flex-shrink: 0;
+  gap: 10px;
+  padding-top: 22px;
+}
+
+.admin-modal-sublist {
+  background: #f7f9fc;
+  border: 1px solid #e3eaf2;
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+}
+
+.required-mark {
+  color: #c0392b;
+  font-weight: 900;
 }
 
 .account-page {
@@ -1758,6 +1865,62 @@ textarea {
 
 .account-form .primary-action {
   grid-column: 1 / -1;
+}
+
+.account-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.account-form label > span {
+  color: #4f5f72;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.account-form textarea {
+  grid-column: 1 / -1;
+}
+
+.star-picker {
+  display: flex;
+  gap: 4px;
+}
+
+.star-picker button {
+  background: none;
+  border: none;
+  color: #d1dae5;
+  cursor: pointer;
+  font-size: 28px;
+  line-height: 1;
+  padding: 0;
+  transition: color 0.1s;
+}
+
+.star-picker button.star-on {
+  color: #f4b942;
+}
+
+.star-picker button:hover,
+.star-picker button:focus {
+  color: #f4b942;
+}
+
+.review-sent {
+  padding: 22px 0;
+  text-align: center;
+}
+
+.review-sent h3 {
+  font-size: 20px;
+  margin: 6px 0 10px;
+}
+
+.review-sent p {
+  color: #4f5f72;
+  margin-bottom: 18px;
 }
 
 .empty-state {

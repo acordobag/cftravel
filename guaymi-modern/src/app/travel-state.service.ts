@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, effect, signal } from '@angular/core';
 
+import { AuthService } from './auth.service';
 import { CompanyProfile, ContactMethod, PlaceOption, ReservationPayload, ShuttleQuote, Testimonial } from './models';
 import { PricingService } from './pricing.service';
 
@@ -102,7 +103,7 @@ export class TravelStateService {
   readonly testimonials = signal<Testimonial[]>(this.defaultTestimonials());
   readonly currentTestimonial = computed(() => this.testimonials()[this.activeTestimonial()] || this.testimonials()[0]);
 
-  constructor(private readonly http: HttpClient, private readonly pricing: PricingService) {
+  constructor(private readonly http: HttpClient, private readonly pricing: PricingService, private readonly auth: AuthService) {
     this.recalculate();
     effect(() => {
       this.pricing.pricingConfig();
@@ -112,6 +113,15 @@ export class TravelStateService {
         return shuttle;
       }));
     }, { allowSignalWrites: true });
+    effect(() => {
+      const user = this.auth.currentUser();
+      if (user) {
+        this.customer.name = this.customer.name || user.name;
+        this.customer.lastName = this.customer.lastName || user.lastName;
+        this.customer.email = this.customer.email || user.email;
+        this.customer.phone = this.customer.phone || user.phone || '';
+      }
+    });
     this.loadPlaces();
     this.loadHeroImages();
     this.loadCompany();
@@ -151,6 +161,38 @@ export class TravelStateService {
     this.recalculate(quote);
   }
 
+  private matchKnownPlace(googlePlaceId: string | undefined, candidateName: string, location?: { lat: number; lng: number }): PlaceOption | null {
+    const stripDiacritics = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '');
+    const normalize = (value: string) => stripDiacritics(value.toLowerCase().trim());
+    const candidate = normalize(candidateName || '');
+
+    const byIdOrName = this.places.find((item) => {
+      if (googlePlaceId && item.placeId && item.placeId === googlePlaceId) {
+        return true;
+      }
+      const itemName = normalize(item.name);
+      return itemName === candidate || (candidate && (candidate.includes(itemName) || itemName.includes(candidate)));
+    });
+
+    if (byIdOrName) return byIdOrName;
+
+    if (location) {
+      const deg2km = (lat1: number, lng1: number, lat2: number, lng2: number) => {
+        const R = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLng = (lng2 - lng1) * Math.PI / 180;
+        const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      };
+      return this.places.find((item) => {
+        if (!item.location) return false;
+        return deg2km(location.lat, location.lng, item.location.lat, item.location.lng) < 15;
+      }) || null;
+    }
+
+    return null;
+  }
+
   async setGooglePlace(quote: ShuttleQuote, kind: 'departing' | 'destination', place: any): Promise<void> {
     if (!place || !place.geometry || !place.geometry.location) {
       return;
@@ -161,9 +203,16 @@ export class TravelStateService {
       lng: typeof place.geometry.location.lng === 'function' ? place.geometry.location.lng() : place.geometry.location.lng
     };
 
-    const option: PlaceOption = {
+    const placeName = place.name || place.formatted_address || '';
+
+    // If the Google suggestion matches one of our own places (by Google place_id or by name),
+    // reuse that place's real id so fixed-route prices set in the admin keep applying.
+    // Otherwise this would always be a brand-new id and admin fixed routes would never match.
+    const known = this.matchKnownPlace(place.place_id, placeName, location);
+
+    const option: PlaceOption = known || {
       id: Date.now(),
-      name: place.name || place.formatted_address || '',
+      name: placeName,
       zone: 'Costa Rica',
       image: 'assets/images/airport.jpg',
       description: place.formatted_address || 'Custom Costa Rica pickup or drop-off.',

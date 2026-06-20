@@ -36,6 +36,26 @@ const defaultTestimonials = [
 ]
 
 const Testimonial = {
+  submitReview: async (req, res, next) => {
+    try {
+      const { name, location, route, rating, comment } = req.body
+      if (!comment || !rating) {
+        return res.status(400).json({ message: 'Comment and rating are required.' })
+      }
+      const testimonial = await TestimonialModel.create({
+        name: name || req.authUser?.name || 'Anonymous',
+        location: location || '',
+        route: route || '',
+        rating: Math.min(5, Math.max(1, parseInt(rating) || 5)),
+        comment,
+        active: false
+      })
+      res.status(201).json(testimonial)
+    } catch (e) {
+      next(e)
+    }
+  },
+
   save: async (req, res, next) => {
     try {
       const testimonial = await TestimonialModel.create(req.body)

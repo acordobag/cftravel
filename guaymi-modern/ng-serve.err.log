@@ -762,3 +762,38 @@ Odd numbered Node.js versions will not enter LTS status and should not be used f
          ╵                [32m~~~~~~~~~~~~~~~~~~~~~~[0m
 
 [39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'emptyCompany' does not exist on type 'AdminPageComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:648:34:
+[37m      648 │   newCompany: AdminCompany = this.[32memptyCompany[37m();
+          ╵                                   [32m~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'emptyCompanyPhone' does not exist on type 'AdminPageComponent'. Did you mean 'newCompanyPhone'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:649:37:
+[37m      649 │   newCompanyPhone: AdminPhone = this.[32memptyCompanyPhone[37m();
+          ╵                                      [32m~~~~~~~~~~~~~~~~~[0m
+
+  'newCompanyPhone' is declared here.
+
+    src/app/admin-pages.ts:649:2:
+[37m      649 │   [32mnewCompanyPhone[37m: AdminPhone = this.emptyCompanyPhone();
+          ╵   [32m~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2345: Argument of type '"newPlace" | "newHero" | "newCompanyLogo" | "modal" | "modalCompanyLogo"' is not assignable to parameter of type '"newPlace" | "newHero" | "modal"'.
+  Type '"newCompanyLogo"' is not assignable to type '"newPlace" | "newHero" | "modal"'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:754:26:
+[37m      754 │       this.setImageTarget([32mtarget[37m, dataUrl);
+          ╵                           [32m~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2345: Argument of type '"newPlace" | "newHero" | "newCompanyLogo" | "modal" | "modalCompanyLogo"' is not assignable to parameter of type '"newPlace" | "newHero" | "modal"'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/admin-pages.ts:758:30:
+[37m      758 │           this.setImageTarget([32mtarget[37m, src);
+          ╵                               [32m~~~~~~[0m
+
+[39m[22m

@@ -47,4 +47,8 @@ export class AccountService {
   getMessages() {
     return this.http.get<AccountMessage[]>(`${API_URL}/account/messages`, this.auth.authOptions());
   }
+
+  submitReview(review: { name: string; location: string; route: string; rating: number; comment: string }) {
+    return this.http.post(`${API_URL}/testimonial`, review, this.auth.authOptions());
+  }
 }

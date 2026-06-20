@@ -39,9 +39,23 @@ export interface AdminCompany {
   tagline?: string;
   address?: string;
   website?: string;
+  logo?: string;
   isDefault?: boolean;
   phones?: AdminPhone[];
 }
+
+export const CONTACT_TYPE_OPTIONS: Array<{ value: string; label: string }> = [
+  { value: 'phone', label: 'Phone' },
+  { value: 'whatsapp', label: 'WhatsApp' },
+  { value: 'email', label: 'Email' },
+  { value: 'social', label: 'Social' }
+];
+
+export const USER_ROLE_OPTIONS: Array<{ value: string; label: string }> = [
+  { value: 'USER', label: 'USER' },
+  { value: 'ADMIN', label: 'ADMIN' },
+  { value: 'SUPER', label: 'SUPER' }
+];
 
 export interface AdminShuttle {
   id?: number;
