@@ -39,11 +39,11 @@ export default {
     },
     dbSettings: {
       host: env.DB_HOST || '127.0.0.1',
-      port: env.DB_PORT || 3306,
+      port: env.DB_PORT || 5432,
       username: env.DB_USER || 'cftravel',
       password: env.DB_PASSWORD || 'CfTravel20',
       database: env.DB_NAME || 'cftravel',
-      dialect: 'mysql',
+      dialect: 'postgres',
       // timezone: 'America/Costa_Rica',
       logging: msg => {
         fs.appendFile(path.join(__dirname, '../db', 'log.log'), msg, (err) => {
