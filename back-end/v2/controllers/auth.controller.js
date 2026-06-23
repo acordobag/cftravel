@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs'
 import jwt from 'jwt-simple'
 import settings from '../config'
 import User from '../models/user.model'
+import Mail from '../utils/mail.util'
 
 const sanitizeUser = (user) => ({
   id: user.id,
@@ -42,6 +43,7 @@ const Auth = {
       user.token = token
       await user.save()
 
+      Mail.welcomeCustomer(user).catch(() => {})
       res.status(201).json({ token, user: sanitizeUser(user) })
     } catch (e) {
       next(e)

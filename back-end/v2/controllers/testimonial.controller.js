@@ -1,4 +1,5 @@
 import TestimonialModel from '../models/testimonial.model'
+import Mail from '../utils/mail.util'
 
 const defaultTestimonials = [
   {
@@ -50,6 +51,7 @@ const Testimonial = {
         comment,
         active: false
       })
+      Mail.reviewSubmitted(testimonial, (req.authUser && req.authUser.name) || 'anonymous').catch(() => {})
       res.status(201).json(testimonial)
     } catch (e) {
       next(e)

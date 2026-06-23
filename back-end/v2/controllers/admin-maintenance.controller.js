@@ -5,6 +5,7 @@ import Place from '../models/place.model'
 import Reservation from '../models/reservation.model'
 import Shuttle from '../models/shuttle.model'
 import User from '../models/user.model'
+import Mail from '../utils/mail.util'
 
 const companyInclude = [{
   model: Phone,
@@ -279,6 +280,7 @@ const AdminMaintenance = {
         email: req.body.email,
         text: req.body.text
       })
+      Mail.getCompanyEmail().then(email => Mail.contactMessage(message, email)).catch(() => {})
       res.status(201).send(message).end()
     } catch (e) {
       next(e)

@@ -18,8 +18,11 @@ export default {
       enviroment: ''
     },
     mailSettings: {
-      user: '',
-      pass: ''
+      host: env.MAIL_HOST || 'smtp.gmail.com',
+      port: parseInt(env.MAIL_PORT || '587'),
+      user: env.MAIL_USER || '',
+      pass: env.MAIL_PASS || '',
+      from: env.MAIL_FROM || env.MAIL_USER || ''
     },
     smsSettings: {
       key: '',
