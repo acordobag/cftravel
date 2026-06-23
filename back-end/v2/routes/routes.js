@@ -8,6 +8,7 @@ import Auth from '../controllers/auth.controller';
 import AdminMaintenance from '../controllers/admin-maintenance.controller';
 import Upload from '../controllers/upload.controller';
 import Pricing from '../controllers/pricing.controller';
+import CarTypeController from '../controllers/car-type.controller';
 import Account from '../controllers/account.controller';
 import { requireAuth, requirePrivileged, requireSuper } from '../middleware/auth.middleware';
 
@@ -181,6 +182,22 @@ router.route('/admin/pricing/service-rule/:id')
     })
     .delete(requirePrivileged, function (req, res, next) {
         Pricing.deleteServiceRule(req, res, next);
+    });
+
+router.route('/admin/car-type')
+    .get(requirePrivileged, function (req, res, next) {
+        CarTypeController.findAllAdmin(req, res, next);
+    })
+    .post(requirePrivileged, function (req, res, next) {
+        CarTypeController.create(req, res, next);
+    });
+
+router.route('/admin/car-type/:id')
+    .put(requirePrivileged, function (req, res, next) {
+        CarTypeController.update(req, res, next);
+    })
+    .delete(requirePrivileged, function (req, res, next) {
+        CarTypeController.delete(req, res, next);
     });
 
 router.route('/admin/reservation')

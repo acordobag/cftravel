@@ -1,5 +1,7 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, signal } from '@angular/core';
+import { Injectable, computed, signal } from '@angular/core';
+
+import { CarType } from './models';
 
 const API_URL = 'http://localhost:8080/api';
 
@@ -19,6 +21,7 @@ export interface FixedRoutePrice {
   departingId: number;
   destinationId: number;
   price: number;
+  roundTripPrice: number | null;
   label: string;
   notes: string;
   active: boolean;
@@ -38,6 +41,7 @@ export interface PricingConfig {
   pricingRules: PriceRule[];
   fixedRoutePrices: FixedRoutePrice[];
   serviceRules: ServicePricingRule[];
+  carTypes: CarType[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -45,8 +49,11 @@ export class PricingService {
   readonly pricingConfig = signal<PricingConfig>({
     pricingRules: this.defaultRateRules(),
     fixedRoutePrices: [],
-    serviceRules: []
+    serviceRules: [],
+    carTypes: []
   });
+
+  readonly carTypes = computed(() => this.pricingConfig().carTypes);
 
   constructor(private readonly http: HttpClient) {
     this.loadPricing();
@@ -58,15 +65,32 @@ export class PricingService {
         this.pricingConfig.set({
           pricingRules: config.pricingRules?.length ? config.pricingRules : this.defaultRateRules(),
           fixedRoutePrices: config.fixedRoutePrices || [],
-          serviceRules: config.serviceRules || []
+          serviceRules: config.serviceRules || [],
+          carTypes: config.carTypes || []
         });
       }
     });
   }
 
-  estimate(routeDistance: number, repositionDistance: number, departingId?: number, destinationId?: number): number {
+  getCarType(carTypeId: number | null): CarType | null {
+    if (!carTypeId) return null;
+    return this.carTypes().find((ct) => ct.id === carTypeId) || null;
+  }
+
+  vehicleSurcharge(passengers: number, carTypeId: number | null): number {
+    const carType = this.getCarType(carTypeId);
+    if (!carType || carType.extraPassengerCharge <= 0) return 0;
+    const extra = Math.max(0, passengers - carType.capacity);
+    const capped = Math.min(extra, carType.maxExtraPassengers);
+    return this.roundMoney(capped * carType.extraPassengerCharge);
+  }
+
+  estimate(routeDistance: number, repositionDistance: number, departingId?: number, destinationId?: number, isRoundTrip = false): number {
     const fixedRoute = this.getFixedRoutePrice(departingId, destinationId);
     if (fixedRoute) {
+      if (isRoundTrip && fixedRoute.roundTripPrice != null) {
+        return this.roundMoney(fixedRoute.roundTripPrice);
+      }
       return this.roundMoney(fixedRoute.price);
     }
 

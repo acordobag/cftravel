@@ -84,7 +84,7 @@ export class PageHeroComponent {
         </label>
         <label class="field">
           <span>{{ i18n.tx().booking.passengers }}</span>
-          <input type="number" name="passengers" min="1" max="20" [(ngModel)]="activeQuote.passengers" required>
+          <input type="number" name="passengers" min="1" [max]="maxPassengers" [(ngModel)]="activeQuote.passengers" (ngModelChange)="onPassengersChange()" required>
         </label>
         <label class="field">
           <span>{{ i18n.tx().booking.date }}</span>
@@ -94,13 +94,25 @@ export class PageHeroComponent {
           <span>{{ i18n.tx().booking.time }}</span>
           <input type="time" name="time" [(ngModel)]="activeQuote.time" required>
         </label>
+
+        <label class="field field-wide" *ngIf="state.carTypes().length">
+          <span>{{ i18n.tx().booking.vehicleType }}</span>
+          <select name="carTypeId" [(ngModel)]="activeQuote.carTypeId" (ngModelChange)="selectCarType($event)">
+            <option [ngValue]="null">— {{ i18n.tx().booking.anyVehicle }} —</option>
+            <option *ngFor="let ct of state.carTypes()" [ngValue]="ct.id">
+              {{ ct.name }} ({{ i18n.tx().booking.upTo }} {{ ct.capacity }} {{ i18n.tx().booking.pax }}<ng-container *ngIf="ct.extraPassengerCharge > 0">, +\${{ ct.extraPassengerCharge }}/{{ i18n.tx().booking.extraPax }}</ng-container>)
+            </option>
+          </select>
+          <p class="vehicle-warn" *ngIf="passengerWarning">⚠ {{ passengerWarning }}</p>
+        </label>
       </form>
 
       <div class="rate-error" *ngIf="activeQuote.rateError">{{ activeQuote.rateError }}</div>
 
       <div class="rate-breakdown" *ngIf="activeQuote.total > 0 && !activeQuote.isCalculating">
         <div><span>{{ i18n.tx().booking.routeLabel }}</span><strong>{{ activeQuote.routeDistance }} km</strong></div>
-        <div><span>{{ i18n.tx().booking.operationsLabel }}</span><strong>{{ activeQuote.repositionDistance }} km</strong></div>
+        <div *ngIf="activeQuote.repositionDistance > 0"><span>{{ i18n.tx().booking.operationsLabel }}</span><strong>{{ activeQuote.repositionDistance }} km</strong></div>
+        <div *ngIf="activeQuote.vehicleSurcharge > 0"><span>{{ i18n.tx().booking.extraPaxLabel }}</span><strong>\${{ activeQuote.vehicleSurcharge | number:'1.2-2' }}</strong></div>
         <div><span>{{ i18n.tx().booking.totalLabel }}</span><strong>\${{ activeQuote.total | number:'1.2-2' }}</strong></div>
       </div>
       <div class="rate-breakdown rate-breakdown-skeleton" *ngIf="activeQuote.isCalculating">
@@ -141,6 +153,37 @@ export class BookingCardComponent {
       kind === 'departing' ? this.activeQuote.departingSearch : this.activeQuote.destinationSearch
     );
     this.resolvingKind = null;
+  }
+
+  selectCarType(id: number | null): void {
+    this.activeQuote.carTypeId = id;
+    this.state.recalculate(this.activeQuote);
+  }
+
+  onPassengersChange(): void {
+    this.state.recalculate(this.activeQuote);
+  }
+
+  get selectedCarType() {
+    return this.state.carTypes().find((ct) => ct.id === this.activeQuote.carTypeId) || null;
+  }
+
+  get maxPassengers(): number {
+    const ct = this.selectedCarType;
+    return ct ? ct.capacity + ct.maxExtraPassengers : 20;
+  }
+
+  get passengerWarning(): string {
+    const ct = this.selectedCarType;
+    if (!ct) return '';
+    if (this.activeQuote.passengers > ct.capacity + ct.maxExtraPassengers) {
+      return `Max ${ct.capacity + ct.maxExtraPassengers} passengers for this vehicle.`;
+    }
+    if (this.activeQuote.passengers > ct.capacity) {
+      const extra = this.activeQuote.passengers - ct.capacity;
+      return `${extra} extra passenger${extra > 1 ? 's' : ''} — surcharge applies.`;
+    }
+    return '';
   }
 
   continueBooking(): void {
@@ -267,10 +310,22 @@ export class BookingCardComponent {
         <h2>{{ i18n.tx().fleetSection.heading }}</h2>
       </div>
       <div class="fleet-grid">
-        <article class="fleet-card" *ngFor="let item of i18n.tx().fleetHighlights">
-          <img src="assets/images/bus.png" alt="Private shuttle vehicle">
-          <div><h3>{{ item.title }}</h3><p>{{ item.text }}</p></div>
-        </article>
+        <ng-container *ngIf="state.carTypes().length; else staticFleet">
+          <article class="fleet-card" *ngFor="let ct of state.carTypes()">
+            <img src="assets/images/bus.png" [alt]="ct.name">
+            <div>
+              <h3>{{ ct.name }}</h3>
+              <p>{{ ct.description }}</p>
+              <span class="fleet-capacity">{{ i18n.tx().booking.upTo }} {{ ct.capacity }} {{ i18n.tx().booking.pax }}<ng-container *ngIf="ct.maxExtraPassengers > 0"> (+{{ ct.maxExtraPassengers }})</ng-container></span>
+            </div>
+          </article>
+        </ng-container>
+        <ng-template #staticFleet>
+          <article class="fleet-card" *ngFor="let item of i18n.tx().fleetHighlights">
+            <img src="assets/images/bus.png" alt="Private shuttle vehicle">
+            <div><h3>{{ item.title }}</h3><p>{{ item.text }}</p></div>
+          </article>
+        </ng-template>
       </div>
     </section>
     <section class="trust-band">
@@ -385,16 +440,28 @@ export class ServicesPageComponent {
     <app-page-hero [title]="i18n.tx().fleetPage.title" [eyebrow]="i18n.tx().fleetPage.eyebrow" [text]="i18n.tx().fleetPage.text"></app-page-hero>
     <section class="fleet-section page-content">
       <div class="fleet-grid">
-        <article class="fleet-card" *ngFor="let item of i18n.tx().fleetHighlights">
-          <img src="assets/images/bus.png" alt="Private shuttle vehicle">
-          <div><h3>{{ item.title }}</h3><p>{{ item.text }}</p></div>
-        </article>
+        <ng-container *ngIf="state.carTypes().length; else staticFleet">
+          <article class="fleet-card" *ngFor="let ct of state.carTypes()">
+            <img src="assets/images/bus.png" [alt]="ct.name">
+            <div>
+              <h3>{{ ct.name }}</h3>
+              <p>{{ ct.description }}</p>
+              <span class="fleet-capacity">{{ i18n.tx().booking.upTo }} {{ ct.capacity }} {{ i18n.tx().booking.pax }}<ng-container *ngIf="ct.maxExtraPassengers > 0"> (+{{ ct.maxExtraPassengers }} extra)</ng-container></span>
+            </div>
+          </article>
+        </ng-container>
+        <ng-template #staticFleet>
+          <article class="fleet-card" *ngFor="let item of i18n.tx().fleetHighlights">
+            <img src="assets/images/bus.png" alt="Private shuttle vehicle">
+            <div><h3>{{ item.title }}</h3><p>{{ item.text }}</p></div>
+          </article>
+        </ng-template>
       </div>
     </section>
   `
 })
 export class FleetPageComponent {
-  constructor(public readonly i18n: I18nService) {}
+  constructor(public readonly i18n: I18nService, public readonly state: TravelStateService) {}
 }
 
 @Component({

@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
 import { AuthService, AuthUser } from './auth.service';
-import { Testimonial } from './models';
+import { CarType, Testimonial } from './models';
 import { FixedRoutePrice, PriceRule, PricingConfig, ServicePricingRule } from './pricing.service';
 
 const API_URL = 'http://localhost:8080/api';
@@ -183,6 +183,22 @@ export class AdminService {
 
   deleteServicePricingRule(id: number) {
     return this.http.delete(`${API_URL}/admin/pricing/service-rule/${id}`, this.auth.authOptions());
+  }
+
+  getCarTypes() {
+    return this.http.get<CarType[]>(`${API_URL}/admin/car-type`, this.auth.authOptions());
+  }
+
+  createCarType(ct: Partial<CarType>) {
+    return this.http.post<CarType>(`${API_URL}/admin/car-type`, ct, this.auth.authOptions());
+  }
+
+  updateCarType(ct: CarType) {
+    return this.http.put<CarType>(`${API_URL}/admin/car-type/${ct.id}`, ct, this.auth.authOptions());
+  }
+
+  deleteCarType(id: number) {
+    return this.http.delete(`${API_URL}/admin/car-type/${id}`, this.auth.authOptions());
   }
 
   getReservations() {

@@ -1,8 +1,8 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, computed, effect, signal } from '@angular/core';
+import { Injectable, computed, effect, signal, untracked } from '@angular/core';
 
 import { AuthService } from './auth.service';
-import { CompanyProfile, ContactMethod, PlaceOption, ReservationPayload, ShuttleQuote, Testimonial } from './models';
+import { CarType, CompanyProfile, ContactMethod, PlaceOption, ReservationPayload, ShuttleQuote, Testimonial } from './models';
 import { PricingService } from './pricing.service';
 
 const API_URL = 'http://localhost:8080/api';
@@ -19,6 +19,7 @@ export class TravelStateService {
   readonly isCalculatingRate = signal(false);
   readonly rateError = signal('');
   readonly reservationShuttles = signal<ShuttleQuote[]>([]);
+  readonly carTypes = this.pricing.carTypes;
 
   places: PlaceOption[] = [
     { id: 1, name: 'SJO Airport', zone: 'Alajuela', image: 'assets/images/airport.jpg', description: 'Reliable airport pickups and departures around San Jose.', airportDistance: 0, placeId: 'ChIJc3hQUMT5oI8RpDE_DiJie7I', location: { lat: 9.9980535, lng: -84.2040896 } },
@@ -90,7 +91,7 @@ export class TravelStateService {
     'Custom stops'
   ];
 
-  readonly quote: ShuttleQuote = this.createQuote();
+  readonly quote: ShuttleQuote = this.createQuote(0, true);
 
   readonly customer = {
     name: '',
@@ -133,6 +134,7 @@ export class TravelStateService {
     if (!quote.departing || !quote.destination || quote.departing.id === quote.destination.id) {
       quote.routeDistance = 0;
       quote.repositionDistance = 0;
+      quote.vehicleSurcharge = 0;
       quote.total = 0;
       return;
     }
@@ -143,7 +145,12 @@ export class TravelStateService {
 
     quote.routeDistance = Math.round(routeDistance);
     quote.repositionDistance = Math.round(repositionDistance);
-    quote.total = this.pricing.estimate(quote.routeDistance, quote.repositionDistance, quote.departing.id, quote.destination.id);
+    quote.vehicleSurcharge = this.pricing.vehicleSurcharge(quote.passengers, quote.carTypeId);
+
+    const isRoundTrip = untracked(() => this.reservationShuttles()).some(
+      (s) => s.uid !== quote.uid && s.departing && s.destination && s.departing.id === quote.destination!.id && s.destination.id === quote.departing!.id
+    );
+    quote.total = this.pricing.estimate(quote.routeDistance, quote.repositionDistance, quote.departing.id, quote.destination.id, isRoundTrip) + quote.vehicleSurcharge;
   }
 
   selectKnownPlace(quote: ShuttleQuote, kind: 'departing' | 'destination', name: string): void {
@@ -262,7 +269,8 @@ export class TravelStateService {
 
       quote.routeDistance = Math.round(routeDistance);
       quote.repositionDistance = Math.round(repositionDistance);
-      quote.total = this.pricing.estimate(quote.routeDistance, quote.repositionDistance, quote.departing.id, quote.destination.id);
+      quote.vehicleSurcharge = this.pricing.vehicleSurcharge(quote.passengers, quote.carTypeId);
+      quote.total = this.pricing.estimate(quote.routeDistance, quote.repositionDistance, quote.departing.id, quote.destination.id) + quote.vehicleSurcharge;
     } catch {
       quote.rateError = 'We could not calculate this route yet. Please check both locations.';
       this.recalculate(quote);
@@ -276,7 +284,7 @@ export class TravelStateService {
   }
 
   addReservationShuttle(): void {
-    const next = this.createQuote(this.reservationShuttles().length);
+    const next = this.createQuote(this.reservationShuttles().length, true);
     this.recalculate(next);
     this.reservationShuttles.update((shuttles) => [...shuttles, next]);
   }
@@ -432,18 +440,20 @@ export class TravelStateService {
     });
   }
 
-  private createQuote(offset = 0): ShuttleQuote {
+  private createQuote(offset = 0, blank = false): ShuttleQuote {
     return {
       uid: Date.now() + offset,
-      departing: this.places[0],
-      destination: this.places[1],
-      departingSearch: this.places[0].name,
-      destinationSearch: this.places[1].name,
+      departing: blank ? null : this.places[0],
+      destination: blank ? null : this.places[1],
+      departingSearch: blank ? '' : this.places[0].name,
+      destinationSearch: blank ? '' : this.places[1].name,
       passengers: 2,
+      carTypeId: null,
       date: this.today,
       time: '08:00',
       routeDistance: 0,
       repositionDistance: 0,
+      vehicleSurcharge: 0,
       total: 0,
       isCalculating: false,
       rateError: ''

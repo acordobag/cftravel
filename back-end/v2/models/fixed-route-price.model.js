@@ -6,6 +6,11 @@ const { sequelize, Sequelize } = db
 const model = () => {
   const FixedRoutePrice = sequelize.define('fixedRoutePrice', {
     price: Sequelize.FLOAT,
+    roundTripPrice: {
+      type: Sequelize.FLOAT,
+      defaultValue: null,
+      allowNull: true
+    },
     label: Sequelize.STRING,
     notes: Sequelize.TEXT,
     active: {

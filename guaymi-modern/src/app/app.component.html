@@ -16,20 +16,25 @@
   <a class="brand" routerLink="/home" [attr.aria-label]="(state.company.name || 'CR Travel Service') + ' home'">
     <img [src]="state.company.logo || 'assets/images/cr-travel-service-logo.svg'" [alt]="state.company.name || 'CR Travel Service'">
   </a>
-  <div class="nav-links">
-    <a routerLink="/home" routerLinkActive="active">{{ i18n.tx().nav.book }}</a>
-    <a routerLink="/services" routerLinkActive="active">{{ i18n.tx().nav.services }}</a>
-    <a routerLink="/destinations" routerLinkActive="active">{{ i18n.tx().nav.destinations }}</a>
-    <a routerLink="/fleet" routerLinkActive="active">{{ i18n.tx().nav.fleet }}</a>
-    <a routerLink="/testimonials" routerLinkActive="active">{{ i18n.tx().nav.testimonials }}</a>
-    <a routerLink="/about-us" routerLinkActive="active">{{ i18n.tx().nav.about }}</a>
-    <a routerLink="/contact-us" routerLinkActive="active">{{ i18n.tx().nav.contact }}</a>
-    <a routerLink="/account" routerLinkActive="active" *ngIf="stateAuth.currentUser() && !stateAuth.isPrivileged()">{{ i18n.tx().nav.account }}</a>
-    <a routerLink="/admin" routerLinkActive="active" *ngIf="stateAuth.isPrivileged()">{{ i18n.tx().nav.admin }}</a>
-    <a routerLink="/login" routerLinkActive="active" *ngIf="!stateAuth.currentUser()">{{ i18n.tx().nav.login }}</a>
-    <button type="button" class="nav-link-button" *ngIf="stateAuth.currentUser()" (click)="stateAuth.logout()">{{ i18n.tx().nav.logout }}</button>
+
+  <button type="button" class="nav-hamburger" [class.is-open]="menuOpen" (click)="toggleMenu()" aria-label="Toggle navigation">
+    <span></span><span></span><span></span>
+  </button>
+
+  <div class="nav-links" [class.nav-links-open]="menuOpen">
+    <a routerLink="/home" routerLinkActive="active" (click)="closeMenu()">{{ i18n.tx().nav.book }}</a>
+    <a routerLink="/services" routerLinkActive="active" (click)="closeMenu()">{{ i18n.tx().nav.services }}</a>
+    <a routerLink="/destinations" routerLinkActive="active" (click)="closeMenu()">{{ i18n.tx().nav.destinations }}</a>
+    <a routerLink="/fleet" routerLinkActive="active" (click)="closeMenu()">{{ i18n.tx().nav.fleet }}</a>
+    <a routerLink="/testimonials" routerLinkActive="active" (click)="closeMenu()">{{ i18n.tx().nav.testimonials }}</a>
+    <a routerLink="/about-us" routerLinkActive="active" (click)="closeMenu()">{{ i18n.tx().nav.about }}</a>
+    <a routerLink="/contact-us" routerLinkActive="active" (click)="closeMenu()">{{ i18n.tx().nav.contact }}</a>
+    <a routerLink="/account" routerLinkActive="active" *ngIf="stateAuth.currentUser() && !stateAuth.isPrivileged()" (click)="closeMenu()">{{ i18n.tx().nav.account }}</a>
+    <a routerLink="/admin" routerLinkActive="active" *ngIf="stateAuth.isPrivileged()" (click)="closeMenu()">{{ i18n.tx().nav.admin }}</a>
+    <a routerLink="/login" routerLinkActive="active" *ngIf="!stateAuth.currentUser()" (click)="closeMenu()">{{ i18n.tx().nav.login }}</a>
+    <button type="button" class="nav-link-button" *ngIf="stateAuth.currentUser()" (click)="stateAuth.logout(); closeMenu()">{{ i18n.tx().nav.logout }}</button>
     <button type="button" class="nav-lang-toggle" (click)="i18n.toggle()" [attr.aria-label]="'Switch to ' + i18n.tx().langToggle">{{ i18n.tx().langToggle }}</button>
-    <a class="nav-cta" routerLink="/reservation">{{ i18n.tx().nav.reserve }}</a>
+    <a class="nav-cta" routerLink="/reservation" (click)="closeMenu()">{{ i18n.tx().nav.reserve }}</a>
   </div>
 </nav>
 

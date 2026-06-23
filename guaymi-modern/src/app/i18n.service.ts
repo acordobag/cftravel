@@ -30,6 +30,12 @@ const EN = {
     operationsLabel: 'Operations distance',
     totalLabel: 'Total',
     continueBtn: 'Continue booking',
+    vehicleType: 'Vehicle type',
+    anyVehicle: 'Any vehicle',
+    upTo: 'Up to',
+    pax: 'passengers',
+    extraPax: 'extra pax',
+    extraPaxLabel: 'Extra passenger charge',
   },
 
   hero: {
@@ -275,6 +281,12 @@ const ES: typeof EN = {
     operationsLabel: 'Distancia operativa',
     totalLabel: 'Total',
     continueBtn: 'Continuar reserva',
+    vehicleType: 'Tipo de vehículo',
+    anyVehicle: 'Cualquier vehículo',
+    upTo: 'Hasta',
+    pax: 'pasajeros',
+    extraPax: 'pax extra',
+    extraPaxLabel: 'Cargo por pasajero extra',
   },
 
   hero: {

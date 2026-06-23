@@ -12,6 +12,17 @@ export interface PlaceOption {
   };
 }
 
+export interface CarType {
+  id: number;
+  name: string;
+  description: string;
+  capacity: number;
+  extraPassengerCharge: number;
+  maxExtraPassengers: number;
+  active: boolean;
+  sortOrder: number;
+}
+
 export interface ShuttleQuote {
   uid: number;
   departing: PlaceOption | null;
@@ -19,10 +30,12 @@ export interface ShuttleQuote {
   departingSearch: string;
   destinationSearch: string;
   passengers: number;
+  carTypeId: number | null;
   date: string;
   time: string;
   routeDistance: number;
   repositionDistance: number;
+  vehicleSurcharge: number;
   total: number;
   isCalculating: boolean;
   rateError: string;

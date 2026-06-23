@@ -15,9 +15,14 @@ import { I18nService } from './i18n.service';
   encapsulation: ViewEncapsulation.None
 })
 export class AppComponent {
+  menuOpen = false;
+
   constructor(
     public readonly state: TravelStateService,
     public readonly stateAuth: AuthService,
     public readonly i18n: I18nService,
   ) {}
+
+  toggleMenu(): void { this.menuOpen = !this.menuOpen; }
+  closeMenu(): void  { this.menuOpen = false; }
 }

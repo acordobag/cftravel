@@ -18,11 +18,11 @@ import {
   USER_ROLE_OPTIONS
 } from './admin.service';
 import { AuthService, AuthUser } from './auth.service';
-import { Testimonial } from './models';
-import { FixedRoutePrice, PriceRule, ServicePricingRule } from './pricing.service';
+import { CarType, Testimonial } from './models';
+import { FixedRoutePrice, PriceRule, PricingConfig, ServicePricingRule } from './pricing.service';
 
 type AdminTab = 'destinations' | 'hero' | 'testimonials' | 'pricing' | 'reservations' | 'company' | 'messages' | 'users';
-type ModalType = 'place' | 'hero' | 'testimonial' | 'pricingRule' | 'fixedRoute' | 'serviceRule' | 'reservation' | 'company' | 'message' | 'user';
+type ModalType = 'place' | 'hero' | 'testimonial' | 'pricingRule' | 'fixedRoute' | 'serviceRule' | 'carType' | 'reservation' | 'company' | 'message' | 'user';
 
 type AdminCompanyDraft = AdminCompany & {
   newPhoneType?: string;
@@ -266,8 +266,12 @@ type AdminCompanyDraft = AdminCompany & {
                   </select>
                 </div>
                 <div class="admin-field admin-field-narrow">
-                  <label for="fixedPrice">Price (USD) <span class="required-mark">*</span></label>
+                  <label for="fixedPrice">One-way price (USD) <span class="required-mark">*</span></label>
                   <input id="fixedPrice" type="number" min="0" step="0.01" name="fixedPrice" placeholder="0.00" [(ngModel)]="newFixedRoutePrice.price" required>
+                </div>
+                <div class="admin-field admin-field-narrow">
+                  <label for="fixedRoundTripPrice">Round-trip price (USD)</label>
+                  <input id="fixedRoundTripPrice" type="number" min="0" step="0.01" name="fixedRoundTripPrice" [placeholder]="newFixedRoutePrice.price ? (newFixedRoutePrice.price * 2 | number:'1.2-2') : '0.00'" [(ngModel)]="newFixedRoutePrice.roundTripPrice">
                 </div>
                 <div class="admin-field">
                   <label for="fixedLabel">Short label</label>
@@ -409,6 +413,72 @@ type AdminCompanyDraft = AdminCompany & {
                       <button type="button" class="secondary-action" (click)="openEdit('serviceRule', rule)">Edit</button>
                       <button type="button" class="remove-transfer" (click)="deleteServicePricingRule(rule)">Delete</button>
                     </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="pricing-block">
+            <div class="pricing-block-heading">
+              <div>
+                <p class="eyebrow">Vehicle types</p>
+                <h3>Capacity and extra-passenger charges</h3>
+              </div>
+            </div>
+            <p class="admin-helper" style="margin:0 0 16px">Define the vehicle options customers see when booking. <strong>Capacity</strong> is the number of passengers included in the base fare. Passengers above capacity are charged the extra fee, up to the maximum allowed.</p>
+            <form class="admin-form admin-create-form" #carTypeForm="ngForm" (ngSubmit)="createCarType()">
+              <div class="admin-form-row">
+                <div class="admin-field admin-field-wide">
+                  <label for="ctName">Vehicle name <span class="required-mark">*</span></label>
+                  <input id="ctName" name="ctName" placeholder="e.g. Toyota HiAce Van" [(ngModel)]="newCarType.name" required>
+                </div>
+                <div class="admin-field admin-field-narrow">
+                  <label for="ctOrder">Sort order</label>
+                  <input id="ctOrder" type="number" min="0" name="ctOrder" placeholder="1" [(ngModel)]="newCarType.sortOrder">
+                </div>
+              </div>
+              <div class="admin-form-row">
+                <div class="admin-field">
+                  <label for="ctDesc">Short description</label>
+                  <input id="ctDesc" name="ctDesc" placeholder="e.g. Up to 8 passengers, A/C" [(ngModel)]="newCarType.description">
+                </div>
+                <div class="admin-field admin-field-narrow">
+                  <label for="ctCapacity">Max passengers (base) <span class="required-mark">*</span></label>
+                  <input id="ctCapacity" type="number" min="1" max="30" name="ctCapacity" placeholder="4" [(ngModel)]="newCarType.capacity" required>
+                </div>
+                <div class="admin-field admin-field-narrow">
+                  <label for="ctExtraCharge">Extra pax charge (USD)</label>
+                  <input id="ctExtraCharge" type="number" min="0" step="0.01" name="ctExtraCharge" placeholder="0.00" [(ngModel)]="newCarType.extraPassengerCharge">
+                </div>
+                <div class="admin-field admin-field-narrow">
+                  <label for="ctMaxExtra">Max extra passengers</label>
+                  <input id="ctMaxExtra" type="number" min="0" max="20" name="ctMaxExtra" placeholder="0" [(ngModel)]="newCarType.maxExtraPassengers">
+                </div>
+              </div>
+              <div class="admin-form-footer">
+                <label class="admin-check"><input type="checkbox" name="ctActive" [(ngModel)]="newCarType.active"> Active (visible to customers)</label>
+                <button type="submit" class="primary-action" [disabled]="carTypeForm.invalid">Add vehicle type</button>
+              </div>
+            </form>
+
+            <div class="admin-table-wrap">
+              <table class="admin-table">
+                <thead><tr><th>Vehicle</th><th>Capacity</th><th>Extra pax charge</th><th>Max extra</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody>
+                  <tr *ngFor="let ct of carTypes">
+                    <td>{{ ct.name }}<small>{{ ct.description }}</small></td>
+                    <td>{{ ct.capacity }} pax</td>
+                    <td>{{ ct.extraPassengerCharge > 0 ? ('$' + ct.extraPassengerCharge + '/pax') : '—' }}</td>
+                    <td>{{ ct.maxExtraPassengers > 0 ? ct.maxExtraPassengers : '—' }}</td>
+                    <td>{{ ct.active ? 'Active' : 'Off' }}</td>
+                    <td class="table-actions">
+                      <button type="button" class="secondary-action" (click)="openEdit('carType', ct)">Edit</button>
+                      <button type="button" class="remove-transfer" (click)="deleteCarType(ct)">Delete</button>
+                    </td>
+                  </tr>
+                  <tr *ngIf="!carTypes.length">
+                    <td colspan="6" style="color:#607086;font-style:italic">No vehicle types yet. Add one above.</td>
                   </tr>
                 </tbody>
               </table>
@@ -746,6 +816,10 @@ type AdminCompanyDraft = AdminCompany & {
                   <input id="editFixedPrice" type="number" min="0" step="0.01" name="editFixedPrice" placeholder="0.00" [(ngModel)]="editModal.data.price" required>
                 </div>
                 <div class="admin-field">
+                  <label for="editFixedRoundTripPrice">Round-trip price (USD)</label>
+                  <input id="editFixedRoundTripPrice" type="number" min="0" step="0.01" name="editFixedRoundTripPrice" [placeholder]="editModal.data.price ? (editModal.data.price * 2 | number:'1.2-2') : '0.00'" [(ngModel)]="editModal.data.roundTripPrice">
+                </div>
+                <div class="admin-field">
                   <label for="editFixedLabel">Short label</label>
                   <input id="editFixedLabel" name="editFixedLabel" placeholder="e.g. Jaco" [(ngModel)]="editModal.data.label">
                 </div>
@@ -787,6 +861,38 @@ type AdminCompanyDraft = AdminCompany & {
                 </div>
                 <label class="admin-check"><input type="checkbox" name="editRuleActive" [(ngModel)]="editModal.data.active"> Active</label>
               </div>
+            </ng-container>
+
+            <ng-container *ngSwitchCase="'carType'">
+              <div class="admin-form-row">
+                <div class="admin-field">
+                  <label for="editCtName">Vehicle type name</label>
+                  <input id="editCtName" name="editCtName" placeholder="e.g. Toyota HiAce Van" [(ngModel)]="editModal.data.name" required>
+                </div>
+                <div class="admin-field">
+                  <label for="editCtOrder">Display order</label>
+                  <input id="editCtOrder" type="number" min="0" name="editCtOrder" placeholder="1" [(ngModel)]="editModal.data.sortOrder">
+                </div>
+              </div>
+              <div class="admin-field">
+                <label for="editCtDesc">Description</label>
+                <input id="editCtDesc" name="editCtDesc" placeholder="e.g. Up to 8 passengers, A/C" [(ngModel)]="editModal.data.description">
+              </div>
+              <div class="admin-form-row">
+                <div class="admin-field">
+                  <label for="editCtCapacity">Base capacity (pax)</label>
+                  <input id="editCtCapacity" type="number" min="1" max="30" name="editCtCapacity" placeholder="4" [(ngModel)]="editModal.data.capacity" required>
+                </div>
+                <div class="admin-field">
+                  <label for="editCtExtraCharge">Extra pax charge ($)</label>
+                  <input id="editCtExtraCharge" type="number" min="0" step="0.01" name="editCtExtraCharge" placeholder="0.00" [(ngModel)]="editModal.data.extraPassengerCharge">
+                </div>
+                <div class="admin-field">
+                  <label for="editCtMaxExtra">Max extra pax</label>
+                  <input id="editCtMaxExtra" type="number" min="0" max="20" name="editCtMaxExtra" placeholder="0" [(ngModel)]="editModal.data.maxExtraPassengers">
+                </div>
+              </div>
+              <label class="admin-check"><input type="checkbox" name="editCtActive" [(ngModel)]="editModal.data.active"> Active (visible to customers)</label>
             </ng-container>
 
             <ng-container *ngSwitchCase="'serviceRule'">
@@ -1009,6 +1115,7 @@ export class AdminPageComponent implements OnInit {
   pricingRules: PriceRule[] = [];
   fixedRoutePrices: FixedRoutePrice[] = [];
   serviceRules: ServicePricingRule[] = [];
+  carTypes: CarType[] = [];
 
   newPlace: AdminPlace = { name: '', description: '', image: '' };
   newHeroImage: HeroImage = { src: '' };
@@ -1022,6 +1129,7 @@ export class AdminPageComponent implements OnInit {
   newFixedRoutePrice: FixedRoutePrice = this.emptyFixedRoutePrice();
   newPricingRule: PriceRule = this.emptyPricingRule();
   newServiceRule: ServicePricingRule = this.emptyServiceRule();
+  newCarType: Partial<CarType> = this.emptyCarType();
   editModal: { type: ModalType; title: string; data: any } | null = null;
   uploadBusy = false;
   message = '';
@@ -1093,6 +1201,9 @@ export class AdminPageComponent implements OnInit {
         break;
       case 'serviceRule':
         this.updateServicePricingRule(data);
+        break;
+      case 'carType':
+        this.updateCarType(data);
         break;
       case 'reservation':
         this.saveReservationModal(data);
@@ -1645,6 +1756,7 @@ export class AdminPageComponent implements OnInit {
         this.pricingRules = config.pricingRules || [];
         this.fixedRoutePrices = config.fixedRoutePrices || [];
         this.serviceRules = config.serviceRules || [];
+        this.carTypes = config.carTypes || [];
       },
       error: (error) => this.fail(error)
     });
@@ -1733,7 +1845,7 @@ export class AdminPageComponent implements OnInit {
   }
 
   private emptyFixedRoutePrice(): FixedRoutePrice {
-    return { departingId: 0, destinationId: 0, price: 0, label: '', notes: '', active: true };
+    return { departingId: 0, destinationId: 0, price: 0, roundTripPrice: null, label: '', notes: '', active: true };
   }
 
   private emptyPricingRule(): PriceRule {
@@ -1752,6 +1864,7 @@ export class AdminPageComponent implements OnInit {
       departingId: Number(route.departingId),
       destinationId: Number(route.destinationId),
       price: Number(route.price || 0),
+      roundTripPrice: route.roundTripPrice != null ? Number(route.roundTripPrice) : null,
       label: route.label || '',
       notes: route.notes || '',
       active: Boolean(route.active)
@@ -1768,6 +1881,35 @@ export class AdminPageComponent implements OnInit {
       sortOrder: Number(rule.sortOrder || 0),
       active: Boolean(rule.active)
     };
+  }
+
+  private emptyCarType(): Partial<CarType> {
+    const nextOrder = this.carTypes.length ? Math.max(...this.carTypes.map((ct) => Number(ct.sortOrder) || 0)) + 1 : 1;
+    return { name: '', description: '', capacity: 4, extraPassengerCharge: 0, maxExtraPassengers: 0, active: true, sortOrder: nextOrder };
+  }
+
+  createCarType(): void {
+    const ct = { ...this.newCarType, capacity: Number(this.newCarType.capacity || 4), extraPassengerCharge: Number(this.newCarType.extraPassengerCharge || 0), maxExtraPassengers: Number(this.newCarType.maxExtraPassengers || 0), sortOrder: Number(this.newCarType.sortOrder || 0), active: Boolean(this.newCarType.active) };
+    this.admin.createCarType(ct).subscribe({
+      next: () => { this.newCarType = this.emptyCarType(); this.loadPricing(); this.done('Vehicle type created.'); },
+      error: (e) => this.fail(e)
+    });
+  }
+
+  updateCarType(ct: CarType): void {
+    const payload = { ...ct, capacity: Number(ct.capacity), extraPassengerCharge: Number(ct.extraPassengerCharge), maxExtraPassengers: Number(ct.maxExtraPassengers), sortOrder: Number(ct.sortOrder), active: Boolean(ct.active) };
+    this.admin.updateCarType(payload).subscribe({
+      next: () => { this.loadPricing(); this.done('Vehicle type updated.'); },
+      error: (e) => this.fail(e)
+    });
+  }
+
+  deleteCarType(ct: CarType): void {
+    if (!confirm(`Delete vehicle type "${ct.name}"?`)) return;
+    this.admin.deleteCarType(ct.id).subscribe({
+      next: () => { this.loadPricing(); this.done('Vehicle type deleted.'); },
+      error: (e) => this.fail(e)
+    });
   }
 
   private normalizeServiceRule(rule: ServicePricingRule): ServicePricingRule {
