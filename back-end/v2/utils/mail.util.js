@@ -16,6 +16,7 @@ function createTransporter() {
     connectionTimeout: 10000,
     greetingTimeout: 10000,
     socketTimeout: 15000,
+    tls: { rejectUnauthorized: false },
     auth: { user, pass }
   })
 }
@@ -66,13 +67,23 @@ async function send(to, subject, html) {
     console.log(`[Mail] SKIP — no SMTP config | to: ${to} | subject: ${subject}`)
     return
   }
+  const { host, port } = settings.mailSettings
   const from = settings.mailSettings.from || settings.mailSettings.user
-  console.log(`[Mail] SENDING | to: ${to} | subject: ${subject} | host: ${settings.mailSettings.host}:${settings.mailSettings.port}`)
+  console.log(`[Mail] SENDING | to: ${to} | subject: ${subject} | host: ${host}:${port}`)
+  try {
+    await transporter.verify()
+    console.log(`[Mail] SMTP connection verified`)
+  } catch (ve) {
+    console.error(`[Mail] SMTP verify FAIL`)
+    console.error(ve)
+    return
+  }
   try {
     const info = await transporter.sendMail({ from: `"${BRAND}" <${from}>`, to, subject, html })
     console.log(`[Mail] OK | to: ${to} | subject: ${subject} | messageId: ${info.messageId || '—'}`)
   } catch (e) {
-    console.error(`[Mail] FAIL | to: ${to} | subject: ${subject} | error: ${e.message} | code: ${e.code || '—'} | response: ${e.response || '—'}`)
+    console.error(`[Mail] FAIL | to: ${to} | subject: ${subject}`)
+    console.error(e)
   }
 }
 
