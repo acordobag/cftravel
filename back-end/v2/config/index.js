@@ -44,6 +44,9 @@ export default {
       password: env.DB_PASSWORD || 'CfTravel20',
       database: env.DB_NAME || 'cftravel',
       dialect: 'postgres',
+      dialectOptions: env.DB_SSL === 'false' ? {} : {
+        ssl: { require: true, rejectUnauthorized: false }
+      },
       // timezone: 'America/Costa_Rica',
       logging: msg => {
         fs.appendFile(path.join(__dirname, '../db', 'log.log'), msg, (err) => {
