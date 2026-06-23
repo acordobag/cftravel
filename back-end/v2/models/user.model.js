@@ -18,6 +18,18 @@ const model = () => {
         active: {
             type: Sequelize.BOOLEAN,
             defaultValue: true
+        },
+        emailVerified: {
+            type: Sequelize.BOOLEAN,
+            defaultValue: false
+        },
+        emailVerificationCode: {
+            type: Sequelize.STRING,
+            allowNull: true
+        },
+        mustChangePassword: {
+            type: Sequelize.BOOLEAN,
+            defaultValue: false
         }
     })
     return User

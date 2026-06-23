@@ -574,7 +574,7 @@ type AdminCompanyDraft = AdminCompany & {
               </div>
               <div class="admin-field">
                 <label for="newCompanyPhoneNumber">Value (number or handle)</label>
-                <input id="newCompanyPhoneNumber" name="newCompanyPhoneNumber" placeholder="+506 8338 8382 or @crtravelservice" [(ngModel)]="newCompanyPhone.number">
+                <input id="newCompanyPhoneNumber" name="newCompanyPhoneNumber" placeholder="+506 8888 8888 or @crtravelservice" [(ngModel)]="newCompanyPhone.number">
               </div>
             </div>
             <div class="admin-form-row">
@@ -683,7 +683,7 @@ type AdminCompanyDraft = AdminCompany & {
               </div>
               <div class="admin-field">
                 <label for="privPhone">Phone</label>
-                <app-phone-field name="privPhone" placeholder="8338 8382" [(ngModel)]="newUser.phone"></app-phone-field>
+                <app-phone-field name="privPhone" placeholder="8888 8888" [(ngModel)]="newUser.phone"></app-phone-field>
               </div>
             </div>
             <div class="admin-form-row">
@@ -1078,7 +1078,7 @@ type AdminCompanyDraft = AdminCompany & {
               </div>
               <div class="admin-field">
                 <label for="editUserPhone">Phone</label>
-                <app-phone-field name="editUserPhone" placeholder="8338 8382" [(ngModel)]="editModal.data.phone"></app-phone-field>
+                <app-phone-field name="editUserPhone" placeholder="8888 8888" [(ngModel)]="editModal.data.phone"></app-phone-field>
               </div>
               <div class="admin-field">
                 <label for="editUserEmail">Email</label>

@@ -32,6 +32,16 @@ router.route('/auth/login')
         Auth.login(req, res, next);
     });
 
+router.route('/auth/verify-email')
+    .post(function (req, res, next) {
+        Auth.verifyEmail(req, res, next);
+    });
+
+router.route('/auth/change-password')
+    .post(requireAuth, function (req, res, next) {
+        Auth.changePassword(req, res, next);
+    });
+
 router.route('/auth/me')
     .get(requireAuth, function (req, res) {
         Auth.me(req, res);

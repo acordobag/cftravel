@@ -91,7 +91,7 @@ function splitPhone(value: string): { code: string; number: string } {
 })
 export class PhoneFieldComponent implements ControlValueAccessor {
   @Input() name = 'phone';
-  @Input() placeholder = '8338 8382';
+  @Input() placeholder = '8888 8888';
   @Input() required = false;
   @Input() size: 'default' | 'sm' = 'default';
 

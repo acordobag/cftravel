@@ -16,6 +16,7 @@ export interface AuthUser {
   phone: string;
   role: 'USER' | 'ADMIN' | 'SUPER';
   active: boolean;
+  mustChangePassword?: boolean;
 }
 
 interface AuthResponse {
@@ -39,9 +40,26 @@ export class AuthService {
     );
   }
 
-  signup(payload: { name: string; lastName: string; email: string; phone: string; password: string }) {
-    return this.http.post<AuthResponse>(`${API_URL}/auth/signup`, payload).pipe(
+  signup(payload: { name: string; lastName: string; email: string; phone: string }) {
+    return this.http.post<{ pendingVerification: boolean }>(`${API_URL}/auth/signup`, payload);
+  }
+
+  verifyEmail(payload: { email: string; code: string; password: string }) {
+    return this.http.post<AuthResponse>(`${API_URL}/auth/verify-email`, payload).pipe(
       tap((response) => this.setSession(response))
+    );
+  }
+
+  changePassword(payload: { password: string }) {
+    return this.http.post<{ message: string }>(`${API_URL}/auth/change-password`, payload, this.authOptions()).pipe(
+      tap(() => {
+        const user = this.currentUser();
+        if (user) {
+          const updated = { ...user, mustChangePassword: false };
+          localStorage.setItem(USER_KEY, JSON.stringify(updated));
+          this.currentUser.set(updated);
+        }
+      })
     );
   }
 

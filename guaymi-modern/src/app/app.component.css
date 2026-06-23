@@ -1338,6 +1338,23 @@ textarea:focus {
   text-decoration: none;
 }
 
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--brand-teal);
+  cursor: pointer;
+  display: inline-block;
+  font-size: inherit;
+  font-weight: 700;
+  margin-top: 14px;
+  padding: 0;
+  text-decoration: underline;
+}
+.link-btn:disabled {
+  color: #8a9ab0;
+  cursor: not-allowed;
+}
+
 .admin-shell {
   margin: 0 auto;
   max-width: 1120px;

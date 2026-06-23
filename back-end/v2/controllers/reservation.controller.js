@@ -46,9 +46,11 @@ const Reservation = {
           password: bcrypt.hashSync(tempPassword, bcrypt.genSaltSync(8)),
           role: 'USER',
           active: true,
-          token: ''
+          token: '',
+          emailVerified: true,
+          mustChangePassword: true
         })
-        Mail.welcomeCustomer(user).catch(() => {})
+        Mail.guestAccountCreated(user, tempPassword).catch(() => {})
       }
 
       reservationData.userId = user.id

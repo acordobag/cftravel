@@ -51,7 +51,7 @@ type AccountTab = 'profile' | 'reservations' | 'messages' | 'review';
             <form class="account-form" #profileForm="ngForm" (ngSubmit)="saveProfile()">
               <input name="name" [placeholder]="i18n.tx().account.firstName" [(ngModel)]="profile.name" required>
               <input name="lastName" [placeholder]="i18n.tx().account.lastName" [(ngModel)]="profile.lastName" required>
-              <app-phone-field name="phone" placeholder="8338 8382" [(ngModel)]="profile.phone"></app-phone-field>
+              <app-phone-field name="phone" placeholder="8888 8888" [(ngModel)]="profile.phone"></app-phone-field>
               <input type="email" name="email" [placeholder]="i18n.tx().account.emailDisabled" [(ngModel)]="profile.email" disabled>
               <input type="password" name="password" [placeholder]="i18n.tx().account.newPassword" [(ngModel)]="profile.password">
               <button type="submit" class="primary-action" [disabled]="profileForm.invalid || loading">{{ loading ? i18n.tx().account.saving : i18n.tx().account.saveBtn }}</button>

@@ -60,15 +60,16 @@ function shuttleRows(shuttles) {
 async function send(to, subject, html) {
   const transporter = createTransporter()
   if (!transporter) {
-    console.log(`[Mail] No SMTP config — skipping email to ${to}: ${subject}`)
+    console.log(`[Mail] SKIP — no SMTP config | to: ${to} | subject: ${subject}`)
     return
   }
   const from = settings.mailSettings.from || settings.mailSettings.user
+  console.log(`[Mail] SENDING | to: ${to} | subject: ${subject} | host: ${settings.mailSettings.host}:${settings.mailSettings.port}`)
   try {
-    await transporter.sendMail({ from: `"${BRAND}" <${from}>`, to, subject, html })
-    console.log(`[Mail] Sent "${subject}" to ${to}`)
+    const info = await transporter.sendMail({ from: `"${BRAND}" <${from}>`, to, subject, html })
+    console.log(`[Mail] OK | to: ${to} | subject: ${subject} | messageId: ${info.messageId || '—'}`)
   } catch (e) {
-    console.error(`[Mail] Failed to send to ${to}:`, e.message)
+    console.error(`[Mail] FAIL | to: ${to} | subject: ${subject} | error: ${e.message} | code: ${e.code || '—'} | response: ${e.response || '—'}`)
   }
 }
 
@@ -85,6 +86,40 @@ async function getCompanyEmail() {
 // ─── Email templates ─────────────────────────────────────────────────────────
 
 const Mail = {
+
+  async emailVerification(user, code) {
+    const subject = `Your ${BRAND} verification code`
+    const html = wrap(subject, `
+      <h2 style="margin:0 0 8px;color:#1a2636;font-size:20px;">Verify your email</h2>
+      <p style="color:#607086;font-size:15px;line-height:1.6;margin:0 0 24px;">
+        Hi ${user.name}, use the code below to complete your account registration.
+      </p>
+      <div style="text-align:center;margin:0 0 28px;">
+        <span style="display:inline-block;background:#f4f7fb;border:2px dashed ${BRAND_COLOR};border-radius:12px;padding:18px 40px;font-size:36px;font-weight:700;letter-spacing:10px;color:#1a2636;">${code}</span>
+      </div>
+      <p style="color:#8a9ab0;font-size:13px;margin:0;">This code expires after 30 minutes. If you didn't request this, ignore this email.</p>
+    `)
+    await send(user.email, subject, html)
+  },
+
+  async guestAccountCreated(user, tempPassword) {
+    const subject = `Your ${BRAND} account — set your password`
+    const html = wrap(subject, `
+      <h2 style="margin:0 0 8px;color:#1a2636;font-size:20px;">Account created for your reservation</h2>
+      <p style="color:#607086;font-size:15px;line-height:1.6;margin:0 0 24px;">
+        Hi ${user.name}, we created an account for you automatically so you can track your reservation and access your trip details.
+      </p>
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+        <tr><td style="padding:6px 0;color:#607086;font-size:13px;width:120px;">Email</td><td style="font-size:14px;font-weight:600;">${user.email}</td></tr>
+        <tr><td style="padding:6px 0;color:#607086;font-size:13px;">Temp password</td><td style="font-size:14px;font-weight:600;letter-spacing:2px;">${tempPassword}</td></tr>
+      </table>
+      <p style="color:#607086;font-size:14px;line-height:1.6;margin:0 0 24px;">
+        You will be asked to choose a new password when you first log in.
+      </p>
+      <a href="${settings.clientUrl}/login" style="display:inline-block;background:${BRAND_COLOR};color:#fff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;">Log in to your account</a>
+    `)
+    await send(user.email, subject, html)
+  },
 
   async welcomeCustomer(user) {
     const subject = `Welcome to ${BRAND}`
