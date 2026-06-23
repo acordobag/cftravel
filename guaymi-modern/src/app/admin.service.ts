@@ -5,7 +5,8 @@ import { AuthService, AuthUser } from './auth.service';
 import { CarType, Testimonial } from './models';
 import { FixedRoutePrice, PriceRule, PricingConfig, ServicePricingRule } from './pricing.service';
 
-const API_URL = 'http://localhost:8080/api';
+import { environment } from '../environments/environment';
+const API_URL = environment.apiUrl;
 
 export interface AdminPlace {
   id?: number;

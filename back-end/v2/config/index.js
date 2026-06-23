@@ -10,7 +10,7 @@ export default {
     host: env.HOST || '',
     clientUrl: env.CLIENT_URL || `http://localhost:8080`,
     authentication: {
-      jwtSecret: 'CfTravel20'
+      jwtSecret: env.JWT_SECRET || 'CfTravel20'
     },
     paypalSettings: {
       clientId: '',

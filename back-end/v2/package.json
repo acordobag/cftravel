@@ -5,6 +5,7 @@
   "main": "v2.js",
   "scripts": {
     "start": "babel-node v2.js --presets env",
+    "build:ui": "cd ../../guaymi-modern && npm install && npm run build && cp -r dist/guaymi-modern/browser/* ../back-end/v2/dist/",
     "db:sync": "babel-node --presets env -e \"require('babel-polyfill'); const dbConfig = require('./db/db.config').default; dbConfig().then(() => process.exit(0)).catch(err => { console.error(err); process.exit(1); });\"",
     "test": "npm run db:sync"
   },

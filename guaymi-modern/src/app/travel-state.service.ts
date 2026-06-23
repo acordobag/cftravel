@@ -5,7 +5,8 @@ import { AuthService } from './auth.service';
 import { CarType, CompanyProfile, ContactMethod, PlaceOption, ReservationPayload, ShuttleQuote, Testimonial } from './models';
 import { PricingService } from './pricing.service';
 
-const API_URL = 'http://localhost:8080/api';
+import { environment } from '../environments/environment';
+const API_URL = environment.apiUrl;
 declare const google: any;
 
 @Injectable({ providedIn: 'root' })

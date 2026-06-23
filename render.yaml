@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: cr-travel-service
+    runtime: node
+    region: oregon
+    plan: free
+    rootDir: .
+    buildCommand: >
+      cd guaymi-modern && npm install && npm run build &&
+      mkdir -p ../back-end/v2/dist &&
+      cp -r dist/guaymi-modern/browser/* ../back-end/v2/dist/ &&
+      cd ../back-end/v2 && npm install
+    startCommand: cd back-end/v2 && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: 3306
+      - key: DB_NAME
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: SUPER_USER_EMAIL
+        sync: false
+      - key: SUPER_USER_PASSWORD
+        sync: false

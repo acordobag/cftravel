@@ -1,7 +1,25 @@
+# Dependencies
 /guaymi/node_modules
-/guaymi/package-lock.json
+/guaymi-modern/node_modules
 /back-end/v1/node_modules
 /back-end/v2/node_modules
+
+# Build output (rebuilt on deploy)
+/guaymi-modern/dist
+/back-end/v2/dist
+
+# Lock files
+/guaymi/package-lock.json
 /back-end/package-lock.json
 /package-lock.json
+
+# Logs
+/back-end/v2/db/log.log
+
+# Secrets / local config
+.env
+.env.local
+/back-end/v2/config/database.js
+
+# Legacy
 /guaymi/src/index.html

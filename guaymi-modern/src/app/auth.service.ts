@@ -3,7 +3,8 @@ import { Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { tap } from 'rxjs';
 
-const API_URL = 'http://localhost:8080/api';
+import { environment } from '../environments/environment';
+const API_URL = environment.apiUrl;
 const TOKEN_KEY = 'cr_travel_token';
 const USER_KEY = 'cr_travel_user';
 

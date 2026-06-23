@@ -3,7 +3,8 @@ import { Injectable, computed, signal } from '@angular/core';
 
 import { CarType } from './models';
 
-const API_URL = 'http://localhost:8080/api';
+import { environment } from '../environments/environment';
+const API_URL = environment.apiUrl;
 
 export interface PriceRule {
   id?: number;
