@@ -11,8 +11,11 @@ function createTransporter() {
   if (!user || !pass) return null
   return nodemailer.createTransport({
     host: host || 'smtp.gmail.com',
-    port: port || 587,
-    secure: false,
+    port: port || 465,
+    secure: port === 465 || (!port && true),
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
     auth: { user, pass }
   })
 }
