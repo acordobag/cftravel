@@ -1,15 +1,24 @@
 'use strict'
 
-const { Resend } = require('resend')
+const nodemailer = require('nodemailer')
 const settings = require('../config').default
 
 const BRAND = 'CR Travel Service'
 const BRAND_COLOR = '#0b8f6a'
 
-function getResend() {
-  const apiKey = process.env.RESEND_API_KEY
-  if (!apiKey) return null
-  return new Resend(apiKey)
+function createTransporter() {
+  const { user, pass, host, port } = settings.mailSettings
+  if (!user || !pass) return null
+  return nodemailer.createTransport({
+    host: host || 'smtp.gmail.com',
+    port: port || 465,
+    secure: port === 465 || (!port && true),
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
+    tls: { rejectUnauthorized: false },
+    auth: { user, pass: pass.replace(/\s/g, '') }
+  })
 }
 
 function wrap(title, bodyHtml) {
@@ -53,20 +62,16 @@ function shuttleRows(shuttles) {
 }
 
 async function send(to, subject, html) {
-  const resend = getResend()
-  if (!resend) {
-    console.log(`[Mail] SKIP — no RESEND_API_KEY | to: ${to} | subject: ${subject}`)
+  const transporter = createTransporter()
+  if (!transporter) {
+    console.log(`[Mail] SKIP — no SMTP config | to: ${to} | subject: ${subject}`)
     return
   }
-  const from = settings.mailSettings.from || settings.mailSettings.user || 'noreply@acit-solutions.com'
-  console.log(`[Mail] SENDING | to: ${to} | subject: ${subject}`)
+  const from = settings.mailSettings.from || settings.mailSettings.user
+  console.log(`[Mail] SENDING | to: ${to} | subject: ${subject} | host: ${settings.mailSettings.host}:${settings.mailSettings.port}`)
   try {
-    const result = await resend.emails.send({ from: `${BRAND} <${from}>`, to, subject, html })
-    if (result.error) {
-      console.error(`[Mail] FAIL | to: ${to} | subject: ${subject} | error: ${result.error.message}`)
-    } else {
-      console.log(`[Mail] OK | to: ${to} | subject: ${subject} | id: ${result.data.id}`)
-    }
+    const info = await transporter.sendMail({ from: `"${BRAND}" <${from}>`, to, subject, html })
+    console.log(`[Mail] OK | to: ${to} | subject: ${subject} | messageId: ${info.messageId || '—'}`)
   } catch (e) {
     console.error(`[Mail] FAIL | to: ${to} | subject: ${subject}`)
     console.error(e)
