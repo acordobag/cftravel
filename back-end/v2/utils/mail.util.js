@@ -77,7 +77,7 @@ async function getCompanyEmail() {
     const Company = require('../models/company.model').default
     const company = await Company.findOne({ where: { isDefault: true } })
     return (company && company.email) || settings.mailSettings.user
-  } catch {
+  } catch (e) {
     return settings.mailSettings.user
   }
 }
