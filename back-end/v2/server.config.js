@@ -29,6 +29,8 @@ export default (app, server) => {
   // |_____|_____| |  _ | (_) | |_| | ||  __\__ \ |_____|_____|
   //               |_| \_\___/ \__,_|\__\___|___/
 
+  app.get('/health', (req, res) => res.json({ status: 'ok', ts: Date.now() }))
+
   app.use('/api', router)
 
   //                ____  _        _   _        _____ _ _

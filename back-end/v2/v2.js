@@ -26,7 +26,20 @@ const server = {
       })
     } else {
       _server.listen(setting.port)
-      dbConfig()
+      dbConfig().then(() => {
+        const publicUrl = setting.clientUrl || ('http://localhost:' + setting.port)
+        setInterval(function () {
+          const http = require('http')
+          const https = require('https')
+          const url = publicUrl + '/health'
+          const lib = url.startsWith('https') ? https : http
+          lib.get(url, function (res) {
+            console.log('[Health] self-ping ' + res.statusCode)
+          }).on('error', function (e) {
+            console.log('[Health] self-ping error: ' + e.message)
+          })
+        }, 10 * 60 * 1000)
+      })
     }
   },
   stop() {
