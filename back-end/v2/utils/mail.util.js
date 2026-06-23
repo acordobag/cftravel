@@ -17,6 +17,7 @@ function createTransporter() {
     greetingTimeout: 10000,
     socketTimeout: 15000,
     tls: { rejectUnauthorized: false },
+    family: 4,
     auth: { user, pass: pass.replace(/\s/g, '') }
   })
 }
