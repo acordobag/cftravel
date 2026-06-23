@@ -1,24 +1,15 @@
 'use strict'
 
-const nodemailer = require('nodemailer')
+const { Resend } = require('resend')
 const settings = require('../config').default
 
 const BRAND = 'CR Travel Service'
 const BRAND_COLOR = '#0b8f6a'
 
-function createTransporter() {
-  const { user, pass, host, port, from } = settings.mailSettings
-  if (!user || !pass) return null
-  return nodemailer.createTransport({
-    host: host || 'smtp.gmail.com',
-    port: port || 465,
-    secure: port === 465 || (!port && true),
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 15000,
-    tls: { rejectUnauthorized: false },
-    auth: { user, pass }
-  })
+function getResend() {
+  const apiKey = process.env.RESEND_API_KEY
+  if (!apiKey) return null
+  return new Resend(apiKey)
 }
 
 function wrap(title, bodyHtml) {
@@ -62,25 +53,20 @@ function shuttleRows(shuttles) {
 }
 
 async function send(to, subject, html) {
-  const transporter = createTransporter()
-  if (!transporter) {
-    console.log(`[Mail] SKIP — no SMTP config | to: ${to} | subject: ${subject}`)
+  const resend = getResend()
+  if (!resend) {
+    console.log(`[Mail] SKIP — no RESEND_API_KEY | to: ${to} | subject: ${subject}`)
     return
   }
-  const { host, port } = settings.mailSettings
-  const from = settings.mailSettings.from || settings.mailSettings.user
-  console.log(`[Mail] SENDING | to: ${to} | subject: ${subject} | host: ${host}:${port}`)
+  const from = settings.mailSettings.from || settings.mailSettings.user || 'noreply@acit-solutions.com'
+  console.log(`[Mail] SENDING | to: ${to} | subject: ${subject}`)
   try {
-    await transporter.verify()
-    console.log(`[Mail] SMTP connection verified`)
-  } catch (ve) {
-    console.error(`[Mail] SMTP verify FAIL`)
-    console.error(ve)
-    return
-  }
-  try {
-    const info = await transporter.sendMail({ from: `"${BRAND}" <${from}>`, to, subject, html })
-    console.log(`[Mail] OK | to: ${to} | subject: ${subject} | messageId: ${info.messageId || '—'}`)
+    const result = await resend.emails.send({ from: `${BRAND} <${from}>`, to, subject, html })
+    if (result.error) {
+      console.error(`[Mail] FAIL | to: ${to} | subject: ${subject} | error: ${result.error.message}`)
+    } else {
+      console.log(`[Mail] OK | to: ${to} | subject: ${subject} | id: ${result.data.id}`)
+    }
   } catch (e) {
     console.error(`[Mail] FAIL | to: ${to} | subject: ${subject}`)
     console.error(e)
