@@ -128,21 +128,43 @@ const Mail = {
     await send(user.email, subject, html)
   },
 
-  async guestAccountCreated(user, tempPassword) {
-    const subject = `Your ${BRAND} account — set your password`
+  async guestAccountCreated(user, tempPassword, reservation) {
+    const subject = `Reservation #${reservation.id} confirmed — your account details`
+    const shuttles = (reservation && reservation.shuttles) || []
     const html = wrap(subject, `
-      <h2 style="margin:0 0 8px;color:#1a2636;font-size:20px;">Account created for your reservation</h2>
-      <p style="color:#607086;font-size:15px;line-height:1.6;margin:0 0 24px;">
-        Hi ${user.name}, we created an account for you automatically so you can track your reservation and access your trip details.
+      <h2 style="margin:0 0 8px;color:#1a2636;font-size:20px;">Your transfer is booked, ${user.name}!</h2>
+      <p style="color:#607086;font-size:15px;line-height:1.6;margin:0 0 28px;">
+        We received your booking request and our team will confirm the driver and vehicle shortly.
       </p>
-      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
-        <tr><td style="padding:6px 0;color:#607086;font-size:13px;width:120px;">Email</td><td style="font-size:14px;font-weight:600;">${user.email}</td></tr>
-        <tr><td style="padding:6px 0;color:#607086;font-size:13px;">Temp password</td><td style="font-size:14px;font-weight:600;letter-spacing:2px;">${tempPassword}</td></tr>
+
+      <p style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#8a9ab0;margin:0 0 10px;">Reservation #${reservation.id}</p>
+      <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #eef1f6;border-radius:8px;border-collapse:collapse;margin-bottom:28px;">
+        <thead><tr style="background:#f7f9fc;">
+          <th style="padding:10px 12px;text-align:left;font-size:12px;color:#8a9ab0;text-transform:uppercase;letter-spacing:.5px;">Route</th>
+          <th style="padding:10px 12px;text-align:left;font-size:12px;color:#8a9ab0;text-transform:uppercase;letter-spacing:.5px;">Date & time</th>
+          <th style="padding:10px 12px;text-align:left;font-size:12px;color:#8a9ab0;text-transform:uppercase;letter-spacing:.5px;">Pax</th>
+        </tr></thead>
+        <tbody>${shuttles.map(function (s, i) {
+          const from = (s.departing && s.departing.name) || '—'
+          const to = (s.destination && s.destination.name) || '—'
+          const date = s.date ? new Date(s.date).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) : '—'
+          return '<tr style="border-top:1px solid #eef1f6;"><td style="padding:10px 12px;font-size:14px;font-weight:600;">' + from + ' → ' + to + '</td><td style="padding:10px 12px;font-size:13px;color:#607086;">' + date + '</td><td style="padding:10px 12px;font-size:13px;color:#607086;">' + (s.persons || 1) + ' pax</td></tr>'
+        }).join('')}</tbody>
       </table>
-      <p style="color:#607086;font-size:14px;line-height:1.6;margin:0 0 24px;">
-        You will be asked to choose a new password when you first log in.
+
+      <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:8px;padding:20px 24px;margin-bottom:28px;">
+        <p style="margin:0 0 12px;font-size:14px;font-weight:700;color:#1a2636;">Your account has been created automatically</p>
+        <p style="margin:0 0 16px;font-size:14px;color:#607086;line-height:1.6;">Use these credentials to log in and track your reservation. You will be asked to set a new password on your first login.</p>
+        <table cellpadding="0" cellspacing="0">
+          <tr><td style="padding:4px 0;font-size:13px;color:#607086;width:130px;">Email</td><td style="font-size:14px;font-weight:700;color:#1a2636;">${user.email}</td></tr>
+          <tr><td style="padding:4px 0;font-size:13px;color:#607086;">Temporary password</td><td style="font-size:18px;font-weight:700;color:${BRAND_COLOR};letter-spacing:3px;">${tempPassword}</td></tr>
+        </table>
+      </div>
+
+      <p style="margin:0 0 20px;font-size:14px;color:#607086;line-height:1.6;">
+        Once logged in you can view your reservation details, trip updates, and messages from our team.
       </p>
-      <a href="${settings.clientUrl}/login" style="display:inline-block;background:${BRAND_COLOR};color:#fff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;">Log in to your account</a>
+      <a href="${settings.clientUrl}/login" style="display:inline-block;background:${BRAND_COLOR};color:#fff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;">Log in &amp; view your reservation</a>
     `)
     await send(user.email, subject, html)
   },

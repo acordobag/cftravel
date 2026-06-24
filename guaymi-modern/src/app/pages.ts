@@ -511,7 +511,7 @@ export class TestimonialsPageComponent {
 @Component({
   selector: 'app-reservation-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, PhoneFieldComponent],
+  imports: [CommonModule, FormsModule, PhoneFieldComponent, RouterLink],
   template: `
     <form class="reservation-form" #reservationForm="ngForm" (ngSubmit)="state.submitReservation()">
       <input name="name" [placeholder]="i18n.tx().reservation.firstName" [(ngModel)]="state.customer.name" required>
@@ -522,7 +522,15 @@ export class TestimonialsPageComponent {
       <div class="submit-row">
         <button type="submit" class="primary-action" [disabled]="reservationForm.invalid || !state.canSubmitReservation()">{{ i18n.tx().reservation.sendBtn }}</button>
       </div>
-      <p class="success" *ngIf="state.reservationSent()">{{ i18n.tx().reservation.successMsg }}</p>
+      <div class="reservation-success" *ngIf="state.reservationSent()">
+        <p class="eyebrow">{{ i18n.tx().reservation.successEyebrow }}</p>
+        <h3>{{ i18n.tx().reservation.successHeading }}</h3>
+        <p>{{ i18n.tx().reservation.successMsg }}</p>
+        <ul class="reservation-success-steps">
+          <li *ngFor="let step of i18n.tx().reservation.successSteps">{{ step }}</li>
+        </ul>
+        <a routerLink="/account" class="secondary-action">{{ i18n.tx().reservation.successAccountBtn }}</a>
+      </div>
       <p class="error" *ngIf="state.reservationError()">{{ state.reservationError() }}</p>
     </form>
   `

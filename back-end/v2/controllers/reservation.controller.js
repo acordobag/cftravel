@@ -35,9 +35,10 @@ const Reservation = {
       }
 
       let user = await UserModel.findOne({ where: { email: req.body.user.email } })
+      let tempPassword = null
 
       if (!user) {
-        const tempPassword = Math.random().toString(36).slice(-8)
+        tempPassword = Math.random().toString(36).slice(-8)
         user = await UserModel.create({
           name: req.body.user.name,
           lastName: req.body.user.lastName,
@@ -50,17 +51,16 @@ const Reservation = {
           emailVerified: true,
           mustChangePassword: true
         })
-        Mail.guestAccountCreated(user, tempPassword).catch(() => {})
       }
 
       reservationData.userId = user.id
-      await Reservation.createReservation(reservationData, user, res)
+      await Reservation.createReservation(reservationData, user, res, tempPassword)
     } catch (e) {
       next(e)
     }
   },
 
-  createReservation: async (data, user, res) => {
+  createReservation: async (data, user, res, tempPassword) => {
     const newReservation = await ReservationModel.create(data, { include: [{ model: Shuttle }] })
     if (!newReservation) {
       return res.status(400).json({ message: 'Reservation could not be created.' })
@@ -68,7 +68,11 @@ const Reservation = {
 
     const full = await ReservationModel.findOne({ where: { id: newReservation.id }, include: reservationInclude })
 
-    Mail.reservationConfirmedCustomer(full, user).catch(() => {})
+    if (tempPassword) {
+      Mail.guestAccountCreated(user, tempPassword, full).catch(() => {})
+    } else {
+      Mail.reservationConfirmedCustomer(full, user).catch(() => {})
+    }
     Mail.reservationNotifyCompany(full, user).catch(() => {})
 
     res.status(201).json(full)
