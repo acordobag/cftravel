@@ -1,24 +1,39 @@
 'use strict'
 
-const nodemailer = require('nodemailer')
+const https = require('https')
 const settings = require('../config').default
 
 const BRAND = 'CR Travel Service'
 const BRAND_COLOR = '#0b8f6a'
 
-function createTransporter() {
-  const { user, pass, host, port } = settings.mailSettings
-  if (!user || !pass) return null
-  return nodemailer.createTransport({
-    host: host || 'smtp.gmail.com',
-    port: port || 465,
-    secure: port === 465 || (!port && true),
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 15000,
-    tls: { rejectUnauthorized: false },
-    family: 4,
-    auth: { user, pass: pass.replace(/\s/g, '') }
+function brevoSend(apiKey, payload) {
+  return new Promise(function (resolve, reject) {
+    const body = JSON.stringify(payload)
+    const options = {
+      hostname: 'api.brevo.com',
+      path: '/v3/smtp/email',
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'api-key': apiKey,
+        'content-type': 'application/json',
+        'content-length': Buffer.byteLength(body)
+      }
+    }
+    const req = https.request(options, function (res) {
+      let data = ''
+      res.on('data', function (chunk) { data += chunk })
+      res.on('end', function () {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          resolve(JSON.parse(data))
+        } else {
+          reject(new Error('Brevo API ' + res.statusCode + ': ' + data))
+        }
+      })
+    })
+    req.on('error', reject)
+    req.write(body)
+    req.end()
   })
 }
 
@@ -63,16 +78,21 @@ function shuttleRows(shuttles) {
 }
 
 async function send(to, subject, html) {
-  const transporter = createTransporter()
-  if (!transporter) {
-    console.log(`[Mail] SKIP — no SMTP config | to: ${to} | subject: ${subject}`)
+  const apiKey = process.env.BREVO_API_KEY
+  if (!apiKey) {
+    console.log(`[Mail] SKIP — no BREVO_API_KEY | to: ${to} | subject: ${subject}`)
     return
   }
-  const from = settings.mailSettings.from || settings.mailSettings.user
-  console.log(`[Mail] SENDING | to: ${to} | subject: ${subject} | host: ${settings.mailSettings.host}:${settings.mailSettings.port}`)
+  const fromEmail = settings.mailSettings.from || settings.mailSettings.user
+  console.log(`[Mail] SENDING | to: ${to} | subject: ${subject}`)
   try {
-    const info = await transporter.sendMail({ from: `"${BRAND}" <${from}>`, to, subject, html })
-    console.log(`[Mail] OK | to: ${to} | subject: ${subject} | messageId: ${info.messageId || '—'}`)
+    const result = await brevoSend(apiKey, {
+      sender: { name: BRAND, email: fromEmail },
+      to: [{ email: to }],
+      subject: subject,
+      htmlContent: html
+    })
+    console.log(`[Mail] OK | to: ${to} | subject: ${subject} | messageId: ${result.messageId || '—'}`)
   } catch (e) {
     console.error(`[Mail] FAIL | to: ${to} | subject: ${subject}`)
     console.error(e)
