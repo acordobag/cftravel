@@ -63,6 +63,7 @@ export interface AdminShuttle {
   id?: number;
   date: string;
   persons: number;
+  rate?: number;
   departingId?: number;
   destinationId?: number;
   reservationId?: number;
