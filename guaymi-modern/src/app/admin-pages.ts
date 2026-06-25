@@ -1,7 +1,11 @@
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+
+import { environment } from '../environments/environment';
+const ADMIN_API = environment.apiUrl;
 
 import { PhoneFieldComponent } from './phone-field.component';
 
@@ -18,10 +22,10 @@ import {
   USER_ROLE_OPTIONS
 } from './admin.service';
 import { AuthService, AuthUser } from './auth.service';
-import { CarType, Testimonial } from './models';
+import { BookingPolicy, CarType, Testimonial } from './models';
 import { FixedRoutePrice, PriceRule, PricingConfig, ServicePricingRule } from './pricing.service';
 
-type AdminTab = 'destinations' | 'hero' | 'testimonials' | 'pricing' | 'reservations' | 'company' | 'messages' | 'users';
+type AdminTab = 'destinations' | 'hero' | 'testimonials' | 'pricing' | 'policy' | 'reservations' | 'company' | 'messages' | 'users';
 type ModalType = 'place' | 'hero' | 'testimonial' | 'pricingRule' | 'fixedRoute' | 'serviceRule' | 'carType' | 'reservation' | 'company' | 'message' | 'user';
 
 type AdminCompanyDraft = AdminCompany & {
@@ -56,6 +60,7 @@ type AdminCompanyDraft = AdminCompany & {
           <button type="button" [class.active]="activeTab === 'hero'" (click)="activeTab = 'hero'">Hero images</button>
           <button type="button" [class.active]="activeTab === 'testimonials'" (click)="activeTab = 'testimonials'">Testimonials</button>
           <button type="button" [class.active]="activeTab === 'pricing'" (click)="activeTab = 'pricing'">Pricing</button>
+          <button type="button" [class.active]="activeTab === 'policy'" (click)="activeTab = 'policy'; loadPolicy()">Booking policy</button>
           <button type="button" [class.active]="activeTab === 'reservations'" (click)="activeTab = 'reservations'">Reservations</button>
           <button type="button" [class.active]="activeTab === 'company'" (click)="activeTab = 'company'">Company</button>
           <button type="button" [class.active]="activeTab === 'messages'" (click)="activeTab = 'messages'">Messages</button>
@@ -486,30 +491,129 @@ type AdminCompanyDraft = AdminCompany & {
           </section>
         </section>
 
+        <section class="admin-panel" *ngIf="activeTab === 'policy'">
+          <div class="admin-panel-heading">
+            <div>
+              <p class="eyebrow">Configurable rates & policies</p>
+              <h2>Booking policy</h2>
+              <p>Set child rates per age group and cancellation/edit rules.</p>
+            </div>
+          </div>
+          <div *ngIf="policy" class="admin-form-grid">
+            <h3 class="admin-subheading">Child rates (per shuttle, in USD)</h3>
+            <label class="admin-field">
+              <span>Infant rate (0–1 yrs)</span>
+              <input type="number" min="0" step="0.01" [(ngModel)]="policy.infantRate">
+            </label>
+            <label class="admin-field">
+              <span>Toddler rate (1–4 yrs)</span>
+              <input type="number" min="0" step="0.01" [(ngModel)]="policy.toddlerRate">
+            </label>
+            <label class="admin-field">
+              <span>Preschool rate (4–6 yrs)</span>
+              <input type="number" min="0" step="0.01" [(ngModel)]="policy.preschoolRate">
+            </label>
+            <label class="admin-field">
+              <span>Child rate (6–12 yrs)</span>
+              <input type="number" min="0" step="0.01" [(ngModel)]="policy.childRate">
+            </label>
+            <h3 class="admin-subheading">Cancellation policy</h3>
+            <label class="admin-field">
+              <span>Min. hours before reservation to allow cancel</span>
+              <input type="number" min="0" step="1" [(ngModel)]="policy.minHoursCancel">
+            </label>
+            <label class="admin-field">
+              <span>Cancellation fee (%)</span>
+              <input type="number" min="0" max="100" step="1" [(ngModel)]="policy.cancelFeePercent">
+            </label>
+            <h3 class="admin-subheading">Edit policy</h3>
+            <label class="admin-field">
+              <span>Min. hours before reservation to allow edit</span>
+              <input type="number" min="0" step="1" [(ngModel)]="policy.minHoursEdit">
+            </label>
+            <label class="admin-field">
+              <span>Edit fee (%)</span>
+              <input type="number" min="0" max="100" step="1" [(ngModel)]="policy.editFeePercent">
+            </label>
+            <div class="admin-form-actions">
+              <button type="button" class="primary-action" (click)="savePolicy()" [disabled]="policyLoading">
+                {{ policyLoading ? 'Saving...' : 'Save policy' }}
+              </button>
+            </div>
+          </div>
+          <p *ngIf="!policy">Loading policy...</p>
+
+          <div class="admin-policy-text-section" *ngIf="defaultCompanyForPolicy">
+            <h3 class="admin-subheading" style="margin-top:32px;grid-column:1/-1;">Public policy page text</h3>
+            <p style="color:var(--text-muted);font-size:13px;margin:0 0 12px;">This text is shown on the public <strong>/policy</strong> page. Use plain text or simple line breaks.</p>
+            <textarea class="policy-text-editor" rows="12" [(ngModel)]="defaultCompanyForPolicy.cancellationPolicyText" placeholder="Write your cancellation, modification, and refund policy here..."></textarea>
+            <button type="button" class="primary-action" style="margin-top:10px;" (click)="savePolicyText()" [disabled]="policyTextLoading">
+              {{ policyTextLoading ? 'Saving...' : 'Save policy text' }}
+            </button>
+          </div>
+        </section>
+
         <section class="admin-panel" *ngIf="activeTab === 'reservations'">
           <div class="admin-panel-heading">
             <div>
               <p class="eyebrow">Booking requests</p>
               <h2>Reservations</h2>
             </div>
+            <div class="admin-panel-filters">
+              <button type="button" [class.active]="reservationFilter === 'pending'" (click)="reservationFilter = 'pending'">Pending</button>
+              <button type="button" [class.active]="reservationFilter === 'confirmed'" (click)="reservationFilter = 'confirmed'">Confirmed</button>
+              <button type="button" [class.active]="reservationFilter === 'cancelled'" (click)="reservationFilter = 'cancelled'">Cancelled</button>
+              <button type="button" [class.active]="reservationFilter === 'all'" (click)="reservationFilter = 'all'">All</button>
+            </div>
           </div>
 
-          <div class="admin-table-wrap">
-            <table class="admin-table">
-              <thead><tr><th>ID</th><th>Customer</th><th>Transfers</th><th>Date</th><th>Actions</th></tr></thead>
-              <tbody>
-                <tr *ngFor="let reservation of reservations">
-                  <td>#{{ reservation.id }}</td>
-                  <td>{{ reservation.user?.name }} {{ reservation.user?.lastName }}<small>{{ reservation.user?.email }}</small></td>
-                  <td>{{ reservation.shuttles.length }}</td>
-                  <td>{{ reservation.createdAt | date:'medium' }}</td>
-                  <td class="table-actions">
-                    <button type="button" class="secondary-action" (click)="openEdit('reservation', reservation)">Edit</button>
-                    <button type="button" class="remove-transfer" (click)="deleteReservation(reservation)">Delete</button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+          <div class="reservation-cards">
+            <article class="reservation-admin-card" *ngFor="let r of filteredReservations" [class.res-pending]="!r.status || r.status === 'pending'" [class.res-confirmed]="r.status === 'confirmed'" [class.res-cancelled]="r.status === 'cancelled'">
+              <div class="res-card-header">
+                <div>
+                  <span class="res-status-badge" [class.badge-pending]="!r.status || r.status === 'pending'" [class.badge-confirmed]="r.status === 'confirmed'" [class.badge-cancelled]="r.status === 'cancelled'">
+                    {{ r.status || 'pending' }}
+                  </span>
+                  <strong class="res-id">#{{ r.id }}</strong>
+                  <span class="res-date">{{ r.createdAt | date:'mediumDate' }}</span>
+                </div>
+                <div class="res-customer">
+                  <span>{{ r.user?.name }} {{ r.user?.lastName }}</span>
+                  <a [href]="'mailto:' + r.user?.email">{{ r.user?.email }}</a>
+                  <span *ngIf="r.user?.phone">{{ r.user?.phone }}</span>
+                </div>
+              </div>
+
+              <div class="res-transfers">
+                <div class="res-transfer-row" *ngFor="let s of r.shuttles">
+                  <span class="res-route">{{ s.departing?.name || '?' }} → {{ s.destination?.name || '?' }}</span>
+                  <span class="res-transfer-meta">{{ s.date | date:'medium' }} · {{ s.persons }} pax · <strong>\${{ s.rate | number:'1.2-2' }}</strong></span>
+                </div>
+              </div>
+
+              <p class="res-message" *ngIf="r.message"><strong>Guest notes:</strong> {{ r.message }}</p>
+              <p class="res-company-notes" *ngIf="r.companyNotes"><strong>Company notes:</strong> {{ r.companyNotes }}</p>
+
+              <div class="res-card-actions" *ngIf="!r.status || r.status === 'pending'">
+                <div *ngIf="confirmingId !== r.id">
+                  <button type="button" class="primary-action res-confirm-btn" (click)="startConfirm(r.id)">Confirm reservation</button>
+                  <button type="button" class="remove-transfer" (click)="cancelReservationAdmin(r)">Cancel</button>
+                </div>
+                <div class="res-confirm-panel" *ngIf="confirmingId === r.id">
+                  <textarea class="res-notes-input" rows="3" placeholder="Optional note to the customer (shown in the confirmation email)..." [(ngModel)]="confirmNotes"></textarea>
+                  <div class="res-confirm-btns">
+                    <button type="button" class="secondary-action" (click)="confirmingId = null">Back</button>
+                    <button type="button" class="primary-action" (click)="sendConfirm(r)" [disabled]="confirmLoading">{{ confirmLoading ? 'Sending...' : 'Send confirmation email' }}</button>
+                  </div>
+                </div>
+              </div>
+              <div class="res-card-actions res-card-actions-secondary" *ngIf="r.status === 'confirmed' || r.status === 'cancelled'">
+                <button type="button" class="secondary-action" (click)="openEdit('reservation', r)">Edit notes</button>
+                <button type="button" class="remove-transfer" (click)="deleteReservation(r)">Delete</button>
+              </div>
+            </article>
+
+            <p class="empty-state-inline" *ngIf="!filteredReservations.length">No {{ reservationFilter === 'all' ? '' : reservationFilter }} reservations.</p>
           </div>
         </section>
 
@@ -1134,10 +1238,19 @@ export class AdminPageComponent implements OnInit {
   uploadBusy = false;
   message = '';
   error = '';
+  policy: BookingPolicy | null = null;
+  policyLoading = false;
+  defaultCompanyForPolicy: AdminCompany | null = null;
+  policyTextLoading = false;
+  reservationFilter: 'pending' | 'confirmed' | 'cancelled' | 'all' = 'pending';
+  confirmingId: number | null = null;
+  confirmNotes = '';
+  confirmLoading = false;
 
   constructor(
     private readonly admin: AdminService,
-    public readonly auth: AuthService
+    public readonly auth: AuthService,
+    private readonly http: HttpClient
   ) {}
 
   ngOnInit(): void {
@@ -1155,6 +1268,89 @@ export class AdminPageComponent implements OnInit {
     if (this.auth.isSuper()) {
       this.loadUsers();
     }
+  }
+
+  get filteredReservations(): AdminReservation[] {
+    if (this.reservationFilter === 'all') return this.reservations;
+    return this.reservations.filter((r) => (r.status || 'pending') === this.reservationFilter);
+  }
+
+  startConfirm(id: number): void {
+    this.confirmingId = id;
+    this.confirmNotes = '';
+  }
+
+  sendConfirm(reservation: AdminReservation): void {
+    this.confirmLoading = true;
+    this.admin.confirmReservation(reservation.id, this.confirmNotes).subscribe({
+      next: (updated) => {
+        const idx = this.reservations.findIndex((r) => r.id === reservation.id);
+        if (idx !== -1) this.reservations[idx] = updated;
+        this.confirmingId = null;
+        this.confirmLoading = false;
+        this.message = `Reservation #${reservation.id} confirmed — confirmation email sent.`;
+      },
+      error: (err) => {
+        this.confirmLoading = false;
+        this.error = err.error?.message || 'Could not confirm reservation.';
+      }
+    });
+  }
+
+  cancelReservationAdmin(reservation: AdminReservation): void {
+    this.admin.updateReservation({ id: reservation.id, message: reservation.message, companyNotes: reservation.companyNotes, status: 'cancelled' }).subscribe({
+      next: (updated) => {
+        const idx = this.reservations.findIndex((r) => r.id === reservation.id);
+        if (idx !== -1) this.reservations[idx] = updated;
+      },
+      error: (err) => this.error = err.error?.message || 'Could not cancel reservation.'
+    });
+  }
+
+  loadPolicy(): void {
+    if (this.policy) return;
+    this.http.get<BookingPolicy>(`${ADMIN_API}/admin/booking-policy`, this.auth.authOptions()).subscribe({
+      next: (p) => this.policy = { ...p },
+      error: () => this.error = 'Could not load booking policy.'
+    });
+    if (!this.defaultCompanyForPolicy) {
+      this.http.get<AdminCompany>(`${ADMIN_API}/company`).subscribe({
+        next: (c) => this.defaultCompanyForPolicy = { ...c },
+        error: () => {}
+      });
+    }
+  }
+
+  savePolicyText(): void {
+    if (!this.defaultCompanyForPolicy || !this.defaultCompanyForPolicy.id) return;
+    this.policyTextLoading = true;
+    this.admin.updateCompany(this.defaultCompanyForPolicy).subscribe({
+      next: (c) => {
+        this.defaultCompanyForPolicy = { ...c };
+        this.policyTextLoading = false;
+        this.message = 'Policy text saved.';
+      },
+      error: () => {
+        this.policyTextLoading = false;
+        this.error = 'Could not save policy text.';
+      }
+    });
+  }
+
+  savePolicy(): void {
+    if (!this.policy) return;
+    this.policyLoading = true;
+    this.http.put<BookingPolicy>(`${ADMIN_API}/admin/booking-policy`, this.policy, this.auth.authOptions()).subscribe({
+      next: (p) => {
+        this.policy = { ...p };
+        this.policyLoading = false;
+        this.message = 'Booking policy saved.';
+      },
+      error: () => {
+        this.policyLoading = false;
+        this.error = 'Could not save booking policy.';
+      }
+    });
   }
 
   openEdit(type: ModalType, item: any): void {

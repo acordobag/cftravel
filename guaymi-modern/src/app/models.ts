@@ -39,6 +39,23 @@ export interface ShuttleQuote {
   total: number;
   isCalculating: boolean;
   rateError: string;
+  infantCount: number;
+  toddlerCount: number;
+  preschoolCount: number;
+  childCount: number;
+  showChildren?: boolean;
+}
+
+export interface BookingPolicy {
+  id?: number;
+  infantRate: number;
+  toddlerRate: number;
+  preschoolRate: number;
+  childRate: number;
+  minHoursCancel: number;
+  cancelFeePercent: number;
+  minHoursEdit: number;
+  editFeePercent: number;
 }
 
 export interface Testimonial {
@@ -66,6 +83,10 @@ export interface ReservationPayload {
     persons: number;
     rate: number;
     distance: number;
+    infantCount: number;
+    toddlerCount: number;
+    preschoolCount: number;
+    childCount: number;
   }>;
 }
 
@@ -89,5 +110,6 @@ export interface CompanyProfile {
   website?: string;
   logo?: string;
   isDefault?: boolean;
+  cancellationPolicyText?: string;
   phones: ContactMethod[];
 }

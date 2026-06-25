@@ -51,9 +51,30 @@ const AdminMaintenance = {
         return res.status(404).json({ message: 'Reservation not found.' })
       }
 
-      reservation.message = req.body.message
+      if (req.body.message !== undefined) reservation.message = req.body.message
+      if (req.body.companyNotes !== undefined) reservation.companyNotes = req.body.companyNotes
+      if (req.body.status !== undefined) reservation.status = req.body.status
       await reservation.save()
       res.status(200).send(await loadReservation(req.params.id)).end()
+    } catch (e) {
+      next(e)
+    }
+  },
+
+  confirmReservation: async (req, res, next) => {
+    try {
+      const reservation = await Reservation.findOne({ where: { id: req.params.id } })
+      if (!reservation) {
+        return res.status(404).json({ message: 'Reservation not found.' })
+      }
+      reservation.status = 'confirmed'
+      if (req.body.companyNotes !== undefined) reservation.companyNotes = req.body.companyNotes
+      await reservation.save()
+      const full = await loadReservation(req.params.id)
+      if (full && full.user) {
+        Mail.reservationConfirmedByCompany(full, full.user).catch(function () {})
+      }
+      res.status(200).send(full).end()
     } catch (e) {
       next(e)
     }
@@ -189,6 +210,7 @@ const AdminMaintenance = {
       company.website = req.body.website
       company.logo = req.body.logo
       company.isDefault = req.body.isDefault === true || req.body.isDefault === 'true'
+      if (req.body.cancellationPolicyText !== undefined) company.cancellationPolicyText = req.body.cancellationPolicyText
       await company.save()
 
       if (company.isDefault) {

@@ -14,6 +14,7 @@ import PricingRule from '../models/pricing-rule.model'
 import FixedRoutePrice from '../models/fixed-route-price.model'
 import ServicePricingRule from '../models/service-pricing-rule.model'
 import UserMessage from '../models/user-message.model'
+import BookingPolicy from '../models/booking-policy.model'
 import bcrypt from 'bcryptjs'
 
 const defaultPricingRules = [
@@ -157,6 +158,21 @@ export default async () => {
         const serviceRuleCount = await ServicePricingRule.count()
         if (!serviceRuleCount) {
             await ServicePricingRule.bulkCreate(defaultServiceRules)
+        }
+
+        const policyCount = await BookingPolicy.count()
+        if (!policyCount) {
+            await BookingPolicy.create({
+                infantRate: 0,
+                toddlerRate: 0,
+                preschoolRate: 15,
+                childRate: 25,
+                minHoursCancel: 48,
+                cancelFeePercent: 50,
+                minHoursEdit: 24,
+                editFeePercent: 25,
+                isDefault: true
+            })
         }
     } catch (e) {
         console.log(e)

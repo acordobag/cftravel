@@ -12,7 +12,7 @@ const EN = {
   nav: {
     book: 'Book', services: 'Services', destinations: 'Destinations', fleet: 'Fleet',
     testimonials: 'Testimonials', about: 'About', contact: 'Contact',
-    account: 'Account', admin: 'Admin', login: 'Login', logout: 'Logout', reserve: 'Reserve now',
+    account: 'Account', admin: 'Admin', login: 'Login', logout: 'Logout', reserve: 'Reserve now', policy: 'Booking policy',
   },
 
   booking: {
@@ -36,6 +36,12 @@ const EN = {
     pax: 'passengers',
     extraPax: 'extra pax',
     extraPaxLabel: 'Extra passenger charge',
+    addChildren: 'Traveling with children?',
+    hideChildren: 'Hide children section',
+    infant: 'Infant',
+    toddler: 'Toddler',
+    preschool: 'Preschooler',
+    child: 'Child',
   },
 
   hero: {
@@ -275,6 +281,17 @@ const EN = {
     reservationLabel: 'Reservation',
     passenger: 'passenger',
     passengers: 'passengers',
+    confirmedBadge: 'Confirmed',
+    cancelBtn: 'Cancel reservation',
+    cancelling: 'Cancelling...',
+    cancelledBadge: 'Cancelled',
+    cancelSuccess: 'Your reservation has been cancelled.',
+    cancelModalTitle: 'Cancel reservation',
+    cancelModalLoading: 'Checking cancellation policy...',
+    cancelModalFeeMsg: 'A cancellation fee of ${fee} ({pct}% of the total) will apply.',
+    cancelModalTooLate: 'Cancellation is not possible within {hours} hours of the reservation.',
+    cancelModalClose: 'Keep reservation',
+    cancelModalConfirm: 'Confirm cancellation',
   },
 };
 
@@ -288,7 +305,7 @@ const ES: typeof EN = {
   nav: {
     book: 'Reservar', services: 'Servicios', destinations: 'Destinos', fleet: 'Flota',
     testimonials: 'Testimonios', about: 'Nosotros', contact: 'Contacto',
-    account: 'Mi cuenta', admin: 'Admin', login: 'Ingresar', logout: 'Salir', reserve: 'Reservar ahora',
+    account: 'Mi cuenta', admin: 'Admin', login: 'Ingresar', logout: 'Salir', reserve: 'Reservar ahora', policy: 'Política de reservas',
   },
 
   booking: {
@@ -312,6 +329,12 @@ const ES: typeof EN = {
     pax: 'pasajeros',
     extraPax: 'pax extra',
     extraPaxLabel: 'Cargo por pasajero extra',
+    addChildren: '¿Viajan niños?',
+    hideChildren: 'Ocultar sección de niños',
+    infant: 'Bebé',
+    toddler: 'Niño pequeño',
+    preschool: 'Preescolar',
+    child: 'Niño',
   },
 
   hero: {
@@ -551,6 +574,17 @@ const ES: typeof EN = {
     reservationLabel: 'Reserva',
     passenger: 'pasajero',
     passengers: 'pasajeros',
+    confirmedBadge: 'Confirmada',
+    cancelBtn: 'Cancelar reserva',
+    cancelling: 'Cancelando...',
+    cancelledBadge: 'Cancelada',
+    cancelSuccess: 'Tu reserva ha sido cancelada.',
+    cancelModalTitle: 'Cancelar reserva',
+    cancelModalLoading: 'Consultando política de cancelación...',
+    cancelModalFeeMsg: 'Se aplicará un cargo de cancelación de ${fee} ({pct}% del total).',
+    cancelModalTooLate: 'No es posible cancelar con menos de {hours} horas de anticipación.',
+    cancelModalClose: 'Mantener reserva',
+    cancelModalConfirm: 'Confirmar cancelación',
   },
 };
 

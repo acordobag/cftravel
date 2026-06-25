@@ -8,7 +8,11 @@ const model = () => {
         date: Sequelize.DATE,
         persons: Sequelize.INTEGER,
         rate: Sequelize.FLOAT,
-        distance: Sequelize.FLOAT
+        distance: Sequelize.FLOAT,
+        infantCount: { type: Sequelize.INTEGER, defaultValue: 0 },
+        toddlerCount: { type: Sequelize.INTEGER, defaultValue: 0 },
+        preschoolCount: { type: Sequelize.INTEGER, defaultValue: 0 },
+        childCount: { type: Sequelize.INTEGER, defaultValue: 0 }
     })
     return Shuttle
 }

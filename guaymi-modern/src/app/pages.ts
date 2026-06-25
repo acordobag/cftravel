@@ -2,6 +2,10 @@ import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, Input, NgZone, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+
+import { environment } from '../environments/environment';
+const API = environment.apiUrl;
 
 import { I18nService } from './i18n.service';
 import { PhoneFieldComponent } from './phone-field.component';
@@ -105,6 +109,49 @@ export class PageHeroComponent {
           </select>
           <p class="vehicle-warn" *ngIf="passengerWarning">⚠ {{ passengerWarning }}</p>
         </label>
+
+        <div class="field field-wide children-toggle-row">
+          <button type="button" class="children-toggle-btn" (click)="activeQuote.showChildren = !activeQuote.showChildren">
+            <span *ngIf="!activeQuote.showChildren">{{ i18n.tx().booking.addChildren }}</span>
+            <span *ngIf="activeQuote.showChildren">{{ i18n.tx().booking.hideChildren }}</span>
+            <span class="children-badge" *ngIf="totalChildren > 0">&nbsp;({{ totalChildren }})</span>
+          </button>
+        </div>
+
+        <div class="children-section" *ngIf="activeQuote.showChildren">
+          <div class="child-group">
+            <span class="child-label">{{ i18n.tx().booking.infant }} <small>0–1</small></span>
+            <div class="child-counter">
+              <button type="button" class="counter-btn" (click)="changeChild('infantCount', -1)" [disabled]="activeQuote.infantCount <= 0">−</button>
+              <span>{{ activeQuote.infantCount }}</span>
+              <button type="button" class="counter-btn" (click)="changeChild('infantCount', 1)">+</button>
+            </div>
+          </div>
+          <div class="child-group">
+            <span class="child-label">{{ i18n.tx().booking.toddler }} <small>1–4</small></span>
+            <div class="child-counter">
+              <button type="button" class="counter-btn" (click)="changeChild('toddlerCount', -1)" [disabled]="activeQuote.toddlerCount <= 0">−</button>
+              <span>{{ activeQuote.toddlerCount }}</span>
+              <button type="button" class="counter-btn" (click)="changeChild('toddlerCount', 1)">+</button>
+            </div>
+          </div>
+          <div class="child-group">
+            <span class="child-label">{{ i18n.tx().booking.preschool }} <small>4–6</small></span>
+            <div class="child-counter">
+              <button type="button" class="counter-btn" (click)="changeChild('preschoolCount', -1)" [disabled]="activeQuote.preschoolCount <= 0">−</button>
+              <span>{{ activeQuote.preschoolCount }}</span>
+              <button type="button" class="counter-btn" (click)="changeChild('preschoolCount', 1)">+</button>
+            </div>
+          </div>
+          <div class="child-group">
+            <span class="child-label">{{ i18n.tx().booking.child }} <small>6–12</small></span>
+            <div class="child-counter">
+              <button type="button" class="counter-btn" (click)="changeChild('childCount', -1)" [disabled]="activeQuote.childCount <= 0">−</button>
+              <span>{{ activeQuote.childCount }}</span>
+              <button type="button" class="counter-btn" (click)="changeChild('childCount', 1)">+</button>
+            </div>
+          </div>
+        </div>
       </form>
 
       <div class="rate-error" *ngIf="activeQuote.rateError">{{ activeQuote.rateError }}</div>
@@ -184,6 +231,15 @@ export class BookingCardComponent {
       return `${extra} extra passenger${extra > 1 ? 's' : ''} — surcharge applies.`;
     }
     return '';
+  }
+
+  get totalChildren(): number {
+    return (this.activeQuote.infantCount || 0) + (this.activeQuote.toddlerCount || 0) + (this.activeQuote.preschoolCount || 0) + (this.activeQuote.childCount || 0);
+  }
+
+  changeChild(field: 'infantCount' | 'toddlerCount' | 'preschoolCount' | 'childCount', delta: number): void {
+    const current = this.activeQuote[field] || 0;
+    this.activeQuote[field] = Math.max(0, current + delta);
   }
 
   continueBooking(): void {
@@ -629,4 +685,32 @@ export class AboutPageComponent {
 })
 export class ContactPageComponent {
   constructor(public readonly i18n: I18nService) {}
+}
+
+@Component({
+  standalone: true,
+  imports: [CommonModule, PageHeroComponent],
+  template: `
+    <app-page-hero title="Booking & Cancellation Policy" eyebrow="Policies" text="Please read the following before booking."></app-page-hero>
+    <section class="policy-page page-band">
+      <div class="policy-content" *ngIf="policyText">
+        <p *ngFor="let para of paragraphs">{{ para }}</p>
+      </div>
+      <p class="policy-placeholder" *ngIf="!policyText">Policy information will be available soon. Contact us for details.</p>
+    </section>
+  `
+})
+export class PolicyPageComponent {
+  policyText = '';
+
+  constructor(private readonly http: HttpClient) {
+    this.http.get<any>(`${API}/company`).subscribe({
+      next: (company) => { if (company && company.cancellationPolicyText) this.policyText = company.cancellationPolicyText; },
+      error: () => {}
+    });
+  }
+
+  get paragraphs(): string[] {
+    return this.policyText.split(/\n+/).filter((p) => p.trim());
+  }
 }

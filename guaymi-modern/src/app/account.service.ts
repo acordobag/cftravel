@@ -10,6 +10,8 @@ const API_URL = environment.apiUrl;
 export interface AccountReservation {
   id: number;
   message: string;
+  status?: string;
+  companyNotes?: string;
   createdAt: string;
   shuttles: Array<{
     id: number;
@@ -22,14 +24,6 @@ export interface AccountReservation {
   }>;
 }
 
-export interface AccountMessage {
-  id: number;
-  title: string;
-  body: string;
-  kind: string;
-  read: boolean;
-  createdAt: string;
-}
 
 @Injectable({ providedIn: 'root' })
 export class AccountService {
@@ -45,11 +39,22 @@ export class AccountService {
     return this.http.get<AccountReservation[]>(`${API_URL}/account/reservations`, this.auth.authOptions());
   }
 
-  getMessages() {
-    return this.http.get<AccountMessage[]>(`${API_URL}/account/messages`, this.auth.authOptions());
-  }
-
   submitReview(review: { name: string; location: string; route: string; rating: number; comment: string }) {
     return this.http.post(`${API_URL}/testimonial`, review, this.auth.authOptions());
+  }
+
+  getCancelPreview(reservationId: number) {
+    return this.http.get<{ canCancel: boolean; fee: number; feePercent: number; minHours: number; hoursUntil: number }>(
+      `${API_URL}/reservation/${reservationId}/cancel-preview`,
+      this.auth.authOptions()
+    );
+  }
+
+  cancelReservation(reservationId: number) {
+    return this.http.post<{ success: boolean; fee: number; feePercent: number }>(
+      `${API_URL}/reservation/${reservationId}/cancel`,
+      {},
+      this.auth.authOptions()
+    );
   }
 }

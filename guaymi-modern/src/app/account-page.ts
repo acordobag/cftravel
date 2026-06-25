@@ -3,12 +3,12 @@ import { AfterViewInit, Component, ElementRef, NgZone, OnInit, ViewChild } from 
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
-import { AccountMessage, AccountReservation, AccountService } from './account.service';
+import { AccountReservation, AccountService } from './account.service';
 import { AuthService } from './auth.service';
 import { I18nService } from './i18n.service';
 import { PhoneFieldComponent } from './phone-field.component';
 
-type AccountTab = 'profile' | 'reservations' | 'messages' | 'review';
+type AccountTab = 'profile' | 'reservations' | 'review';
 
 @Component({
   standalone: true,
@@ -28,12 +28,30 @@ type AccountTab = 'profile' | 'reservations' | 'messages' | 'review';
         <nav class="admin-tabs admin-tabs-buttons account-tabs" aria-label="Account sections">
           <button type="button" [class.active]="activeTab === 'profile'" (click)="activeTab = 'profile'">{{ i18n.tx().account.tabProfile }}</button>
           <button type="button" [class.active]="activeTab === 'reservations'" (click)="activeTab = 'reservations'">{{ i18n.tx().account.tabReservations }}</button>
-          <button type="button" [class.active]="activeTab === 'messages'" (click)="activeTab = 'messages'">{{ i18n.tx().account.tabMessages }}</button>
           <button type="button" [class.active]="activeTab === 'review'" [disabled]="!hasCompletedShuttles" [title]="hasCompletedShuttles ? '' : i18n.tx().account.reviewLockedTip" (click)="hasCompletedShuttles && (activeTab = 'review')">{{ i18n.tx().account.tabReview }}</button>
         </nav>
 
         <p class="success" *ngIf="message">{{ message }}</p>
         <p class="error" *ngIf="error">{{ error }}</p>
+
+        <div class="cancel-modal-overlay" *ngIf="cancelModal" (click)="closeCancelModal()">
+          <div class="cancel-modal" (click)="$event.stopPropagation()">
+            <h3>{{ i18n.tx().account.cancelModalTitle }}</h3>
+            <p *ngIf="cancelPreview && cancelPreview.canCancel">
+              {{ i18n.tx().account.cancelModalFeeMsg.replace('{fee}', cancelPreview.fee.toFixed(2)).replace('{pct}', cancelPreview.feePercent.toString()) }}
+            </p>
+            <p *ngIf="cancelPreview && !cancelPreview.canCancel">
+              {{ i18n.tx().account.cancelModalTooLate.replace('{hours}', cancelPreview.minHours.toString()) }}
+            </p>
+            <p *ngIf="!cancelPreview">{{ i18n.tx().account.cancelModalLoading }}</p>
+            <div class="cancel-modal-actions">
+              <button type="button" class="secondary-action" (click)="closeCancelModal()">{{ i18n.tx().account.cancelModalClose }}</button>
+              <button type="button" class="remove-transfer" (click)="confirmCancel()" *ngIf="cancelPreview && cancelPreview.canCancel" [disabled]="cancellingId !== null">
+                {{ i18n.tx().account.cancelModalConfirm }}
+              </button>
+            </div>
+          </div>
+        </div>
 
         <section class="account-grid" *ngIf="activeTab === 'profile'">
           <article class="account-card account-summary-card">
@@ -88,24 +106,18 @@ type AccountTab = 'profile' | 'reservations' | 'messages' | 'review';
                 <strong class="money">{{ shuttle.rate | currency:'USD':'symbol':'1.2-2' }}</strong>
               </div>
               <p *ngIf="reservation.message">{{ reservation.message }}</p>
-            </article>
-          </div>
-        </section>
-
-        <section class="account-card" *ngIf="activeTab === 'messages'">
-          <div class="account-card-heading">
-            <p class="eyebrow">{{ i18n.tx().account.messagesEyebrow }}</p>
-            <h2>{{ i18n.tx().account.messagesHeading }}</h2>
-          </div>
-
-          <div class="message-list">
-            <article class="message-record" *ngFor="let item of messages">
-              <div>
-                <span>{{ item.kind || 'info' }}</span>
-                <h3>{{ item.title }}</h3>
-                <p>{{ item.body }}</p>
+              <p class="reservation-company-note" *ngIf="reservation.companyNotes"><strong>Note from our team:</strong> {{ reservation.companyNotes }}</p>
+              <div class="reservation-record-actions" *ngIf="!reservation.status || reservation.status === 'pending'">
+                <button type="button" class="cancel-reservation-btn" (click)="openCancelModal(reservation.id)" [disabled]="cancellingId === reservation.id">
+                  {{ cancellingId === reservation.id ? i18n.tx().account.cancelling : i18n.tx().account.cancelBtn }}
+                </button>
               </div>
-              <small>{{ item.createdAt | date:'mediumDate' }}</small>
+              <div class="reservation-status-badge reservation-status-confirmed" *ngIf="reservation.status === 'confirmed'">
+                {{ i18n.tx().account.confirmedBadge }}
+              </div>
+              <div class="reservation-status-badge reservation-status-cancelled" *ngIf="reservation.status === 'cancelled'">
+                {{ i18n.tx().account.cancelledBadge }}
+              </div>
             </article>
           </div>
         </section>
@@ -164,14 +176,17 @@ export class AccountPageComponent implements OnInit, AfterViewInit {
   @ViewChild('reviewLocationInput') reviewLocationInput?: ElementRef<HTMLInputElement>;
 
   activeTab: AccountTab = 'profile';
-  reservations: AccountReservation[] = [];
-  messages: AccountMessage[] = [];
+  reservations: (AccountReservation & { status?: string })[] = [];
   profile = { name: '', lastName: '', phone: '', email: '', password: '' };
   review = { name: '', location: '', route: '', rating: 5, comment: '' };
   reviewSent = false;
   loading = false;
   message = '';
   error = '';
+  cancelModal = false;
+  cancellingId: number | null = null;
+  cancelTargetId: number | null = null;
+  cancelPreview: { canCancel: boolean; fee: number; feePercent: number; minHours: number; hoursUntil: number } | null = null;
 
   constructor(
     private readonly account: AccountService,
@@ -220,7 +235,6 @@ export class AccountPageComponent implements OnInit, AfterViewInit {
     }
 
     this.loadReservations();
-    this.loadMessages();
   }
 
   saveProfile(): void {
@@ -292,6 +306,42 @@ export class AccountPageComponent implements OnInit, AfterViewInit {
     return routes;
   }
 
+  openCancelModal(reservationId: number): void {
+    this.cancelTargetId = reservationId;
+    this.cancelModal = true;
+    this.cancelPreview = null;
+    this.account.getCancelPreview(reservationId).subscribe({
+      next: (preview) => this.cancelPreview = preview,
+      error: () => this.closeCancelModal()
+    });
+  }
+
+  closeCancelModal(): void {
+    this.cancelModal = false;
+    this.cancelTargetId = null;
+    this.cancelPreview = null;
+  }
+
+  confirmCancel(): void {
+    if (!this.cancelTargetId) return;
+    this.cancellingId = this.cancelTargetId;
+    this.account.cancelReservation(this.cancelTargetId).subscribe({
+      next: () => {
+        const id = this.cancelTargetId;
+        const r = this.reservations.find((res) => res.id === id);
+        if (r) (r as any).status = 'cancelled';
+        this.cancellingId = null;
+        this.message = this.i18n.tx().account.cancelSuccess;
+        this.closeCancelModal();
+      },
+      error: (err) => {
+        this.cancellingId = null;
+        this.error = err.error?.message || 'Could not cancel reservation.';
+        this.closeCancelModal();
+      }
+    });
+  }
+
   private loadReservations(): void {
     this.account.getReservations().subscribe({
       next: (reservations) => {
@@ -304,10 +354,4 @@ export class AccountPageComponent implements OnInit, AfterViewInit {
     });
   }
 
-  private loadMessages(): void {
-    this.account.getMessages().subscribe({
-      next: (messages) => this.messages = messages,
-      error: (error) => this.error = error.error?.message || 'Could not load messages.'
-    });
-  }
 }

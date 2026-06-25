@@ -2,6 +2,7 @@ import express from 'express'
 
 import Place from '../controllers/place.controller';
 import Reservation from '../controllers/reservation.controller';
+import BookingPolicyController from '../controllers/booking-policy.controller';
 import Testimonial from '../controllers/testimonial.controller';
 import HeroImage from '../controllers/hero-image.controller';
 import Auth from '../controllers/auth.controller';
@@ -223,6 +224,11 @@ router.route('/admin/reservation/:id')
         AdminMaintenance.deleteReservation(req, res, next);
     });
 
+router.route('/admin/reservation/:id/confirm')
+    .post(requirePrivileged, function (req, res, next) {
+        AdminMaintenance.confirmReservation(req, res, next);
+    });
+
 router.route('/admin/shuttle/:id')
     .put(requirePrivileged, function (req, res, next) {
         AdminMaintenance.updateShuttle(req, res, next);
@@ -315,6 +321,24 @@ router.route('/admin/users/:id')
 router.route('/reservation')
     .post((req, res, next) => {
         Reservation.save(req, res, next);
+    });
+
+router.route('/reservation/:id/cancel-preview')
+    .get(requireAuth, (req, res, next) => {
+        Reservation.cancelPreview(req, res, next);
+    });
+
+router.route('/reservation/:id/cancel')
+    .post(requireAuth, (req, res, next) => {
+        Reservation.cancel(req, res, next);
+    });
+
+router.route('/admin/booking-policy')
+    .get(requirePrivileged, (req, res, next) => {
+        BookingPolicyController.get(req, res, next);
+    })
+    .put(requirePrivileged, (req, res, next) => {
+        BookingPolicyController.update(req, res, next);
     });
 
 

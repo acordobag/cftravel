@@ -332,7 +332,11 @@ export class TravelStateService {
         date: `${quote.date}T${quote.time}`,
         persons: quote.passengers,
         rate: quote.total,
-        distance: quote.routeDistance
+        distance: quote.routeDistance,
+        infantCount: quote.infantCount || 0,
+        toddlerCount: quote.toddlerCount || 0,
+        preschoolCount: quote.preschoolCount || 0,
+        childCount: quote.childCount || 0
       }))
     };
 
@@ -457,7 +461,12 @@ export class TravelStateService {
       vehicleSurcharge: 0,
       total: 0,
       isCalculating: false,
-      rateError: ''
+      rateError: '',
+      infantCount: 0,
+      toddlerCount: 0,
+      preschoolCount: 0,
+      childCount: 0,
+      showChildren: false
     };
   }
 

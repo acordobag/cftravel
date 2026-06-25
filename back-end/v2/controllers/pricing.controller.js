@@ -3,6 +3,7 @@ import FixedRoutePrice from '../models/fixed-route-price.model'
 import Place from '../models/place.model'
 import PricingRule from '../models/pricing-rule.model'
 import ServicePricingRule from '../models/service-pricing-rule.model'
+import BookingPolicy from '../models/booking-policy.model'
 
 const fixedInclude = [
   { model: Place, as: 'departing' },
@@ -29,8 +30,9 @@ const Pricing = {
         where: { active: true },
         order: [['sortOrder', 'ASC'], ['id', 'ASC']]
       })
+      const bookingPolicy = await BookingPolicy.findOne({ where: { isDefault: true } })
 
-      res.status(200).json({ pricingRules, fixedRoutePrices, serviceRules, carTypes })
+      res.status(200).json({ pricingRules, fixedRoutePrices, serviceRules, carTypes, bookingPolicy })
     } catch (e) {
       next(e)
     }
@@ -42,7 +44,8 @@ const Pricing = {
       const fixedRoutePrices = await FixedRoutePrice.findAll({ include: fixedInclude, order: [['id', 'ASC']] })
       const serviceRules = await ServicePricingRule.findAll({ order: [['sortOrder', 'ASC'], ['id', 'ASC']] })
       const carTypes = await CarType.findAll({ order: [['sortOrder', 'ASC'], ['id', 'ASC']] })
-      res.status(200).json({ pricingRules, fixedRoutePrices, serviceRules, carTypes })
+      const bookingPolicy = await BookingPolicy.findOne({ where: { isDefault: true } })
+      res.status(200).json({ pricingRules, fixedRoutePrices, serviceRules, carTypes, bookingPolicy })
     } catch (e) {
       next(e)
     }

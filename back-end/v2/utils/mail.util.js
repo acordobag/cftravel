@@ -40,41 +40,74 @@ function brevoSend(apiKey, payload) {
 function wrap(title, bodyHtml) {
   return `<!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title></head>
-<body style="margin:0;padding:0;background:#f4f7fb;font-family:Arial,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f7fb;padding:32px 0;">
-    <tr><td align="center">
-      <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.08);">
-        <tr><td style="background:${BRAND_COLOR};padding:28px 40px;">
-          <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:700;">${BRAND}</h1>
-          <p style="margin:6px 0 0;color:rgba(255,255,255,.8);font-size:14px;">Private shuttle transportation · Costa Rica</p>
-        </td></tr>
-        <tr><td style="padding:36px 40px;">
-          ${bodyHtml}
-        </td></tr>
-        <tr><td style="background:#f4f7fb;padding:20px 40px;text-align:center;">
-          <p style="margin:0;color:#8a9ab0;font-size:12px;">${BRAND} · Costa Rica · <a href="https://crtravelservice.com" style="color:${BRAND_COLOR};text-decoration:none;">crtravelservice.com</a></p>
-        </td></tr>
-      </table>
-    </td></tr>
-  </table>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="x-apple-disable-message-reformatting">
+  <title>${title}</title>
+  <style>
+    body { margin:0; padding:0; background:#f4f7fb; font-family:Arial,sans-serif; -webkit-text-size-adjust:100%; }
+    .wrapper { background:#f4f7fb; padding:24px 12px; }
+    .card { background:#ffffff; border-radius:12px; overflow:hidden; max-width:560px; margin:0 auto; }
+    .header { background:${BRAND_COLOR}; padding:24px 28px; }
+    .header h1 { margin:0; color:#ffffff; font-size:20px; font-weight:700; }
+    .header p { margin:4px 0 0; color:rgba(255,255,255,.8); font-size:13px; }
+    .body { padding:28px 28px; }
+    .footer { background:#f4f7fb; padding:16px 28px; text-align:center; }
+    .footer p { margin:0; color:#8a9ab0; font-size:11px; }
+    .footer a { color:${BRAND_COLOR}; text-decoration:none; }
+    .btn { display:inline-block; background:${BRAND_COLOR}; color:#ffffff !important; padding:13px 28px; border-radius:8px; text-decoration:none; font-weight:700; font-size:15px; margin-top:4px; }
+    .shuttle-block { border:1px solid #eef1f6; border-radius:8px; margin-bottom:8px; padding:14px 16px; }
+    .shuttle-block .route { font-size:15px; font-weight:700; color:#1a2636; margin:0 0 6px; }
+    .shuttle-block .meta { font-size:13px; color:#607086; margin:0; }
+    .info-row { display:flex; padding:6px 0; border-bottom:1px solid #f0f3f7; }
+    .info-label { font-size:13px; color:#8a9ab0; min-width:110px; }
+    .info-value { font-size:14px; color:#1a2636; font-weight:600; }
+    .highlight-box { background:#fff8e1; border:1px solid #ffe082; border-radius:8px; padding:18px 20px; margin-bottom:24px; }
+    .highlight-box p { margin:0 0 10px; font-size:14px; color:#607086; line-height:1.6; }
+    .highlight-box p:first-child { font-weight:700; color:#1a2636; margin-bottom:12px; }
+    .cred-email { font-size:14px; font-weight:700; color:#1a2636; word-break:break-all; }
+    .cred-pass { font-size:24px; font-weight:700; color:${BRAND_COLOR}; letter-spacing:4px; }
+    @media only screen and (max-width:480px) {
+      .wrapper { padding:12px 8px !important; }
+      .header { padding:20px 20px !important; }
+      .body { padding:22px 20px !important; }
+      .footer { padding:14px 20px !important; }
+      .btn { display:block !important; text-align:center !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="card">
+      <div class="header">
+        <h1>${BRAND}</h1>
+        <p>Private shuttle transportation &middot; Costa Rica</p>
+      </div>
+      <div class="body">
+        ${bodyHtml}
+      </div>
+      <div class="footer">
+        <p>${BRAND} &middot; Costa Rica &middot; <a href="https://crtravelservice.com">crtravelservice.com</a></p>
+      </div>
+    </div>
+  </div>
 </body>
 </html>`
 }
 
-function shuttleRows(shuttles) {
+function shuttleBlocks(shuttles) {
   if (!shuttles || !shuttles.length) return ''
-  return shuttles.map((s, i) => {
+  return shuttles.map(function (s, i) {
     const from = (s.departing && s.departing.name) || s.departingId || '—'
     const to = (s.destination && s.destination.name) || s.destinationId || '—'
     const date = s.date ? new Date(s.date).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) : '—'
-    return `<tr style="border-bottom:1px solid #eef1f6;">
-      <td style="padding:10px 0;color:#607086;font-size:13px;">Transfer ${i + 1}</td>
-      <td style="padding:10px 0;font-size:14px;font-weight:600;">${from} → ${to}</td>
-      <td style="padding:10px 12px;font-size:13px;color:#607086;">${date}</td>
-      <td style="padding:10px 0;font-size:13px;color:#607086;">${s.persons || 1} pax</td>
-    </tr>`
+    return '<div class="shuttle-block"><p class="route">Transfer ' + (i + 1) + ': ' + from + ' &rarr; ' + to + '</p><p class="meta">' + date + ' &nbsp;&bull;&nbsp; ' + (s.persons || 1) + ' passenger' + ((s.persons || 1) !== 1 ? 's' : '') + '</p></div>'
   }).join('')
+}
+
+function infoRow(label, value) {
+  return '<div class="info-row"><span class="info-label">' + label + '</span><span class="info-value">' + value + '</span></div>'
 }
 
 async function send(to, subject, html) {
@@ -116,14 +149,15 @@ const Mail = {
   async emailVerification(user, code) {
     const subject = `Your ${BRAND} verification code`
     const html = wrap(subject, `
-      <h2 style="margin:0 0 8px;color:#1a2636;font-size:20px;">Verify your email</h2>
+      <h2 style="margin:0 0 8px;color:#1a2636;font-size:20px;font-weight:800;">Verify your email</h2>
       <p style="color:#607086;font-size:15px;line-height:1.6;margin:0 0 24px;">
         Hi ${user.name}, use the code below to complete your account registration.
       </p>
-      <div style="text-align:center;margin:0 0 28px;">
-        <span style="display:inline-block;background:#f4f7fb;border:2px dashed ${BRAND_COLOR};border-radius:12px;padding:18px 40px;font-size:36px;font-weight:700;letter-spacing:10px;color:#1a2636;">${code}</span>
+      <div style="text-align:center;margin:0 0 28px;padding:24px 16px;background:#f4f7fb;border-radius:12px;">
+        <p style="margin:0 0 8px;font-size:12px;color:#8a9ab0;text-transform:uppercase;letter-spacing:1px;">Your verification code</p>
+        <span style="font-size:40px;font-weight:800;letter-spacing:10px;color:#1a2636;">${code}</span>
       </div>
-      <p style="color:#8a9ab0;font-size:13px;margin:0;">This code expires after 30 minutes. If you didn't request this, ignore this email.</p>
+      <p style="color:#8a9ab0;font-size:13px;margin:0;text-align:center;">Expires in 30 minutes &nbsp;&bull;&nbsp; If you didn't request this, ignore this email.</p>
     `)
     await send(user.email, subject, html)
   },
@@ -132,39 +166,30 @@ const Mail = {
     const subject = `Reservation #${reservation.id} confirmed — your account details`
     const shuttles = (reservation && reservation.shuttles) || []
     const html = wrap(subject, `
-      <h2 style="margin:0 0 8px;color:#1a2636;font-size:20px;">Your transfer is booked, ${user.name}!</h2>
-      <p style="color:#607086;font-size:15px;line-height:1.6;margin:0 0 28px;">
-        We received your booking request and our team will confirm the driver and vehicle shortly.
+      <h2 style="margin:0 0 8px;color:#1a2636;font-size:20px;font-weight:800;">Your transfer is booked, ${user.name}!</h2>
+      <p style="color:#607086;font-size:14px;line-height:1.6;margin:0 0 24px;">
+        We received your request. Our team will confirm the driver and vehicle shortly.
       </p>
 
-      <p style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#8a9ab0;margin:0 0 10px;">Reservation #${reservation.id}</p>
-      <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #eef1f6;border-radius:8px;border-collapse:collapse;margin-bottom:28px;">
-        <thead><tr style="background:#f7f9fc;">
-          <th style="padding:10px 12px;text-align:left;font-size:12px;color:#8a9ab0;text-transform:uppercase;letter-spacing:.5px;">Route</th>
-          <th style="padding:10px 12px;text-align:left;font-size:12px;color:#8a9ab0;text-transform:uppercase;letter-spacing:.5px;">Date & time</th>
-          <th style="padding:10px 12px;text-align:left;font-size:12px;color:#8a9ab0;text-transform:uppercase;letter-spacing:.5px;">Pax</th>
-        </tr></thead>
-        <tbody>${shuttles.map(function (s, i) {
-          const from = (s.departing && s.departing.name) || '—'
-          const to = (s.destination && s.destination.name) || '—'
-          const date = s.date ? new Date(s.date).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) : '—'
-          return '<tr style="border-top:1px solid #eef1f6;"><td style="padding:10px 12px;font-size:14px;font-weight:600;">' + from + ' → ' + to + '</td><td style="padding:10px 12px;font-size:13px;color:#607086;">' + date + '</td><td style="padding:10px 12px;font-size:13px;color:#607086;">' + (s.persons || 1) + ' pax</td></tr>'
-        }).join('')}</tbody>
-      </table>
+      <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#8a9ab0;margin:0 0 10px;">Reservation #${reservation.id}</p>
+      ${shuttleBlocks(shuttles)}
+      ${reservation.message ? '<p style="background:#f7f9fc;border-radius:8px;padding:12px 14px;color:#607086;font-size:13px;margin:12px 0 0;"><strong>Notes:</strong> ' + reservation.message + '</p>' : ''}
 
-      <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:8px;padding:20px 24px;margin-bottom:28px;">
-        <p style="margin:0 0 12px;font-size:14px;font-weight:700;color:#1a2636;">Your account has been created automatically</p>
-        <p style="margin:0 0 16px;font-size:14px;color:#607086;line-height:1.6;">Use these credentials to log in and track your reservation. You will be asked to set a new password on your first login.</p>
-        <table cellpadding="0" cellspacing="0">
-          <tr><td style="padding:4px 0;font-size:13px;color:#607086;width:130px;">Email</td><td style="font-size:14px;font-weight:700;color:#1a2636;">${user.email}</td></tr>
-          <tr><td style="padding:4px 0;font-size:13px;color:#607086;">Temporary password</td><td style="font-size:18px;font-weight:700;color:${BRAND_COLOR};letter-spacing:3px;">${tempPassword}</td></tr>
-        </table>
+      <div style="height:1px;background:#eef1f6;margin:24px 0;"></div>
+
+      <div class="highlight-box">
+        <p>Your account was created automatically</p>
+        <p>Use these credentials to log in and track your reservation. You will be asked to set a new password on first login.</p>
+        <p style="margin:0 0 4px;font-size:12px;color:#8a9ab0;text-transform:uppercase;letter-spacing:.5px;">Email</p>
+        <p class="cred-email" style="margin:0 0 14px;">${user.email}</p>
+        <p style="margin:0 0 4px;font-size:12px;color:#8a9ab0;text-transform:uppercase;letter-spacing:.5px;">Temporary password</p>
+        <p class="cred-pass" style="margin:0;">${tempPassword}</p>
       </div>
 
       <p style="margin:0 0 20px;font-size:14px;color:#607086;line-height:1.6;">
-        Once logged in you can view your reservation details, trip updates, and messages from our team.
+        Once logged in you can view reservation details, trip updates, and messages from our team.
       </p>
-      <a href="${settings.clientUrl}/login" style="display:inline-block;background:${BRAND_COLOR};color:#fff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;">Log in &amp; view your reservation</a>
+      <a href="${settings.clientUrl}/login" class="btn">Log in &amp; view your reservation</a>
     `)
     await send(user.email, subject, html)
   },
@@ -172,11 +197,11 @@ const Mail = {
   async welcomeCustomer(user) {
     const subject = `Welcome to ${BRAND}`
     const html = wrap(subject, `
-      <h2 style="margin:0 0 8px;color:#1a2636;font-size:20px;">Welcome, ${user.name}!</h2>
-      <p style="color:#607086;font-size:15px;line-height:1.6;margin:0 0 24px;">
+      <h2 style="margin:0 0 8px;color:#1a2636;font-size:20px;font-weight:800;">Welcome, ${user.name}!</h2>
+      <p style="color:#607086;font-size:14px;line-height:1.6;margin:0 0 24px;">
         Your account is ready. You can now book private shuttles, track your reservations, and leave reviews from your account page.
       </p>
-      <a href="${settings.clientUrl}" style="display:inline-block;background:${BRAND_COLOR};color:#fff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;">Go to your account</a>
+      <a href="${settings.clientUrl}" class="btn">Go to your account</a>
     `)
     await send(user.email, subject, html)
   },
@@ -185,21 +210,14 @@ const Mail = {
     const subject = `Reservation #${reservation.id} received — ${BRAND}`
     const shuttles = reservation.shuttles || []
     const html = wrap(subject, `
-      <h2 style="margin:0 0 8px;color:#1a2636;font-size:20px;">Your transfer request is confirmed</h2>
-      <p style="color:#607086;font-size:15px;line-height:1.6;margin:0 0 24px;">
-        Hi ${user.name}, we received your booking request. Our team will review the details and send you a final confirmation with the driver and vehicle assignment.
+      <h2 style="margin:0 0 8px;color:#1a2636;font-size:20px;font-weight:800;">Transfer request confirmed</h2>
+      <p style="color:#607086;font-size:14px;line-height:1.6;margin:0 0 24px;">
+        Hi ${user.name}, we received your booking. Our team will send you a final confirmation with the driver and vehicle assignment.
       </p>
-      <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #eef1f6;border-radius:8px;border-collapse:collapse;margin-bottom:24px;">
-        <thead><tr style="background:#f7f9fc;">
-          <th style="padding:10px 0;text-align:left;font-size:12px;color:#8a9ab0;text-transform:uppercase;letter-spacing:.5px;"></th>
-          <th style="padding:10px 0;text-align:left;font-size:12px;color:#8a9ab0;text-transform:uppercase;letter-spacing:.5px;">Route</th>
-          <th style="padding:10px 12px;text-align:left;font-size:12px;color:#8a9ab0;text-transform:uppercase;letter-spacing:.5px;">Date & time</th>
-          <th style="padding:10px 0;text-align:left;font-size:12px;color:#8a9ab0;text-transform:uppercase;letter-spacing:.5px;">Pax</th>
-        </tr></thead>
-        <tbody>${shuttleRows(shuttles)}</tbody>
-      </table>
-      ${reservation.message ? `<p style="background:#f7f9fc;border-radius:8px;padding:14px;color:#607086;font-size:14px;margin:0 0 24px;"><strong>Notes:</strong> ${reservation.message}</p>` : ''}
-      <p style="color:#607086;font-size:14px;margin:0;">Questions? Reply to this email or reach us on WhatsApp.</p>
+      <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#8a9ab0;margin:0 0 10px;">Reservation #${reservation.id}</p>
+      ${shuttleBlocks(shuttles)}
+      ${reservation.message ? '<p style="background:#f7f9fc;border-radius:8px;padding:12px 14px;color:#607086;font-size:13px;margin:12px 0 24px;"><strong>Notes:</strong> ' + reservation.message + '</p>' : '<div style="height:24px;"></div>'}
+      <p style="color:#607086;font-size:13px;margin:0;">Questions? Reply to this email or reach us on WhatsApp.</p>
     `)
     await send(user.email, subject, html)
   },
@@ -209,24 +227,35 @@ const Mail = {
     const subject = `New reservation #${reservation.id} — ${user.name} ${user.lastName || ''}`
     const shuttles = reservation.shuttles || []
     const html = wrap(subject, `
-      <h2 style="margin:0 0 8px;color:#1a2636;font-size:20px;">New booking request</h2>
-      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
-        <tr><td style="padding:6px 0;color:#607086;font-size:13px;width:120px;">Customer</td><td style="font-size:14px;font-weight:600;">${user.name} ${user.lastName || ''}</td></tr>
-        <tr><td style="padding:6px 0;color:#607086;font-size:13px;">Email</td><td style="font-size:14px;"><a href="mailto:${user.email}" style="color:${BRAND_COLOR};">${user.email}</a></td></tr>
-        <tr><td style="padding:6px 0;color:#607086;font-size:13px;">Phone</td><td style="font-size:14px;">${user.phone || '—'}</td></tr>
-      </table>
-      <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #eef1f6;border-radius:8px;border-collapse:collapse;margin-bottom:20px;">
-        <thead><tr style="background:#f7f9fc;">
-          <th style="padding:10px 0;text-align:left;font-size:12px;color:#8a9ab0;text-transform:uppercase;letter-spacing:.5px;"></th>
-          <th style="padding:10px 0;text-align:left;font-size:12px;color:#8a9ab0;text-transform:uppercase;letter-spacing:.5px;">Route</th>
-          <th style="padding:10px 12px;text-align:left;font-size:12px;color:#8a9ab0;text-transform:uppercase;letter-spacing:.5px;">Date & time</th>
-          <th style="padding:10px 0;text-align:left;font-size:12px;color:#8a9ab0;text-transform:uppercase;letter-spacing:.5px;">Pax</th>
-        </tr></thead>
-        <tbody>${shuttleRows(shuttles)}</tbody>
-      </table>
-      ${reservation.message ? `<p style="background:#f7f9fc;border-radius:8px;padding:14px;color:#607086;font-size:14px;margin:0 0 20px;"><strong>Notes:</strong> ${reservation.message}</p>` : ''}
+      <h2 style="margin:0 0 16px;color:#1a2636;font-size:20px;font-weight:800;">New booking request</h2>
+      ${infoRow('Customer', user.name + ' ' + (user.lastName || ''))}
+      ${infoRow('Email', '<a href="mailto:' + user.email + '" style="color:' + BRAND_COLOR + ';">' + user.email + '</a>')}
+      ${infoRow('Phone', user.phone || '—')}
+      <div style="height:1px;background:#eef1f6;margin:16px 0;"></div>
+      <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#8a9ab0;margin:0 0 10px;">Transfers</p>
+      ${shuttleBlocks(shuttles)}
+      ${reservation.message ? '<p style="background:#f7f9fc;border-radius:8px;padding:12px 14px;color:#607086;font-size:13px;margin:12px 0 0;"><strong>Notes:</strong> ' + reservation.message + '</p>' : ''}
     `)
     await send(companyEmail, subject, html)
+  },
+
+  async reservationConfirmedByCompany(reservation, user) {
+    const subject = `Reservation #${reservation.id} confirmed — ${BRAND}`
+    const shuttles = reservation.shuttles || []
+    const html = wrap(subject, `
+      <h2 style="margin:0 0 8px;color:#1a2636;font-size:20px;font-weight:800;">Your reservation is confirmed, ${user.name}!</h2>
+      <p style="color:#607086;font-size:14px;line-height:1.6;margin:0 0 24px;">
+        Great news — our team has reviewed your transfer request and everything is set. Your driver and vehicle will be ready for your pickup.
+      </p>
+      <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#8a9ab0;margin:0 0 10px;">Reservation #${reservation.id}</p>
+      ${shuttleBlocks(shuttles)}
+      ${reservation.message ? '<p style="background:#f7f9fc;border-radius:8px;padding:12px 14px;color:#607086;font-size:13px;margin:12px 0 0;"><strong>Your notes:</strong> ' + reservation.message + '</p>' : ''}
+      ${reservation.companyNotes ? '<div style="background:#eef8f5;border:1px solid #b2e0d0;border-radius:8px;padding:14px 16px;margin-top:16px;"><p style="margin:0 0 4px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#0b8f6a;">Note from our team</p><p style="margin:0;font-size:14px;color:#1a2636;line-height:1.6;">' + reservation.companyNotes + '</p></div>' : ''}
+      <div style="height:1px;background:#eef1f6;margin:24px 0;"></div>
+      <p style="color:#607086;font-size:13px;margin:0 0 20px;line-height:1.6;">Questions or changes? Reply to this email or reach us on WhatsApp before your travel date.</p>
+      <a href="${settings.clientUrl}/account" class="btn">View your reservation</a>
+    `)
+    await send(user.email, subject, html)
   },
 
   async reviewSubmitted(testimonial, user) {
@@ -234,15 +263,14 @@ const Mail = {
     const stars = '★'.repeat(testimonial.rating || 5) + '☆'.repeat(5 - (testimonial.rating || 5))
     const subject = `New review from ${testimonial.name || user} — ${testimonial.rating}/5`
     const html = wrap(subject, `
-      <h2 style="margin:0 0 8px;color:#1a2636;font-size:20px;">New review submitted</h2>
-      <p style="color:#f59e0b;font-size:22px;margin:0 0 12px;letter-spacing:2px;">${stars}</p>
-      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
-        <tr><td style="padding:6px 0;color:#607086;font-size:13px;width:100px;">Name</td><td style="font-size:14px;font-weight:600;">${testimonial.name}</td></tr>
-        <tr><td style="padding:6px 0;color:#607086;font-size:13px;">Location</td><td style="font-size:14px;">${testimonial.location || '—'}</td></tr>
-        <tr><td style="padding:6px 0;color:#607086;font-size:13px;">Route</td><td style="font-size:14px;">${testimonial.route || '—'}</td></tr>
-      </table>
-      <blockquote style="border-left:4px solid ${BRAND_COLOR};margin:0 0 20px;padding:12px 16px;background:#f7f9fc;border-radius:0 8px 8px 0;color:#1a2636;font-size:15px;line-height:1.6;">"${testimonial.comment}"</blockquote>
-      <p style="color:#607086;font-size:14px;margin:0;">Review is pending approval — activate it from the admin panel.</p>
+      <h2 style="margin:0 0 16px;color:#1a2636;font-size:20px;font-weight:800;">New review submitted</h2>
+      <p style="color:#f59e0b;font-size:26px;margin:0 0 16px;letter-spacing:2px;">${stars}</p>
+      ${infoRow('Name', testimonial.name)}
+      ${infoRow('Location', testimonial.location || '—')}
+      ${infoRow('Route', testimonial.route || '—')}
+      <div style="height:1px;background:#eef1f6;margin:16px 0;"></div>
+      <blockquote style="border-left:4px solid ${BRAND_COLOR};margin:0 0 16px;padding:12px 16px;background:#f7f9fc;border-radius:0 8px 8px 0;color:#1a2636;font-size:14px;line-height:1.6;">"${testimonial.comment}"</blockquote>
+      <p style="color:#607086;font-size:13px;margin:0;">Review is pending approval — activate it from the admin panel.</p>
     `)
     await send(companyEmail, subject, html)
   },
@@ -252,13 +280,12 @@ const Mail = {
   async contactMessage(message, companyEmail) {
     const subject = `New contact message from ${message.name}`
     const html = wrap(subject, `
-      <h2 style="margin:0 0 8px;color:#1a2636;font-size:20px;">New contact message</h2>
-      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
-        <tr><td style="padding:6px 0;color:#607086;font-size:13px;width:100px;">Name</td><td style="font-size:14px;font-weight:600;">${message.name}</td></tr>
-        <tr><td style="padding:6px 0;color:#607086;font-size:13px;">Email</td><td style="font-size:14px;"><a href="mailto:${message.email}" style="color:${BRAND_COLOR};">${message.email}</a></td></tr>
-        <tr><td style="padding:6px 0;color:#607086;font-size:13px;">Phone</td><td style="font-size:14px;">${message.phone || '—'}</td></tr>
-      </table>
-      <blockquote style="border-left:4px solid ${BRAND_COLOR};margin:0;padding:12px 16px;background:#f7f9fc;border-radius:0 8px 8px 0;color:#1a2636;font-size:15px;line-height:1.6;">${message.text}</blockquote>
+      <h2 style="margin:0 0 16px;color:#1a2636;font-size:20px;font-weight:800;">New contact message</h2>
+      ${infoRow('Name', message.name)}
+      ${infoRow('Email', '<a href="mailto:' + message.email + '" style="color:' + BRAND_COLOR + ';">' + message.email + '</a>')}
+      ${infoRow('Phone', message.phone || '—')}
+      <div style="height:1px;background:#eef1f6;margin:16px 0;"></div>
+      <blockquote style="border-left:4px solid ${BRAND_COLOR};margin:0;padding:12px 16px;background:#f7f9fc;border-radius:0 8px 8px 0;color:#1a2636;font-size:14px;line-height:1.6;">${message.text}</blockquote>
     `)
     await send(companyEmail, subject, html)
   }

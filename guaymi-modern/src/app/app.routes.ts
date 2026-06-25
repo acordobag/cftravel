@@ -11,6 +11,7 @@ import {
   DestinationsPageComponent,
   FleetPageComponent,
   HomePageComponent,
+  PolicyPageComponent,
   ReservationPageComponent,
   ServicesPageComponent,
   TestimonialsPageComponent
@@ -26,6 +27,7 @@ export const routes: Routes = [
   { path: 'reservation', component: ReservationPageComponent },
   { path: 'about-us', component: AboutPageComponent },
   { path: 'contact-us', component: ContactPageComponent },
+  { path: 'policy', component: PolicyPageComponent },
   { path: 'login', component: LoginPageComponent },
   { path: 'signup', component: SignupPageComponent },
   { path: 'change-password', component: ChangePasswordPageComponent, canActivate: [authGuard] },

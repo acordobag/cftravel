@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, signal } from '@angular/core';
 
-import { CarType } from './models';
+import { BookingPolicy, CarType } from './models';
 
 import { environment } from '../environments/environment';
 const API_URL = environment.apiUrl;
@@ -43,6 +43,7 @@ export interface PricingConfig {
   fixedRoutePrices: FixedRoutePrice[];
   serviceRules: ServicePricingRule[];
   carTypes: CarType[];
+  bookingPolicy?: BookingPolicy;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -51,8 +52,11 @@ export class PricingService {
     pricingRules: this.defaultRateRules(),
     fixedRoutePrices: [],
     serviceRules: [],
-    carTypes: []
+    carTypes: [],
+    bookingPolicy: undefined
   });
+
+  readonly bookingPolicy = computed(() => this.pricingConfig().bookingPolicy);
 
   readonly carTypes = computed(() => this.pricingConfig().carTypes);
 
@@ -67,7 +71,8 @@ export class PricingService {
           pricingRules: config.pricingRules?.length ? config.pricingRules : this.defaultRateRules(),
           fixedRoutePrices: config.fixedRoutePrices || [],
           serviceRules: config.serviceRules || [],
-          carTypes: config.carTypes || []
+          carTypes: config.carTypes || [],
+          bookingPolicy: config.bookingPolicy
         });
       }
     });

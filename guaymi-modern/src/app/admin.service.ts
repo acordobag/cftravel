@@ -42,6 +42,7 @@ export interface AdminCompany {
   website?: string;
   logo?: string;
   isDefault?: boolean;
+  cancellationPolicyText?: string;
   phones?: AdminPhone[];
 }
 
@@ -72,6 +73,8 @@ export interface AdminShuttle {
 export interface AdminReservation {
   id: number;
   message: string;
+  companyNotes?: string;
+  status?: string;
   user?: AuthUser;
   shuttles: AdminShuttle[];
   createdAt?: string;
@@ -206,8 +209,12 @@ export class AdminService {
     return this.http.get<AdminReservation[]>(`${API_URL}/admin/reservation`, this.auth.authOptions());
   }
 
-  updateReservation(reservation: Pick<AdminReservation, 'id' | 'message'>) {
+  updateReservation(reservation: Pick<AdminReservation, 'id' | 'message' | 'companyNotes' | 'status'>) {
     return this.http.put<AdminReservation>(`${API_URL}/admin/reservation/${reservation.id}`, reservation, this.auth.authOptions());
+  }
+
+  confirmReservation(id: number, companyNotes: string) {
+    return this.http.post<AdminReservation>(`${API_URL}/admin/reservation/${id}/confirm`, { companyNotes }, this.auth.authOptions());
   }
 
   deleteReservation(id: number) {

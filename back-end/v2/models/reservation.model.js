@@ -5,7 +5,9 @@ const { sequelize, Sequelize } = db
 
 const model = () => {
     const Reservation = sequelize.define('reservation', {
-        message: Sequelize.STRING
+        message: Sequelize.STRING,
+        status: { type: Sequelize.STRING, defaultValue: 'pending' },
+        companyNotes: { type: Sequelize.TEXT, allowNull: true }
     })
     return Reservation
 }

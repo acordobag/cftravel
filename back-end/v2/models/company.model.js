@@ -14,7 +14,8 @@ const model = () => {
       isDefault: {
         type: Sequelize.BOOLEAN,
         defaultValue: false
-      }
+      },
+      cancellationPolicyText: { type: Sequelize.TEXT, allowNull: true }
     })
     return Company
 }
