@@ -11,10 +11,26 @@ export interface PriceRule {
   name: string;
   minDistance: number;
   maxDistance: number;
+  baseFare: number;
   pricePerKm: number;
+  operationsRatePerKm: number | null;
   discount: number;
   active: boolean;
   sortOrder: number;
+}
+
+export interface PricingZone {
+  id?: number;
+  code: string;
+  name: string;
+  originPlaceId: number;
+  oneWayPrice: number;
+  roundTripPrice: number | null;
+  notes: string;
+  requiresReview: boolean;
+  active: boolean;
+  sortOrder: number;
+  origin?: { id: number; name: string };
 }
 
 export interface FixedRoutePrice {
@@ -40,6 +56,7 @@ export interface ServicePricingRule {
 
 export interface PricingConfig {
   pricingRules: PriceRule[];
+  pricingZones: PricingZone[];
   fixedRoutePrices: FixedRoutePrice[];
   serviceRules: ServicePricingRule[];
   carTypes: CarType[];
@@ -50,6 +67,7 @@ export interface PricingConfig {
 export class PricingService {
   readonly pricingConfig = signal<PricingConfig>({
     pricingRules: this.defaultRateRules(),
+    pricingZones: [],
     fixedRoutePrices: [],
     serviceRules: [],
     carTypes: [],
@@ -69,6 +87,7 @@ export class PricingService {
       next: (config) => {
         this.pricingConfig.set({
           pricingRules: config.pricingRules?.length ? config.pricingRules : this.defaultRateRules(),
+          pricingZones: config.pricingZones || [],
           fixedRoutePrices: config.fixedRoutePrices || [],
           serviceRules: config.serviceRules || [],
           carTypes: config.carTypes || [],
@@ -91,22 +110,55 @@ export class PricingService {
     return this.roundMoney(capped * carType.extraPassengerCharge);
   }
 
-  estimate(routeDistance: number, repositionDistance: number, departingId?: number, destinationId?: number, isRoundTrip = false): number {
+  estimate(
+    routeDistance: number,
+    repositionDistance: number,
+    departingId?: number,
+    destinationId?: number,
+    departingZoneId?: number | null,
+    destinationZoneId?: number | null,
+    isRoundTrip = false
+  ): number {
     const fixedRoute = this.getFixedRoutePrice(departingId, destinationId);
     if (fixedRoute) {
       if (isRoundTrip && fixedRoute.roundTripPrice != null) {
-        return this.roundMoney(fixedRoute.roundTripPrice);
+        return this.roundMoney(fixedRoute.roundTripPrice / 2);
       }
       return this.roundMoney(fixedRoute.price);
     }
 
+    const zone = this.getPricingZone(departingId, destinationId, departingZoneId, destinationZoneId);
+    if (zone) {
+      if (isRoundTrip && zone.roundTripPrice != null) {
+        return this.roundMoney(zone.roundTripPrice / 2);
+      }
+      return this.roundMoney(Number(zone.oneWayPrice));
+    }
+
     const routeRate = this.getKilometerRate(routeDistance);
-    const repositionRate = this.getKilometerRate(repositionDistance);
-    const routeSubtotal = routeDistance * routeRate.pricePerKm;
+    const routeSubtotal = Number(routeRate.baseFare || 0) + routeDistance * Number(routeRate.pricePerKm);
     const routeTotal = Math.max(routeSubtotal - routeSubtotal * routeRate.discount, 0);
-    const repositionTotal = repositionDistance * repositionRate.pricePerKm;
+    const operationsRate = routeRate.operationsRatePerKm == null
+      ? Number(routeRate.pricePerKm)
+      : Number(routeRate.operationsRatePerKm);
+    const repositionTotal = repositionDistance * operationsRate;
 
     return this.roundMoney(routeTotal + repositionTotal);
+  }
+
+  getPricingZone(
+    departingId?: number,
+    destinationId?: number,
+    departingZoneId?: number | null,
+    destinationZoneId?: number | null
+  ): PricingZone | null {
+    if (!departingId || !destinationId) return null;
+
+    return this.pricingConfig().pricingZones.find((zone) => {
+      const direct = zone.originPlaceId === departingId && zone.id === destinationZoneId;
+      const reverse = zone.originPlaceId === destinationId && zone.id === departingZoneId;
+      return zone.active && (direct || reverse);
+    }) || null;
   }
 
   getFixedRoutePrice(departingId?: number, destinationId?: number): FixedRoutePrice | null {
@@ -130,7 +182,9 @@ export class PricingService {
       name: 'Default fallback',
       minDistance: 0,
       maxDistance: 9999,
-      pricePerKm: 0.9,
+      baseFare: 85,
+      pricePerKm: 1.5,
+      operationsRatePerKm: 0.75,
       discount: 0,
       active: true,
       sortOrder: 999
@@ -143,28 +197,17 @@ export class PricingService {
 
   private defaultRateRules(): PriceRule[] {
     return [
-      { name: 'Very short routes', minDistance: 0, maxDistance: 50, pricePerKm: 3.57, discount: 1, active: true, sortOrder: 1 },
-      { name: 'Short route promo', minDistance: 55, maxDistance: 65, pricePerKm: 2.24, discount: 0.8, active: true, sortOrder: 2 },
-      { name: 'Short routes', minDistance: 50, maxDistance: 75, pricePerKm: 2.24, discount: 0.9, active: true, sortOrder: 3 },
-      { name: 'Mid route promo', minDistance: 97.2, maxDistance: 99, pricePerKm: 1.68, discount: 0.9, active: true, sortOrder: 4 },
-      { name: 'Mid routes', minDistance: 75, maxDistance: 100, pricePerKm: 1.68, discount: 0.8, active: true, sortOrder: 5 },
-      { name: 'Specific route adjustment A', minDistance: 113, maxDistance: 116, pricePerKm: 1.42, discount: 0.3, active: true, sortOrder: 6 },
-      { name: 'Specific route adjustment B', minDistance: 124, maxDistance: 126, pricePerKm: 1.42, discount: 0.3, active: true, sortOrder: 7 },
-      { name: 'Specific route adjustment C', minDistance: 105, maxDistance: 107, pricePerKm: 1.42, discount: 1.35, active: true, sortOrder: 8 },
-      { name: 'Long mid routes', minDistance: 100, maxDistance: 150, pricePerKm: 1.42, discount: 0.55, active: true, sortOrder: 9 },
-      { name: 'Long route base', minDistance: 161, maxDistance: 180, pricePerKm: 1.03, discount: 0, active: true, sortOrder: 10 },
-      { name: 'Long route adjustment A', minDistance: 180, maxDistance: 185, pricePerKm: 1.03, discount: 0.42, active: true, sortOrder: 11 },
-      { name: 'Long route adjustment B', minDistance: 191, maxDistance: 193.1, pricePerKm: 1.43, discount: 1, active: true, sortOrder: 12 },
-      { name: 'Extended route adjustment A', minDistance: 205, maxDistance: 215, pricePerKm: 1.03, discount: 0.24, active: true, sortOrder: 13 },
-      { name: 'Extended route adjustment B', minDistance: 229, maxDistance: 231, pricePerKm: 1.12, discount: 0.42, active: true, sortOrder: 14 },
-      { name: 'Extended route band', minDistance: 230, maxDistance: 259, pricePerKm: 1.12, discount: 0.67, active: true, sortOrder: 15 },
-      { name: 'Extended route fallback A', minDistance: 220, maxDistance: 230, pricePerKm: 1.03, discount: 0.4, active: true, sortOrder: 16 },
-      { name: 'Extended routes', minDistance: 150, maxDistance: 262, pricePerKm: 1.03, discount: 0.75, active: true, sortOrder: 17 },
-      { name: 'Far route adjustment A', minDistance: 262, maxDistance: 264, pricePerKm: 1.07, discount: 0.67, active: true, sortOrder: 18 },
-      { name: 'Far route adjustment B', minDistance: 300, maxDistance: 310, pricePerKm: 1.07, discount: 0.16, active: true, sortOrder: 19 },
-      { name: 'Far routes', minDistance: 264, maxDistance: 315, pricePerKm: 1.07, discount: 0.3, active: true, sortOrder: 20 },
-      { name: 'Far route adjustment C', minDistance: 315, maxDistance: 320, pricePerKm: 1.07, discount: 0.22, active: true, sortOrder: 21 },
-      { name: 'Very far routes', minDistance: 320, maxDistance: 370, pricePerKm: 0.9, discount: 0.07, active: true, sortOrder: 22 }
+      {
+        name: 'Standard distance fallback',
+        minDistance: 0,
+        maxDistance: 9999,
+        baseFare: 85,
+        pricePerKm: 1.5,
+        operationsRatePerKm: 0.75,
+        discount: 0,
+        active: true,
+        sortOrder: 1
+      }
     ];
   }
 }

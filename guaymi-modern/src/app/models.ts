@@ -5,6 +5,8 @@ export interface PlaceOption {
   image: string;
   description: string;
   airportDistance: number;
+  pricingZoneId?: number | null;
+  featured?: boolean;
   placeId?: string;
   location?: {
     lat: number;

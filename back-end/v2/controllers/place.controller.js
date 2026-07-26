@@ -4,32 +4,44 @@ import Image from '../models/image.model';
 const defaultPlaces = [
     {
         name: 'SJO Airport',
+        zone: 'Alajuela',
         description: 'Reliable private pickups and drop-offs with flight-friendly scheduling and transparent route pricing.',
+        featured: true,
         images: [{ src: 'assets/images/airport.jpg' }]
     },
     {
         name: 'La Fortuna / Arenal',
+        zone: 'Northern Highlands',
         description: 'Door-to-door private transfers to La Fortuna, hot springs, boutique hotels, and adventure lodges near Arenal Volcano.',
+        featured: true,
         images: [{ src: 'assets/images/arenal.jpg' }]
     },
     {
         name: 'Jaco Beach',
+        zone: 'Central Pacific',
         description: 'Easy coastal rides for surf trips, family vacations, marina connections, and hotel-to-hotel transfers.',
+        featured: true,
         images: [{ src: 'assets/images/jaco.jpg' }]
     },
     {
         name: 'Manuel Antonio',
+        zone: 'Central Pacific',
         description: 'Hotel-to-hotel transfers to Quepos and Manuel Antonio with planned comfort stops along the coast.',
+        featured: true,
         images: [{ src: 'assets/images/t1.jpg' }]
     },
     {
         name: 'Monteverde',
+        zone: 'Cloud Forest',
         description: 'Mountain road transfers to cloud forest hotels, reserves, and adventure lodges.',
+        featured: true,
         images: [{ src: 'assets/images/h1.jpg' }]
     },
     {
         name: 'Tamarindo',
+        zone: 'Guanacaste',
         description: 'Long-distance private shuttles to northern beaches, villas, and surf stays.',
+        featured: true,
         images: [{ src: 'assets/images/c1.jpg' }]
     }
 ]
@@ -46,11 +58,13 @@ const Place = {
 
     findAll: async (req, res, next) => {
         try {
-            let places = await PlaceModel.findAll({ include: [{ model: Image }], order: [['id', 'ASC']] })
+            const where = req.path && req.path.indexOf('/admin/') === 0 ? {} : { active: true }
+            let places = await PlaceModel.findAll({ where, include: [{ model: Image }], order: [['id', 'ASC']] })
 
-            if (!places.length) {
+            const placeCount = await PlaceModel.count()
+            if (!placeCount) {
                 await PlaceModel.bulkCreate(defaultPlaces, { include: [{ model: Image }] })
-                places = await PlaceModel.findAll({ include: [{ model: Image }], order: [['id', 'ASC']] })
+                places = await PlaceModel.findAll({ where, include: [{ model: Image }], order: [['id', 'ASC']] })
             }
 
             res.status(200).send(places).end()
@@ -68,6 +82,14 @@ const Place = {
 
             place.name = req.body.name
             place.description = req.body.description
+            place.zone = req.body.zone || ''
+            place.airportDistance = req.body.airportDistance == null ? null : Number(req.body.airportDistance)
+            place.googlePlaceId = req.body.googlePlaceId || ''
+            place.latitude = req.body.latitude == null ? null : Number(req.body.latitude)
+            place.longitude = req.body.longitude == null ? null : Number(req.body.longitude)
+            place.pricingZoneId = req.body.pricingZoneId || null
+            place.featured = req.body.featured !== false
+            place.active = req.body.active !== false
             await place.save()
 
             if (req.body.image) {

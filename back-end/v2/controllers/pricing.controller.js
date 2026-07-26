@@ -2,12 +2,17 @@ import CarType from '../models/car-type.model'
 import FixedRoutePrice from '../models/fixed-route-price.model'
 import Place from '../models/place.model'
 import PricingRule from '../models/pricing-rule.model'
+import PricingZone from '../models/pricing-zone.model'
 import ServicePricingRule from '../models/service-pricing-rule.model'
 import BookingPolicy from '../models/booking-policy.model'
 
 const fixedInclude = [
   { model: Place, as: 'departing' },
   { model: Place, as: 'destination' }
+]
+
+const zoneInclude = [
+  { model: Place, as: 'origin', attributes: ['id', 'name'] }
 ]
 
 const Pricing = {
@@ -22,6 +27,11 @@ const Pricing = {
         include: fixedInclude,
         order: [['id', 'ASC']]
       })
+      const pricingZones = await PricingZone.findAll({
+        where: { active: true },
+        include: zoneInclude,
+        order: [['sortOrder', 'ASC'], ['id', 'ASC']]
+      })
       const serviceRules = await ServicePricingRule.findAll({
         where: { active: true },
         order: [['sortOrder', 'ASC'], ['id', 'ASC']]
@@ -32,7 +42,7 @@ const Pricing = {
       })
       const bookingPolicy = await BookingPolicy.findOne({ where: { isDefault: true } })
 
-      res.status(200).json({ pricingRules, fixedRoutePrices, serviceRules, carTypes, bookingPolicy })
+      res.status(200).json({ pricingRules, pricingZones, fixedRoutePrices, serviceRules, carTypes, bookingPolicy })
     } catch (e) {
       next(e)
     }
@@ -41,11 +51,12 @@ const Pricing = {
   adminConfig: async (req, res, next) => {
     try {
       const pricingRules = await PricingRule.findAll({ order: [['sortOrder', 'ASC'], ['id', 'ASC']] })
+      const pricingZones = await PricingZone.findAll({ include: zoneInclude, order: [['sortOrder', 'ASC'], ['id', 'ASC']] })
       const fixedRoutePrices = await FixedRoutePrice.findAll({ include: fixedInclude, order: [['id', 'ASC']] })
       const serviceRules = await ServicePricingRule.findAll({ order: [['sortOrder', 'ASC'], ['id', 'ASC']] })
       const carTypes = await CarType.findAll({ order: [['sortOrder', 'ASC'], ['id', 'ASC']] })
       const bookingPolicy = await BookingPolicy.findOne({ where: { isDefault: true } })
-      res.status(200).json({ pricingRules, fixedRoutePrices, serviceRules, carTypes, bookingPolicy })
+      res.status(200).json({ pricingRules, pricingZones, fixedRoutePrices, serviceRules, carTypes, bookingPolicy })
     } catch (e) {
       next(e)
     }
@@ -77,6 +88,44 @@ const Pricing = {
   deleteRule: async (req, res, next) => {
     try {
       await PricingRule.destroy({ where: { id: req.params.id } })
+      res.status(200).json({ success: true })
+    } catch (e) {
+      next(e)
+    }
+  },
+
+  createZone: async (req, res, next) => {
+    try {
+      const zone = await PricingZone.create(req.body)
+      const created = await PricingZone.findOne({ where: { id: zone.id }, include: zoneInclude })
+      res.status(201).json(created)
+    } catch (e) {
+      next(e)
+    }
+  },
+
+  updateZone: async (req, res, next) => {
+    try {
+      const zone = await PricingZone.findOne({ where: { id: req.params.id } })
+      if (!zone) {
+        return res.status(404).json({ message: 'Pricing zone not found.' })
+      }
+      Object.assign(zone, req.body)
+      await zone.save()
+      const updated = await PricingZone.findOne({ where: { id: zone.id }, include: zoneInclude })
+      res.status(200).json(updated)
+    } catch (e) {
+      next(e)
+    }
+  },
+
+  deleteZone: async (req, res, next) => {
+    try {
+      const assignedPlaces = await Place.count({ where: { pricingZoneId: req.params.id } })
+      if (assignedPlaces) {
+        return res.status(409).json({ message: 'Move destinations out of this zone before deleting it.' })
+      }
+      await PricingZone.destroy({ where: { id: req.params.id } })
       res.status(200).json({ success: true })
     } catch (e) {
       next(e)

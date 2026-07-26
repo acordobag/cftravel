@@ -105,6 +105,10 @@ export class TravelStateService {
   readonly testimonials = signal<Testimonial[]>(this.defaultTestimonials());
   readonly currentTestimonial = computed(() => this.testimonials()[this.activeTestimonial()] || this.testimonials()[0]);
 
+  get featuredPlaces(): PlaceOption[] {
+    return this.places.filter((place) => place.featured !== false);
+  }
+
   constructor(private readonly http: HttpClient, private readonly pricing: PricingService, private readonly auth: AuthService) {
     this.recalculate();
     effect(() => {
@@ -151,7 +155,15 @@ export class TravelStateService {
     const isRoundTrip = untracked(() => this.reservationShuttles()).some(
       (s) => s.uid !== quote.uid && s.departing && s.destination && s.departing.id === quote.destination!.id && s.destination.id === quote.departing!.id
     );
-    quote.total = this.pricing.estimate(quote.routeDistance, quote.repositionDistance, quote.departing.id, quote.destination.id, isRoundTrip) + quote.vehicleSurcharge;
+    quote.total = this.pricing.estimate(
+      quote.routeDistance,
+      quote.repositionDistance,
+      quote.departing.id,
+      quote.destination.id,
+      quote.departing.pricingZoneId,
+      quote.destination.pricingZoneId,
+      isRoundTrip
+    ) + quote.vehicleSurcharge;
   }
 
   selectKnownPlace(quote: ShuttleQuote, kind: 'departing' | 'destination', name: string): void {
@@ -218,16 +230,18 @@ export class TravelStateService {
     // Otherwise this would always be a brand-new id and admin fixed routes would never match.
     const known = this.matchKnownPlace(place.place_id, placeName, location);
 
-    const option: PlaceOption = known || {
-      id: Date.now(),
-      name: placeName,
-      zone: 'Costa Rica',
-      image: 'assets/images/airport.jpg',
-      description: place.formatted_address || 'Custom Costa Rica pickup or drop-off.',
-      airportDistance: 0,
-      placeId: place.place_id,
-      location
-    };
+    const option: PlaceOption = known
+      ? { ...known, placeId: place.place_id || known.placeId, location }
+      : {
+          id: Date.now(),
+          name: placeName,
+          zone: 'Costa Rica',
+          image: 'assets/images/airport.jpg',
+          description: place.formatted_address || 'Custom Costa Rica pickup or drop-off.',
+          airportDistance: 0,
+          placeId: place.place_id,
+          location
+        };
 
     if (kind === 'departing') {
       quote.departingSearch = option.name;
@@ -271,7 +285,18 @@ export class TravelStateService {
       quote.routeDistance = Math.round(routeDistance);
       quote.repositionDistance = Math.round(repositionDistance);
       quote.vehicleSurcharge = this.pricing.vehicleSurcharge(quote.passengers, quote.carTypeId);
-      quote.total = this.pricing.estimate(quote.routeDistance, quote.repositionDistance, quote.departing.id, quote.destination.id) + quote.vehicleSurcharge;
+      const isRoundTrip = untracked(() => this.reservationShuttles()).some(
+        (s) => s.uid !== quote.uid && s.departing && s.destination && s.departing.id === quote.destination!.id && s.destination.id === quote.departing!.id
+      );
+      quote.total = this.pricing.estimate(
+        quote.routeDistance,
+        quote.repositionDistance,
+        quote.departing.id,
+        quote.destination.id,
+        quote.departing.pricingZoneId,
+        quote.destination.pricingZoneId,
+        isRoundTrip
+      ) + quote.vehicleSurcharge;
     } catch {
       quote.rateError = 'We could not calculate this route yet. Please check both locations.';
       this.recalculate(quote);
@@ -370,15 +395,19 @@ export class TravelStateService {
             ...fallback,
             id: place.id,
             name: place.name,
+            zone: place.zone || fallback.zone,
             description: place.description || fallback.description,
-            image
+            image,
+            airportDistance: Number(place.airportDistance ?? fallback.airportDistance ?? 0),
+            placeId: place.googlePlaceId || fallback.placeId,
+            location: place.latitude != null && place.longitude != null
+              ? { lat: Number(place.latitude), lng: Number(place.longitude) }
+              : fallback.location,
+            pricingZoneId: place.pricingZoneId == null ? null : Number(place.pricingZoneId),
+            featured: place.featured !== false
           };
         });
 
-        this.quote.departing = this.places[0] || this.quote.departing;
-        this.quote.destination = this.places[1] || this.quote.destination;
-        this.quote.departingSearch = this.quote.departing?.name || '';
-        this.quote.destinationSearch = this.quote.destination?.name || '';
         this.recalculate();
       }
     });
@@ -452,10 +481,10 @@ export class TravelStateService {
       destination: blank ? null : this.places[1],
       departingSearch: blank ? '' : this.places[0].name,
       destinationSearch: blank ? '' : this.places[1].name,
-      passengers: 2,
+      passengers: 1,
       carTypeId: null,
-      date: this.today,
-      time: '08:00',
+      date: '',
+      time: '',
       routeDistance: 0,
       repositionDistance: 0,
       vehicleSurcharge: 0,

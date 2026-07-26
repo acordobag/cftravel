@@ -150,10 +150,10 @@ const EN = {
   testimonialsPage: { eyebrow: 'Traveler notes', title: 'Testimonials', text: 'Real feedback from travelers who used CR Travel Service.' },
 
   aboutPage: {
-    eyebrow: 'Local operations', title: 'About', text: 'CR Travel Service is built around private shuttle planning for Costa Rica routes.',
-    rideEyebrow: 'Ride experience', rideHeading: 'Private vans, planned stops, smoother handoffs',
-    rideP: 'Long routes can include mountain roads, beach traffic, ferry timing, and airport deadlines. The quote keeps route and operations distance visible.',
-    rideItems: ['Air-conditioned vehicles', 'Hotel and villa pickups', 'Custom stops by request'],
+    eyebrow: 'A family story', title: 'About', text: 'Our family has welcomed travelers to Costa Rica since the 1980s, when the first rides began as a local taxi service.',
+    rideEyebrow: 'Local hospitality', rideHeading: 'A family business, still close to every trip',
+    rideP: 'Today the next generation runs the company with the same commitment to personal service. Every transfer is a chance to share Costa Rica with care, practical local knowledge, and genuine hospitality.',
+    rideItems: ['Family operated since the 1980s', 'Local route experience', 'Personal trip support'],
   },
 
   contactPage: {
@@ -443,10 +443,10 @@ const ES: typeof EN = {
   testimonialsPage: { eyebrow: 'Opiniones de viajeros', title: 'Testimonios', text: 'Opiniones reales de viajeros que usaron CR Travel Service.' },
 
   aboutPage: {
-    eyebrow: 'Operaciones locales', title: 'Nosotros', text: 'CR Travel Service está diseñado para la planificación de shuttles privados en rutas de Costa Rica.',
-    rideEyebrow: 'Experiencia de viaje', rideHeading: 'Vans privadas, paradas planificadas, traslados más fluidos',
-    rideP: 'Las rutas largas pueden incluir caminos de montaña, tráfico en playa, ferris y plazos aeroportuarios. La cotización mantiene visible la distancia de ruta y operación.',
-    rideItems: ['Vehículos con aire acondicionado', 'Recogidas en hoteles y villas', 'Paradas personalizadas a solicitud'],
+    eyebrow: 'Una historia familiar', title: 'Nosotros', text: 'Nuestra familia recibe viajeros en Costa Rica desde los años 80, cuando los primeros recorridos comenzaron como un servicio local de taxi.',
+    rideEyebrow: 'Hospitalidad local', rideHeading: 'Una empresa familiar, cercana a cada viaje',
+    rideP: 'Hoy la siguiente generación dirige la empresa con el mismo compromiso de servicio personal. Cada traslado es una oportunidad para compartir Costa Rica con cuidado, conocimiento local y hospitalidad genuina.',
+    rideItems: ['Empresa familiar desde los años 80', 'Experiencia en rutas locales', 'Atención personal durante el viaje'],
   },
 
   contactPage: {

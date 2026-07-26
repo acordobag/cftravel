@@ -527,7 +527,7 @@ export class FleetPageComponent {
     <app-page-hero [title]="i18n.tx().destPage.title" [eyebrow]="i18n.tx().destPage.eyebrow" [text]="i18n.tx().destPage.text"></app-page-hero>
     <section class="destinations-section page-content">
       <div class="destination-grid">
-        <article class="destination-card" *ngFor="let place of state.places">
+        <article class="destination-card" *ngFor="let place of state.featuredPlaces">
           <img [src]="place.image" [alt]="place.name">
           <div><span>{{ place.zone }}</span><h3>{{ place.name }}</h3><p>{{ place.description }}</p></div>
         </article>

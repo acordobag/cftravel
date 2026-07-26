@@ -169,6 +169,19 @@ router.route('/admin/pricing/rule/:id')
         Pricing.deleteRule(req, res, next);
     });
 
+router.route('/admin/pricing/zone')
+    .post(requirePrivileged, function (req, res, next) {
+        Pricing.createZone(req, res, next);
+    });
+
+router.route('/admin/pricing/zone/:id')
+    .put(requirePrivileged, function (req, res, next) {
+        Pricing.updateZone(req, res, next);
+    })
+    .delete(requirePrivileged, function (req, res, next) {
+        Pricing.deleteZone(req, res, next);
+    });
+
 router.route('/admin/pricing/fixed-route')
     .post(requirePrivileged, function (req, res, next) {
         Pricing.createFixedRoute(req, res, next);

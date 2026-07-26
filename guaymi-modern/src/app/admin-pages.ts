@@ -23,10 +23,10 @@ import {
 } from './admin.service';
 import { AuthService, AuthUser } from './auth.service';
 import { BookingPolicy, CarType, Testimonial } from './models';
-import { FixedRoutePrice, PriceRule, PricingConfig, ServicePricingRule } from './pricing.service';
+import { FixedRoutePrice, PriceRule, PricingConfig, PricingZone, ServicePricingRule } from './pricing.service';
 
 type AdminTab = 'destinations' | 'hero' | 'testimonials' | 'pricing' | 'policy' | 'reservations' | 'company' | 'messages' | 'users';
-type ModalType = 'place' | 'hero' | 'testimonial' | 'pricingRule' | 'fixedRoute' | 'serviceRule' | 'carType' | 'reservation' | 'company' | 'message' | 'user';
+type ModalType = 'place' | 'hero' | 'testimonial' | 'pricingRule' | 'pricingZone' | 'fixedRoute' | 'serviceRule' | 'carType' | 'reservation' | 'company' | 'message' | 'user';
 
 type AdminCompanyDraft = AdminCompany & {
   newPhoneType?: string;
@@ -84,6 +84,17 @@ type AdminCompanyDraft = AdminCompany & {
                 <label for="newPlaceName">Destination name <span class="required-mark">*</span></label>
                 <input id="newPlaceName" name="newPlaceName" placeholder="e.g. La Fortuna / Arenal" [(ngModel)]="newPlace.name" required>
               </div>
+              <div class="admin-field">
+                <label for="newPlaceArea">Area shown on site</label>
+                <input id="newPlaceArea" name="newPlaceArea" placeholder="e.g. Northern Highlands" [(ngModel)]="newPlace.zone">
+              </div>
+              <div class="admin-field">
+                <label for="newPlacePricingZone">SJO price zone</label>
+                <select id="newPlacePricingZone" name="newPlacePricingZone" [(ngModel)]="newPlace.pricingZoneId">
+                  <option [ngValue]="null">Distance formula only</option>
+                  <option *ngFor="let zone of pricingZones" [ngValue]="zone.id">{{ zone.name }} - {{ formatCurrency(zone.oneWayPrice) }}</option>
+                </select>
+              </div>
               <label class="admin-file-control">
                 <span class="file-label">Image</span>
                 <span class="file-picker-shell">
@@ -101,17 +112,19 @@ type AdminCompanyDraft = AdminCompany & {
               </div>
             </div>
             <div class="admin-form-footer">
+              <label class="admin-check"><input type="checkbox" name="newPlaceFeatured" [(ngModel)]="newPlace.featured"> Show on Destinations page</label>
               <button type="submit" class="primary-action" [disabled]="placeForm.invalid || uploadBusy">Add destination</button>
             </div>
           </form>
 
           <div class="admin-table-wrap">
             <table class="admin-table">
-              <thead><tr><th>Image</th><th>Name</th><th>Description</th><th>Actions</th></tr></thead>
+              <thead><tr><th>Image</th><th>Name</th><th>Price zone</th><th>Description</th><th>Actions</th></tr></thead>
               <tbody>
                 <tr *ngFor="let place of places">
                   <td><img class="admin-thumb" *ngIf="place.image" [src]="place.image" alt=""></td>
-                  <td>{{ place.name }}</td>
+                  <td>{{ place.name }}<small>{{ place.zone }}<ng-container *ngIf="place.featured"> · Featured</ng-container></small></td>
+                  <td>{{ pricingZoneName(place.pricingZoneId) }}</td>
                   <td>{{ place.description }}</td>
                   <td class="table-actions">
                     <button type="button" class="secondary-action" (click)="openEdit('place', place)">Edit</button>
@@ -228,24 +241,91 @@ type AdminCompanyDraft = AdminCompany & {
             <div>
               <p class="eyebrow">Pricing rules</p>
               <h2>Route pricing control center</h2>
-              <p class="admin-helper">Use fixed route prices for high-volume routes. Distance rules apply only when no fixed price exists for the selected origin and destination.</p>
+              <p class="admin-helper">Quotes follow one clear order: exact route, SJO price zone, then the distance fallback. This keeps common prices consistent without creating an exception for every hotel.</p>
             </div>
           </div>
 
           <div class="pricing-guidance-grid">
             <article>
-              <strong>1. Fixed price wins</strong>
-              <span>SJO to La Fortuna can be set as an exact amount, regardless of distance formula.</span>
+              <strong>1. Exact route wins</strong>
+              <span>Use an override only when one hotel, ferry, or access road must differ from its area.</span>
             </article>
             <article>
-              <strong>2. Distance rules fill gaps</strong>
-              <span>For routes without a fixed price, the quote uses route km, operation km, rate, and discount.</span>
+              <strong>2. Zones standardize SJO</strong>
+              <span>Hotels assigned to the same zone inherit one commercial airport price.</span>
             </article>
             <article>
-              <strong>3. Service notes guide humans</strong>
-              <span>Use operational rules to remind admins when a quote needs review.</span>
+              <strong>3. Distance fills gaps</strong>
+              <span>Unknown routes use a base fare plus route km and a lower operations-km rate.</span>
             </article>
           </div>
+
+          <section class="pricing-block">
+            <div class="pricing-block-heading">
+              <div>
+                <p class="eyebrow">SJO price zones</p>
+                <h3>Standard prices by destination area</h3>
+                <p class="admin-helper">Assign destinations to a zone in the Destinations tab. The zone price applies in either direction between SJO and that destination.</p>
+              </div>
+            </div>
+            <form class="admin-form admin-create-form" #pricingZoneForm="ngForm" (ngSubmit)="createPricingZone()">
+              <div class="admin-form-row">
+                <div class="admin-field admin-field-narrow">
+                  <label for="zoneCode">Code <span class="required-mark">*</span></label>
+                  <input id="zoneCode" name="zoneCode" placeholder="SJO-ARENAL" [(ngModel)]="newPricingZone.code" required>
+                </div>
+                <div class="admin-field admin-field-wide">
+                  <label for="zoneName">Customer-friendly name <span class="required-mark">*</span></label>
+                  <input id="zoneName" name="zoneName" placeholder="La Fortuna and Arenal" [(ngModel)]="newPricingZone.name" required>
+                </div>
+                <div class="admin-field">
+                  <label for="zoneOrigin">Airport or origin <span class="required-mark">*</span></label>
+                  <select id="zoneOrigin" name="zoneOrigin" [(ngModel)]="newPricingZone.originPlaceId" required>
+                    <option [ngValue]="0">Select origin</option>
+                    <option *ngFor="let place of places" [ngValue]="place.id">{{ place.name }}</option>
+                  </select>
+                </div>
+                <div class="admin-field admin-field-narrow">
+                  <label for="zonePrice">One-way (USD) <span class="required-mark">*</span></label>
+                  <input id="zonePrice" type="number" min="0" step="0.01" name="zonePrice" placeholder="0.00" [(ngModel)]="newPricingZone.oneWayPrice" required>
+                </div>
+                <div class="admin-field admin-field-narrow">
+                  <label for="zoneRoundTrip">Round-trip (USD)</label>
+                  <input id="zoneRoundTrip" type="number" min="0" step="0.01" name="zoneRoundTrip" placeholder="Optional" [(ngModel)]="newPricingZone.roundTripPrice">
+                </div>
+              </div>
+              <div class="admin-form-row">
+                <div class="admin-field admin-field-full">
+                  <label for="zoneNotes">What belongs here and what needs attention?</label>
+                  <textarea id="zoneNotes" name="zoneNotes" rows="2" placeholder="Area coverage, access notes, ferry or border reminders..." [(ngModel)]="newPricingZone.notes"></textarea>
+                </div>
+              </div>
+              <div class="admin-form-footer">
+                <label class="admin-check"><input type="checkbox" name="zoneReview" [(ngModel)]="newPricingZone.requiresReview"> Require operational review</label>
+                <label class="admin-check"><input type="checkbox" name="zoneActive" [(ngModel)]="newPricingZone.active"> Active</label>
+                <button type="submit" class="primary-action" [disabled]="pricingZoneForm.invalid || !newPricingZone.originPlaceId">Add zone</button>
+              </div>
+            </form>
+
+            <div class="admin-table-wrap">
+              <table class="admin-table">
+                <thead><tr><th>Zone</th><th>Origin</th><th>One-way</th><th>Review</th><th>Destinations</th><th>Actions</th></tr></thead>
+                <tbody>
+                  <tr *ngFor="let zone of pricingZones">
+                    <td>{{ zone.name }}<small>{{ zone.code }}</small></td>
+                    <td>{{ zone.origin?.name || placeName(zone.originPlaceId) }}</td>
+                    <td>{{ formatCurrency(zone.oneWayPrice) }}</td>
+                    <td>{{ zone.requiresReview ? 'Required' : 'Standard' }}</td>
+                    <td>{{ destinationCountForZone(zone.id) }}</td>
+                    <td class="table-actions">
+                      <button type="button" class="secondary-action" (click)="openEdit('pricingZone', zone)">Edit</button>
+                      <button type="button" class="remove-transfer" (click)="deletePricingZone(zone)">Delete</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
 
           <section class="pricing-block">
             <div class="pricing-block-heading">
@@ -342,8 +422,16 @@ type AdminCompanyDraft = AdminCompany & {
                   <input id="ruleMax" type="number" step="0.1" min="0" name="ruleMax" placeholder="100" [(ngModel)]="newPricingRule.maxDistance" required>
                 </div>
                 <div class="admin-field admin-field-narrow">
+                  <label for="ruleBase">Base fare (USD) <span class="required-mark">*</span></label>
+                  <input id="ruleBase" type="number" step="0.01" min="0" name="ruleBase" placeholder="85.00" [(ngModel)]="newPricingRule.baseFare" required>
+                </div>
+                <div class="admin-field admin-field-narrow">
                   <label for="rulePrice">Rate per km (USD) <span class="required-mark">*</span></label>
                   <input id="rulePrice" type="number" step="0.01" min="0" name="rulePrice" placeholder="1.68" [(ngModel)]="newPricingRule.pricePerKm" required>
+                </div>
+                <div class="admin-field admin-field-narrow">
+                  <label for="ruleOperationsRate">Operations per km</label>
+                  <input id="ruleOperationsRate" type="number" step="0.01" min="0" name="ruleOperationsRate" placeholder="0.75" [(ngModel)]="newPricingRule.operationsRatePerKm">
                 </div>
                 <div class="admin-field admin-field-narrow">
                   <label for="ruleDiscount">Discount factor (0 – 1)</label>
@@ -358,12 +446,12 @@ type AdminCompanyDraft = AdminCompany & {
 
             <div class="admin-table-wrap">
               <table class="admin-table">
-                <thead><tr><th>Rule</th><th>Distance</th><th>Rate</th><th>Discount</th><th>Status</th><th>Actions</th></tr></thead>
+                <thead><tr><th>Rule</th><th>Distance</th><th>Formula</th><th>Discount</th><th>Status</th><th>Actions</th></tr></thead>
                 <tbody>
                   <tr *ngFor="let rule of pricingRules">
                     <td>{{ rule.name }}<small>Order {{ rule.sortOrder }}</small></td>
                     <td>{{ rule.minDistance }} - {{ rule.maxDistance }} km</td>
-                    <td>{{ formatCurrency(rule.pricePerKm) }}/km</td>
+                    <td>{{ formatCurrency(rule.baseFare) }} + {{ formatCurrency(rule.pricePerKm) }}/km<small>Operations: {{ formatCurrency(rule.operationsRatePerKm || rule.pricePerKm) }}/km</small></td>
                     <td>{{ formatPercent(rule.discount) }}</td>
                     <td>{{ rule.active ? 'Active' : 'Off' }}</td>
                     <td class="table-actions">
@@ -852,6 +940,23 @@ type AdminCompanyDraft = AdminCompany & {
                 <label for="editPlaceDescription">Description</label>
                 <textarea id="editPlaceDescription" name="editPlaceDescription" rows="4" placeholder="Description" [(ngModel)]="editModal.data.description" required></textarea>
               </div>
+              <div class="admin-form-row">
+                <div class="admin-field">
+                  <label for="editPlaceArea">Area shown on site</label>
+                  <input id="editPlaceArea" name="editPlaceArea" placeholder="e.g. Northern Highlands" [(ngModel)]="editModal.data.zone">
+                </div>
+                <div class="admin-field">
+                  <label for="editPlacePricingZone">SJO price zone</label>
+                  <select id="editPlacePricingZone" name="editPlacePricingZone" [(ngModel)]="editModal.data.pricingZoneId">
+                    <option [ngValue]="null">Distance formula only</option>
+                    <option *ngFor="let zone of pricingZones" [ngValue]="zone.id">{{ zone.name }} - {{ formatCurrency(zone.oneWayPrice) }}</option>
+                  </select>
+                </div>
+              </div>
+              <div class="admin-form-row">
+                <label class="admin-check"><input type="checkbox" name="editPlaceFeatured" [(ngModel)]="editModal.data.featured"> Show on Destinations page</label>
+                <label class="admin-check"><input type="checkbox" name="editPlaceActive" [(ngModel)]="editModal.data.active"> Available for booking</label>
+              </div>
               <label class="admin-file-control">
                 <span class="file-label">Image</span>
                 <span class="file-picker-shell">
@@ -952,8 +1057,16 @@ type AdminCompanyDraft = AdminCompany & {
                   <input id="editRuleMax" type="number" step="0.1" min="0" name="editRuleMax" placeholder="Max km" [(ngModel)]="editModal.data.maxDistance" required>
                 </div>
                 <div class="admin-field">
+                  <label for="editRuleBase">Base fare (USD)</label>
+                  <input id="editRuleBase" type="number" step="0.01" min="0" name="editRuleBase" placeholder="85.00" [(ngModel)]="editModal.data.baseFare" required>
+                </div>
+                <div class="admin-field">
                   <label for="editRulePrice">Price per km (USD)</label>
                   <input id="editRulePrice" type="number" step="0.01" min="0" name="editRulePrice" placeholder="Price/km" [(ngModel)]="editModal.data.pricePerKm" required>
+                </div>
+                <div class="admin-field">
+                  <label for="editRuleOperationsRate">Operations per km</label>
+                  <input id="editRuleOperationsRate" type="number" step="0.01" min="0" name="editRuleOperationsRate" placeholder="0.75" [(ngModel)]="editModal.data.operationsRatePerKm">
                 </div>
                 <div class="admin-field">
                   <label for="editRuleDiscount">Discount (0-1)</label>
@@ -964,6 +1077,43 @@ type AdminCompanyDraft = AdminCompany & {
                   <input id="editRuleOrder" type="number" step="1" min="0" name="editRuleOrder" placeholder="Order" [(ngModel)]="editModal.data.sortOrder" required>
                 </div>
                 <label class="admin-check"><input type="checkbox" name="editRuleActive" [(ngModel)]="editModal.data.active"> Active</label>
+              </div>
+            </ng-container>
+
+            <ng-container *ngSwitchCase="'pricingZone'">
+              <div class="admin-form-row">
+                <div class="admin-field admin-field-narrow">
+                  <label for="editZoneCode">Code</label>
+                  <input id="editZoneCode" name="editZoneCode" [(ngModel)]="editModal.data.code" required>
+                </div>
+                <div class="admin-field admin-field-wide">
+                  <label for="editZoneName">Name</label>
+                  <input id="editZoneName" name="editZoneName" [(ngModel)]="editModal.data.name" required>
+                </div>
+              </div>
+              <div class="admin-form-row">
+                <div class="admin-field">
+                  <label for="editZoneOrigin">Airport or origin</label>
+                  <select id="editZoneOrigin" name="editZoneOrigin" [(ngModel)]="editModal.data.originPlaceId" required>
+                    <option *ngFor="let place of places" [ngValue]="place.id">{{ place.name }}</option>
+                  </select>
+                </div>
+                <div class="admin-field">
+                  <label for="editZonePrice">One-way price (USD)</label>
+                  <input id="editZonePrice" type="number" min="0" step="0.01" name="editZonePrice" [(ngModel)]="editModal.data.oneWayPrice" required>
+                </div>
+                <div class="admin-field">
+                  <label for="editZoneRoundTrip">Round-trip price (USD)</label>
+                  <input id="editZoneRoundTrip" type="number" min="0" step="0.01" name="editZoneRoundTrip" [(ngModel)]="editModal.data.roundTripPrice">
+                </div>
+              </div>
+              <div class="admin-field">
+                <label for="editZoneNotes">Coverage and operational notes</label>
+                <textarea id="editZoneNotes" name="editZoneNotes" rows="4" [(ngModel)]="editModal.data.notes"></textarea>
+              </div>
+              <div class="admin-form-row">
+                <label class="admin-check"><input type="checkbox" name="editZoneReview" [(ngModel)]="editModal.data.requiresReview"> Require operational review</label>
+                <label class="admin-check"><input type="checkbox" name="editZoneActive" [(ngModel)]="editModal.data.active"> Active</label>
               </div>
             </ng-container>
 
@@ -1217,11 +1367,12 @@ export class AdminPageComponent implements OnInit {
   messages: AdminMessage[] = [];
   users: AuthUser[] = [];
   pricingRules: PriceRule[] = [];
+  pricingZones: PricingZone[] = [];
   fixedRoutePrices: FixedRoutePrice[] = [];
   serviceRules: ServicePricingRule[] = [];
   carTypes: CarType[] = [];
 
-  newPlace: AdminPlace = { name: '', description: '', image: '' };
+  newPlace: AdminPlace = { name: '', description: '', image: '', zone: '', pricingZoneId: null, featured: true, active: true };
   newHeroImage: HeroImage = { src: '' };
   newTestimonial: Testimonial = { id: 0, name: '', location: '', route: '', rating: 5, comment: '', active: true };
   newCompany: AdminCompany = this.emptyCompany();
@@ -1231,6 +1382,7 @@ export class AdminPageComponent implements OnInit {
   newMessage: AdminMessage = { name: '', phone: '', email: '', text: '' };
   newUser = { name: '', lastName: '', phone: '', email: '', password: '', role: 'ADMIN' as 'ADMIN' | 'SUPER' };
   newFixedRoutePrice: FixedRoutePrice = this.emptyFixedRoutePrice();
+  newPricingZone: PricingZone = this.emptyPricingZone();
   newPricingRule: PriceRule = this.emptyPricingRule();
   newServiceRule: ServicePricingRule = this.emptyServiceRule();
   newCarType: Partial<CarType> = this.emptyCarType();
@@ -1392,6 +1544,9 @@ export class AdminPageComponent implements OnInit {
       case 'fixedRoute':
         this.updateFixedRoutePrice(data);
         break;
+      case 'pricingZone':
+        this.updatePricingZone(data);
+        break;
       case 'pricingRule':
         this.updatePricingRule(data);
         break;
@@ -1446,7 +1601,7 @@ export class AdminPageComponent implements OnInit {
   createPlace(): void {
     this.admin.createPlace(this.newPlace).subscribe({
       next: () => {
-        this.newPlace = { name: '', description: '', image: '' };
+        this.newPlace = { name: '', description: '', image: '', zone: '', pricingZoneId: null, featured: true, active: true };
         this.done('Destination created.');
         this.loadPlaces();
       },
@@ -1539,6 +1694,38 @@ export class AdminPageComponent implements OnInit {
       next: () => {
         this.done('Testimonial deleted.');
         this.loadTestimonials();
+      },
+      error: (error) => this.fail(error)
+    });
+  }
+
+  createPricingZone(): void {
+    this.admin.createPricingZone(this.normalizePricingZone(this.newPricingZone)).subscribe({
+      next: () => {
+        this.newPricingZone = this.emptyPricingZone();
+        this.done('Pricing zone created.');
+        this.loadPricing();
+      },
+      error: (error) => this.fail(error)
+    });
+  }
+
+  updatePricingZone(zone: PricingZone): void {
+    this.admin.updatePricingZone(this.normalizePricingZone(zone)).subscribe({
+      next: () => {
+        this.done('Pricing zone updated.');
+        this.loadPricing();
+      },
+      error: (error) => this.fail(error)
+    });
+  }
+
+  deletePricingZone(zone: PricingZone): void {
+    if (!zone.id) return;
+    this.admin.deletePricingZone(zone.id).subscribe({
+      next: () => {
+        this.done('Pricing zone deleted.');
+        this.loadPricing();
       },
       error: (error) => this.fail(error)
     });
@@ -1950,6 +2137,7 @@ export class AdminPageComponent implements OnInit {
     this.admin.getPricingConfig().subscribe({
       next: (config) => {
         this.pricingRules = config.pricingRules || [];
+        this.pricingZones = config.pricingZones || [];
         this.fixedRoutePrices = config.fixedRoutePrices || [];
         this.serviceRules = config.serviceRules || [];
         this.carTypes = config.carTypes || [];
@@ -2026,6 +2214,9 @@ export class AdminPageComponent implements OnInit {
     if (type === 'pricingRule') {
       return item.name || 'Pricing rule';
     }
+    if (type === 'pricingZone') {
+      return item.name || 'Pricing zone';
+    }
     if (type === 'serviceRule') {
       return item.title || 'Service rule';
     }
@@ -2040,13 +2231,43 @@ export class AdminPageComponent implements OnInit {
     return `${(Number(value || 0) * 100).toFixed(0)}%`;
   }
 
+  pricingZoneName(id?: number | null): string {
+    if (!id) return 'Distance formula';
+    return this.pricingZones.find((zone) => zone.id === Number(id))?.name || 'Unknown zone';
+  }
+
+  destinationCountForZone(id?: number): number {
+    if (!id) return 0;
+    return this.places.filter((place) => Number(place.pricingZoneId) === Number(id)).length;
+  }
+
+  placeName(id?: number): string {
+    return this.places.find((place) => place.id === Number(id))?.name || 'Unknown origin';
+  }
+
   private emptyFixedRoutePrice(): FixedRoutePrice {
     return { departingId: 0, destinationId: 0, price: 0, roundTripPrice: null, label: '', notes: '', active: true };
   }
 
+  private emptyPricingZone(): PricingZone {
+    const nextOrder = this.pricingZones.length ? Math.max(...this.pricingZones.map((zone) => Number(zone.sortOrder) || 0)) + 1 : 1;
+    const sjo = this.places.find((place) => place.name.toLowerCase().includes('sjo'));
+    return {
+      code: '',
+      name: '',
+      originPlaceId: sjo?.id || 0,
+      oneWayPrice: 0,
+      roundTripPrice: null,
+      notes: '',
+      requiresReview: false,
+      active: true,
+      sortOrder: nextOrder
+    };
+  }
+
   private emptyPricingRule(): PriceRule {
     const nextOrder = this.pricingRules.length ? Math.max(...this.pricingRules.map((rule) => Number(rule.sortOrder) || 0)) + 1 : 1;
-    return { name: '', minDistance: 0, maxDistance: 0, pricePerKm: 0, discount: 0, active: true, sortOrder: nextOrder };
+    return { name: '', minDistance: 0, maxDistance: 9999, baseFare: 85, pricePerKm: 1.5, operationsRatePerKm: 0.75, discount: 0, active: true, sortOrder: nextOrder };
   }
 
   private emptyServiceRule(): ServicePricingRule {
@@ -2067,12 +2288,29 @@ export class AdminPageComponent implements OnInit {
     };
   }
 
+  private normalizePricingZone(zone: PricingZone): PricingZone {
+    return {
+      ...zone,
+      code: String(zone.code || '').trim().toUpperCase(),
+      name: String(zone.name || '').trim(),
+      originPlaceId: Number(zone.originPlaceId || 0),
+      oneWayPrice: Number(zone.oneWayPrice || 0),
+      roundTripPrice: zone.roundTripPrice == null || zone.roundTripPrice === ('' as any) ? null : Number(zone.roundTripPrice),
+      notes: zone.notes || '',
+      requiresReview: Boolean(zone.requiresReview),
+      active: Boolean(zone.active),
+      sortOrder: Number(zone.sortOrder || 0)
+    };
+  }
+
   private normalizePricingRule(rule: PriceRule): PriceRule {
     return {
       ...rule,
       minDistance: Number(rule.minDistance || 0),
       maxDistance: Number(rule.maxDistance || 0),
+      baseFare: Number(rule.baseFare || 0),
       pricePerKm: Number(rule.pricePerKm || 0),
+      operationsRatePerKm: rule.operationsRatePerKm == null ? null : Number(rule.operationsRatePerKm),
       discount: Number(rule.discount || 0),
       sortOrder: Number(rule.sortOrder || 0),
       active: Boolean(rule.active)

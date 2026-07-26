@@ -8,7 +8,15 @@ const model = () => {
     name: Sequelize.STRING,
     minDistance: Sequelize.FLOAT,
     maxDistance: Sequelize.FLOAT,
+    baseFare: {
+      type: Sequelize.DECIMAL(10, 2),
+      defaultValue: 0
+    },
     pricePerKm: Sequelize.FLOAT,
+    operationsRatePerKm: {
+      type: Sequelize.DECIMAL(10, 2),
+      allowNull: true
+    },
     discount: {
       type: Sequelize.FLOAT,
       defaultValue: 0

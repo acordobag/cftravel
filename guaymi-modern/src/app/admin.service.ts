@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 
 import { AuthService, AuthUser } from './auth.service';
 import { CarType, Testimonial } from './models';
-import { FixedRoutePrice, PriceRule, PricingConfig, ServicePricingRule } from './pricing.service';
+import { FixedRoutePrice, PriceRule, PricingConfig, PricingZone, ServicePricingRule } from './pricing.service';
 
 import { environment } from '../environments/environment';
 const API_URL = environment.apiUrl;
@@ -12,6 +12,14 @@ export interface AdminPlace {
   id?: number;
   name: string;
   description: string;
+  zone?: string;
+  airportDistance?: number | null;
+  googlePlaceId?: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  pricingZoneId?: number | null;
+  featured?: boolean;
+  active?: boolean;
   image?: string;
   images?: Array<{ id: number; src: string; placeId: number }>;
 }
@@ -102,6 +110,14 @@ export class AdminService {
     return this.http.post<AdminPlace>(`${API_URL}/admin/place`, {
       name: place.name,
       description: place.description,
+      zone: place.zone || '',
+      airportDistance: place.airportDistance,
+      googlePlaceId: place.googlePlaceId || '',
+      latitude: place.latitude,
+      longitude: place.longitude,
+      pricingZoneId: place.pricingZoneId || null,
+      featured: place.featured !== false,
+      active: place.active !== false,
       images: place.image ? [{ src: place.image }] : []
     }, this.auth.authOptions());
   }
@@ -164,6 +180,18 @@ export class AdminService {
 
   deletePricingRule(id: number) {
     return this.http.delete(`${API_URL}/admin/pricing/rule/${id}`, this.auth.authOptions());
+  }
+
+  createPricingZone(zone: PricingZone) {
+    return this.http.post<PricingZone>(`${API_URL}/admin/pricing/zone`, zone, this.auth.authOptions());
+  }
+
+  updatePricingZone(zone: PricingZone) {
+    return this.http.put<PricingZone>(`${API_URL}/admin/pricing/zone/${zone.id}`, zone, this.auth.authOptions());
+  }
+
+  deletePricingZone(id: number) {
+    return this.http.delete(`${API_URL}/admin/pricing/zone/${id}`, this.auth.authOptions());
   }
 
   createFixedRoutePrice(route: FixedRoutePrice) {
