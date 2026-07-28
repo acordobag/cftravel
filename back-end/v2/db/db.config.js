@@ -71,8 +71,14 @@ export default async () => {
     FixedRoutePrice.belongsTo(Place, {as: 'departing'});
     FixedRoutePrice.belongsTo(Place, {as: 'destination'});
 
-    Place.belongsTo(PricingZone);
-    PricingZone.hasMany(Place);
+    Place.belongsTo(PricingZone, {
+        foreignKey: { name: 'pricingZoneId', allowNull: true },
+        constraints: false
+    });
+    PricingZone.hasMany(Place, {
+        foreignKey: { name: 'pricingZoneId', allowNull: true },
+        constraints: false
+    });
     PricingZone.belongsTo(Place, { as: 'origin', foreignKey: 'originPlaceId' });
 
     try {
