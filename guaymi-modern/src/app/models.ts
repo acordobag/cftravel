@@ -1,9 +1,17 @@
 export interface PlaceOption {
   id: number;
   name: string;
+  slug?: string;
   zone: string;
   image: string;
   description: string;
+  descriptionEs?: string;
+  content?: string;
+  contentEs?: string;
+  imageAlt?: string;
+  imageCredit?: string;
+  imageLicense?: string;
+  imageSourceUrl?: string;
   airportDistance: number;
   pricingZoneId?: number | null;
   featured?: boolean;
@@ -112,6 +120,9 @@ export interface CompanyProfile {
   website?: string;
   logo?: string;
   isDefault?: boolean;
+  aboutUsText?: string;
+  aboutUsTextEs?: string;
   cancellationPolicyText?: string;
+  cancellationPolicyTextEs?: string;
   phones: ContactMethod[];
 }

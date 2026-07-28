@@ -15,7 +15,10 @@ const model = () => {
         type: Sequelize.BOOLEAN,
         defaultValue: false
       },
-      cancellationPolicyText: { type: Sequelize.TEXT, allowNull: true }
+      aboutUsText: { type: Sequelize.TEXT, allowNull: true },
+      aboutUsTextEs: { type: Sequelize.TEXT, allowNull: true },
+      cancellationPolicyText: { type: Sequelize.TEXT, allowNull: true },
+      cancellationPolicyTextEs: { type: Sequelize.TEXT, allowNull: true }
     })
     return Company
 }

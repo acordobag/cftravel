@@ -6,7 +6,15 @@ const { sequelize, Sequelize } = db
 const model = () => {
     const Place = sequelize.define('place', {
         name: Sequelize.STRING,
+        slug: {
+            type: Sequelize.STRING,
+            allowNull: true,
+            unique: true
+        },
         description: Sequelize.TEXT,
+        descriptionEs: Sequelize.TEXT,
+        content: Sequelize.TEXT,
+        contentEs: Sequelize.TEXT,
         zone: Sequelize.STRING,
         airportDistance: {
             type: Sequelize.FLOAT,

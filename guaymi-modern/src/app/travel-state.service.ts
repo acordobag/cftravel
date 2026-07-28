@@ -106,7 +106,7 @@ export class TravelStateService {
   readonly currentTestimonial = computed(() => this.testimonials()[this.activeTestimonial()] || this.testimonials()[0]);
 
   get featuredPlaces(): PlaceOption[] {
-    return this.places.filter((place) => place.featured !== false);
+    return this.places.filter((place) => place.featured !== false && Boolean(place.slug));
   }
 
   constructor(private readonly http: HttpClient, private readonly pricing: PricingService, private readonly auth: AuthService) {
@@ -389,15 +389,24 @@ export class TravelStateService {
 
         this.places = places.map((place, index) => {
           const fallback = this.places.find((item) => item.name.toLowerCase() === String(place.name).toLowerCase()) || this.places[index] || this.places[0];
-          const image = place.images && place.images.length ? place.images[0].src : fallback.image;
+          const primaryImage = place.images && place.images.length ? place.images[0] : null;
+          const image = primaryImage?.src || fallback.image;
 
           return {
             ...fallback,
             id: place.id,
             name: place.name,
+            slug: place.slug || '',
             zone: place.zone || fallback.zone,
             description: place.description || fallback.description,
+            descriptionEs: place.descriptionEs || '',
+            content: place.content || '',
+            contentEs: place.contentEs || '',
             image,
+            imageAlt: primaryImage?.alt || place.name,
+            imageCredit: primaryImage?.credit || '',
+            imageLicense: primaryImage?.license || '',
+            imageSourceUrl: primaryImage?.sourceUrl || '',
             airportDistance: Number(place.airportDistance ?? fallback.airportDistance ?? 0),
             placeId: place.googlePlaceId || fallback.placeId,
             location: place.latitude != null && place.longitude != null

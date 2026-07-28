@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, Input, NgZone, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 
 import { environment } from '../environments/environment';
@@ -10,8 +10,23 @@ const API = environment.apiUrl;
 import { I18nService } from './i18n.service';
 import { PhoneFieldComponent } from './phone-field.component';
 import { TravelStateService } from './travel-state.service';
-import { ShuttleQuote } from './models';
+import { CompanyProfile, PlaceOption, ShuttleQuote } from './models';
 declare const google: any;
+
+type ContentBlock = {
+  type: 'heading' | 'bullet' | 'paragraph';
+  text: string;
+};
+
+const parseContentBlocks = (text: string): ContentBlock[] => text
+  .split(/\r?\n/)
+  .map((line) => line.trim())
+  .filter(Boolean)
+  .map((line) => {
+    if (line.startsWith('## ')) return { type: 'heading', text: line.slice(3) };
+    if (line.startsWith('- ')) return { type: 'bullet', text: line.slice(2) };
+    return { type: 'paragraph', text: line };
+  });
 
 @Component({
   selector: 'app-page-hero',
@@ -400,10 +415,15 @@ export class BookingCardComponent {
         <h2>{{ i18n.tx().destSection.heading }}</h2>
       </div>
       <div class="destination-grid">
-        <article class="destination-card" *ngFor="let place of state.places.slice(0, 4)">
-          <img [src]="place.image" [alt]="place.name">
-          <div><span>{{ place.zone }}</span><h3>{{ place.name }}</h3><p>{{ place.description }}</p></div>
-        </article>
+        <a class="destination-card destination-card-link" *ngFor="let place of state.featuredPlaces.slice(0, 4)" [routerLink]="['/destinations', place.slug]">
+          <img [src]="place.image" [alt]="place.imageAlt || place.name">
+          <div>
+            <span>{{ place.zone }}</span>
+            <h3>{{ place.name }}</h3>
+            <p>{{ i18n.lang() === 'es' ? (place.descriptionEs || place.description) : place.description }}</p>
+            <strong>{{ i18n.lang() === 'es' ? 'Conocer el destino' : 'Explore destination' }} <span aria-hidden="true">&rarr;</span></strong>
+          </div>
+        </a>
       </div>
     </section>
     <section class="split-cta">
@@ -522,21 +542,135 @@ export class FleetPageComponent {
 
 @Component({
   standalone: true,
-  imports: [CommonModule, PageHeroComponent],
+  imports: [CommonModule, RouterLink, PageHeroComponent],
   template: `
     <app-page-hero [title]="i18n.tx().destPage.title" [eyebrow]="i18n.tx().destPage.eyebrow" [text]="i18n.tx().destPage.text"></app-page-hero>
     <section class="destinations-section page-content">
       <div class="destination-grid">
-        <article class="destination-card" *ngFor="let place of state.featuredPlaces">
-          <img [src]="place.image" [alt]="place.name">
-          <div><span>{{ place.zone }}</span><h3>{{ place.name }}</h3><p>{{ place.description }}</p></div>
-        </article>
+        <a class="destination-card destination-card-link" *ngFor="let place of state.featuredPlaces" [routerLink]="['/destinations', place.slug]">
+          <img [src]="place.image" [alt]="place.imageAlt || place.name">
+          <div>
+            <span>{{ place.zone }}</span>
+            <h3>{{ place.name }}</h3>
+            <p>{{ descriptionFor(place) }}</p>
+            <strong>{{ i18n.lang() === 'es' ? 'Conocer el destino' : 'Explore destination' }} <span aria-hidden="true">&rarr;</span></strong>
+          </div>
+        </a>
       </div>
     </section>
   `
 })
 export class DestinationsPageComponent {
   constructor(public readonly state: TravelStateService, public readonly i18n: I18nService) {}
+
+  descriptionFor(place: PlaceOption): string {
+    return this.i18n.lang() === 'es' ? (place.descriptionEs || place.description) : place.description;
+  }
+}
+
+@Component({
+  standalone: true,
+  imports: [CommonModule, RouterLink],
+  template: `
+    <ng-container *ngIf="destination as place; else destinationState">
+      <section class="destination-detail-hero">
+        <img [src]="primaryImage(place)" [alt]="primaryImageAlt(place)">
+        <div class="destination-detail-overlay">
+          <a routerLink="/destinations" class="destination-back">&larr; {{ i18n.lang() === 'es' ? 'Todos los destinos' : 'All destinations' }}</a>
+          <p>{{ place.zone }}</p>
+          <h1>{{ place.name }}</h1>
+          <span>{{ summaryFor(place) }}</span>
+        </div>
+      </section>
+
+      <main class="destination-detail-main">
+        <article class="destination-story">
+          <p class="eyebrow">{{ i18n.lang() === 'es' ? 'Descubre Costa Rica' : 'Discover Costa Rica' }}</p>
+          <h2>{{ i18n.lang() === 'es' ? 'Vive este destino a tu ritmo' : 'Experience this destination at your pace' }}</h2>
+          <p *ngFor="let paragraph of paragraphs">{{ paragraph }}</p>
+          <p class="destination-image-credit" *ngIf="primaryImageData(place)?.credit">
+            {{ i18n.lang() === 'es' ? 'Fotografía' : 'Photo' }}:
+            <a [href]="primaryImageData(place)?.sourceUrl" target="_blank" rel="noopener noreferrer">
+              {{ primaryImageData(place)?.credit }} · {{ primaryImageData(place)?.license }}
+            </a>
+          </p>
+        </article>
+
+        <aside class="destination-booking-panel">
+          <p class="eyebrow">{{ i18n.lang() === 'es' ? 'Traslado privado' : 'Private transfer' }}</p>
+          <h2>{{ i18n.lang() === 'es' ? 'Haz que el trayecto sea parte del viaje' : 'Make the ride part of the journey' }}</h2>
+          <p>{{ i18n.lang() === 'es'
+            ? 'Servicio puerta a puerta, paradas coordinadas y atención antes del día de viaje.'
+            : 'Door-to-door service, coordinated stops, and support before travel day.' }}</p>
+          <a routerLink="/home" fragment="booking" class="primary-action">
+            {{ i18n.lang() === 'es' ? 'Cotizar este traslado' : 'Quote this transfer' }}
+          </a>
+        </aside>
+      </main>
+    </ng-container>
+
+    <ng-template #destinationState>
+      <section class="destination-detail-status">
+        <p *ngIf="loading">{{ i18n.lang() === 'es' ? 'Cargando destino...' : 'Loading destination...' }}</p>
+        <div *ngIf="!loading">
+          <h1>{{ i18n.lang() === 'es' ? 'Destino no disponible' : 'Destination unavailable' }}</h1>
+          <p>{{ error }}</p>
+          <a routerLink="/destinations" class="primary-action">{{ i18n.lang() === 'es' ? 'Ver destinos' : 'View destinations' }}</a>
+        </div>
+      </section>
+    </ng-template>
+  `
+})
+export class DestinationDetailPageComponent {
+  destination: any = null;
+  loading = true;
+  error = '';
+
+  constructor(
+    private readonly route: ActivatedRoute,
+    private readonly http: HttpClient,
+    public readonly i18n: I18nService
+  ) {
+    const slug = this.route.snapshot.paramMap.get('slug') || '';
+    this.http.get<any>(`${API}/place/${encodeURIComponent(slug)}`).subscribe({
+      next: (place) => {
+        this.destination = place;
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+        this.error = this.i18n.lang() === 'es'
+          ? 'No pudimos encontrar esta página. Revisa los demás destinos disponibles.'
+          : 'We could not find this page. Browse the other available destinations.';
+      }
+    });
+  }
+
+  get paragraphs(): string[] {
+    if (!this.destination) return [];
+    const text = this.i18n.lang() === 'es'
+      ? (this.destination.contentEs || this.destination.content)
+      : (this.destination.content || this.destination.contentEs);
+    return String(text || '').split(/\n+/).map((item) => item.trim()).filter(Boolean);
+  }
+
+  summaryFor(place: any): string {
+    return this.i18n.lang() === 'es'
+      ? (place.descriptionEs || place.description)
+      : (place.description || place.descriptionEs);
+  }
+
+  primaryImageData(place: any): any {
+    return place.images?.[0] || null;
+  }
+
+  primaryImage(place: any): string {
+    return this.primaryImageData(place)?.src || 'assets/images/banner_0.jpg';
+  }
+
+  primaryImageAlt(place: any): string {
+    return this.primaryImageData(place)?.alt || place.name;
+  }
 }
 
 @Component({
@@ -651,21 +785,43 @@ export class ReservationPageComponent {
   imports: [CommonModule, PageHeroComponent],
   template: `
     <app-page-hero [title]="i18n.tx().aboutPage.title" [eyebrow]="i18n.tx().aboutPage.eyebrow" [text]="i18n.tx().aboutPage.text"></app-page-hero>
-    <section class="experience-section">
-      <div class="experience-media"><img src="assets/images/bus.png" alt="Private shuttle van"></div>
-      <div class="experience-copy">
-        <p class="eyebrow">{{ i18n.tx().aboutPage.rideEyebrow }}</p>
-        <h2>{{ i18n.tx().aboutPage.rideHeading }}</h2>
-        <p>{{ i18n.tx().aboutPage.rideP }}</p>
+    <section class="about-story-section">
+      <div class="about-story-media">
+        <img src="assets/images/bus.png" alt="CR Travel Service private transfer van">
+        <span>{{ i18n.lang() === 'es' ? 'Empresa familiar desde los años 80' : 'Family operated since the 1980s' }}</span>
+      </div>
+      <article class="about-story-copy">
+        <p class="eyebrow">{{ i18n.lang() === 'es' ? 'Nuestra historia' : 'Our story' }}</p>
+        <h2>{{ i18n.lang() === 'es' ? 'Un legado familiar que sigue en movimiento' : 'A family legacy that keeps moving forward' }}</h2>
+        <ng-container *ngIf="aboutParagraphs.length; else aboutFallback">
+          <p *ngFor="let paragraph of aboutParagraphs">{{ paragraph }}</p>
+        </ng-container>
+        <ng-template #aboutFallback>
+          <p>{{ i18n.tx().aboutPage.rideP }}</p>
+        </ng-template>
         <div class="experience-list">
           <span *ngFor="let item of i18n.tx().aboutPage.rideItems">{{ item }}</span>
         </div>
-      </div>
+      </article>
     </section>
   `
 })
 export class AboutPageComponent {
-  constructor(public readonly i18n: I18nService) {}
+  company: CompanyProfile | null = null;
+
+  constructor(public readonly i18n: I18nService, private readonly http: HttpClient) {
+    this.http.get<CompanyProfile>(`${API}/company`).subscribe({
+      next: (company) => this.company = company,
+      error: () => {}
+    });
+  }
+
+  get aboutParagraphs(): string[] {
+    const text = this.i18n.lang() === 'es'
+      ? (this.company?.aboutUsTextEs || this.company?.aboutUsText)
+      : (this.company?.aboutUsText || this.company?.aboutUsTextEs);
+    return String(text || '').split(/\n+/).map((item) => item.trim()).filter(Boolean);
+  }
 }
 
 @Component({
@@ -691,26 +847,46 @@ export class ContactPageComponent {
   standalone: true,
   imports: [CommonModule, PageHeroComponent],
   template: `
-    <app-page-hero title="Booking & Cancellation Policy" eyebrow="Policies" text="Please read the following before booking."></app-page-hero>
+    <app-page-hero
+      [title]="i18n.lang() === 'es' ? 'Políticas de servicio' : 'Service policies'"
+      [eyebrow]="i18n.lang() === 'es' ? 'Información importante' : 'Important information'"
+      [text]="i18n.lang() === 'es' ? 'Conoce los términos de cancelación, cambios, pagos y operación antes de reservar.' : 'Review cancellation, change, payment, and operating terms before booking.'">
+    </app-page-hero>
     <section class="policy-page page-band">
-      <div class="policy-content" *ngIf="policyText">
-        <p *ngFor="let para of paragraphs">{{ para }}</p>
+      <div class="policy-intro">
+        <p class="eyebrow">{{ i18n.lang() === 'es' ? 'Claridad antes del viaje' : 'Clarity before travel' }}</p>
+        <h2>{{ i18n.lang() === 'es' ? 'Términos organizados para una lectura sencilla' : 'Terms organized for easy reading' }}</h2>
+        <p>{{ i18n.lang() === 'es'
+          ? 'Los plazos cambian según el tamaño del grupo. Revisa la sección que corresponde a tu reservación.'
+          : 'Timing differs by group size. Review the section that applies to your reservation.' }}</p>
       </div>
-      <p class="policy-placeholder" *ngIf="!policyText">Policy information will be available soon. Contact us for details.</p>
+      <div class="policy-content" *ngIf="blocks.length">
+        <ng-container *ngFor="let block of blocks">
+          <h2 *ngIf="block.type === 'heading'">{{ block.text }}</h2>
+          <p *ngIf="block.type === 'paragraph'">{{ block.text }}</p>
+          <p class="policy-bullet" *ngIf="block.type === 'bullet'"><span aria-hidden="true">&check;</span>{{ block.text }}</p>
+        </ng-container>
+      </div>
+      <p class="policy-placeholder" *ngIf="!blocks.length">
+        {{ i18n.lang() === 'es' ? 'La información estará disponible pronto. Contáctanos para más detalles.' : 'Policy information will be available soon. Contact us for details.' }}
+      </p>
     </section>
   `
 })
 export class PolicyPageComponent {
-  policyText = '';
+  company: CompanyProfile | null = null;
 
-  constructor(private readonly http: HttpClient) {
-    this.http.get<any>(`${API}/company`).subscribe({
-      next: (company) => { if (company && company.cancellationPolicyText) this.policyText = company.cancellationPolicyText; },
+  constructor(private readonly http: HttpClient, public readonly i18n: I18nService) {
+    this.http.get<CompanyProfile>(`${API}/company`).subscribe({
+      next: (company) => this.company = company,
       error: () => {}
     });
   }
 
-  get paragraphs(): string[] {
-    return this.policyText.split(/\n+/).filter((p) => p.trim());
+  get blocks(): ContentBlock[] {
+    const text = this.i18n.lang() === 'es'
+      ? (this.company?.cancellationPolicyTextEs || this.company?.cancellationPolicyText)
+      : (this.company?.cancellationPolicyText || this.company?.cancellationPolicyTextEs);
+    return parseContentBlocks(String(text || ''));
   }
 }

@@ -82,7 +82,11 @@ type AdminCompanyDraft = AdminCompany & {
             <div class="admin-form-row">
               <div class="admin-field admin-field-wide">
                 <label for="newPlaceName">Destination name <span class="required-mark">*</span></label>
-                <input id="newPlaceName" name="newPlaceName" placeholder="e.g. La Fortuna / Arenal" [(ngModel)]="newPlace.name" required>
+                <input id="newPlaceName" name="newPlaceName" placeholder="e.g. La Fortuna / Arenal" [(ngModel)]="newPlace.name" (blur)="ensureNewPlaceSlug()" required>
+              </div>
+              <div class="admin-field">
+                <label for="newPlaceSlug">Page URL <span class="required-mark">*</span></label>
+                <input id="newPlaceSlug" name="newPlaceSlug" placeholder="la-fortuna-arenal" [(ngModel)]="newPlace.slug" required>
               </div>
               <div class="admin-field">
                 <label for="newPlaceArea">Area shown on site</label>
@@ -107,8 +111,40 @@ type AdminCompanyDraft = AdminCompany & {
             </div>
             <div class="admin-form-row">
               <div class="admin-field admin-field-full">
-                <label for="newPlaceDescription">Description <span class="required-mark">*</span></label>
-                <textarea id="newPlaceDescription" name="newPlaceDescription" placeholder="What makes this destination notable?" rows="3" [(ngModel)]="newPlace.description" required></textarea>
+                <label for="newPlaceDescription">Card summary - English <span class="required-mark">*</span></label>
+                <textarea id="newPlaceDescription" name="newPlaceDescription" placeholder="What makes this destination notable?" rows="2" [(ngModel)]="newPlace.description" required></textarea>
+              </div>
+              <div class="admin-field admin-field-full">
+                <label for="newPlaceDescriptionEs">Card summary - Spanish</label>
+                <textarea id="newPlaceDescriptionEs" name="newPlaceDescriptionEs" placeholder="Resumen que se muestra en la tarjeta..." rows="2" [(ngModel)]="newPlace.descriptionEs"></textarea>
+              </div>
+            </div>
+            <div class="admin-form-row">
+              <div class="admin-field admin-field-full">
+                <label for="newPlaceContent">Destination page - English</label>
+                <textarea id="newPlaceContent" name="newPlaceContent" placeholder="Full destination story. Separate paragraphs with a blank line." rows="6" [(ngModel)]="newPlace.content"></textarea>
+              </div>
+              <div class="admin-field admin-field-full">
+                <label for="newPlaceContentEs">Destination page - Spanish</label>
+                <textarea id="newPlaceContentEs" name="newPlaceContentEs" placeholder="Texto completo del destino. Separa los párrafos con una línea en blanco." rows="6" [(ngModel)]="newPlace.contentEs"></textarea>
+              </div>
+            </div>
+            <div class="admin-form-row admin-image-attribution-fields">
+              <div class="admin-field admin-field-wide">
+                <label for="newPlaceImageAlt">Image description</label>
+                <input id="newPlaceImageAlt" name="newPlaceImageAlt" placeholder="Describe the place shown in the image" [(ngModel)]="newPlace.imageAlt">
+              </div>
+              <div class="admin-field">
+                <label for="newPlaceImageCredit">Photographer</label>
+                <input id="newPlaceImageCredit" name="newPlaceImageCredit" placeholder="Author or photographer" [(ngModel)]="newPlace.imageCredit">
+              </div>
+              <div class="admin-field">
+                <label for="newPlaceImageLicense">License</label>
+                <input id="newPlaceImageLicense" name="newPlaceImageLicense" placeholder="e.g. CC BY-SA 4.0" [(ngModel)]="newPlace.imageLicense">
+              </div>
+              <div class="admin-field admin-field-wide">
+                <label for="newPlaceImageSource">Image source URL</label>
+                <input id="newPlaceImageSource" name="newPlaceImageSource" type="url" placeholder="https://..." [(ngModel)]="newPlace.imageSourceUrl">
               </div>
             </div>
             <div class="admin-form-footer">
@@ -123,7 +159,7 @@ type AdminCompanyDraft = AdminCompany & {
               <tbody>
                 <tr *ngFor="let place of places">
                   <td><img class="admin-thumb" *ngIf="place.image" [src]="place.image" alt=""></td>
-                  <td>{{ place.name }}<small>{{ place.zone }}<ng-container *ngIf="place.featured"> · Featured</ng-container></small></td>
+                  <td>{{ place.name }}<small>/destinations/{{ place.slug }} · {{ place.zone }}<ng-container *ngIf="place.featured"> · Featured</ng-container></small></td>
                   <td>{{ pricingZoneName(place.pricingZoneId) }}</td>
                   <td>{{ place.description }}</td>
                   <td class="table-actions">
@@ -633,8 +669,15 @@ type AdminCompanyDraft = AdminCompany & {
 
           <div class="admin-policy-text-section" *ngIf="defaultCompanyForPolicy">
             <h3 class="admin-subheading" style="margin-top:32px;grid-column:1/-1;">Public policy page text</h3>
-            <p style="color:var(--text-muted);font-size:13px;margin:0 0 12px;">This text is shown on the public <strong>/policy</strong> page. Use plain text or simple line breaks.</p>
-            <textarea class="policy-text-editor" rows="12" [(ngModel)]="defaultCompanyForPolicy.cancellationPolicyText" placeholder="Write your cancellation, modification, and refund policy here..."></textarea>
+            <p style="color:var(--text-muted);font-size:13px;margin:0 0 12px;">Use <strong>##</strong> for section titles and <strong>-</strong> for policy items. Both versions are shown on <strong>/policy</strong> according to the selected language.</p>
+            <label class="admin-field">
+              <span>English policy</span>
+              <textarea class="policy-text-editor" rows="16" [(ngModel)]="defaultCompanyForPolicy.cancellationPolicyText" placeholder="## Cancellation&#10;- Policy item..."></textarea>
+            </label>
+            <label class="admin-field">
+              <span>Política en español</span>
+              <textarea class="policy-text-editor" rows="16" [(ngModel)]="defaultCompanyForPolicy.cancellationPolicyTextEs" placeholder="## Cancelaciones&#10;- Condición..."></textarea>
+            </label>
             <button type="button" class="primary-action" style="margin-top:10px;" (click)="savePolicyText()" [disabled]="policyTextLoading">
               {{ policyTextLoading ? 'Saving...' : 'Save policy text' }}
             </button>
@@ -937,8 +980,24 @@ type AdminCompanyDraft = AdminCompany & {
                 <input id="editPlaceName" name="editPlaceName" placeholder="Destination name" [(ngModel)]="editModal.data.name" required>
               </div>
               <div class="admin-field">
-                <label for="editPlaceDescription">Description</label>
-                <textarea id="editPlaceDescription" name="editPlaceDescription" rows="4" placeholder="Description" [(ngModel)]="editModal.data.description" required></textarea>
+                <label for="editPlaceSlug">Page URL</label>
+                <input id="editPlaceSlug" name="editPlaceSlug" placeholder="destination-url" [(ngModel)]="editModal.data.slug" required>
+              </div>
+              <div class="admin-field">
+                <label for="editPlaceDescription">Card summary - English</label>
+                <textarea id="editPlaceDescription" name="editPlaceDescription" rows="3" placeholder="English summary" [(ngModel)]="editModal.data.description" required></textarea>
+              </div>
+              <div class="admin-field">
+                <label for="editPlaceDescriptionEs">Card summary - Spanish</label>
+                <textarea id="editPlaceDescriptionEs" name="editPlaceDescriptionEs" rows="3" placeholder="Resumen en español" [(ngModel)]="editModal.data.descriptionEs"></textarea>
+              </div>
+              <div class="admin-field">
+                <label for="editPlaceContent">Destination page - English</label>
+                <textarea id="editPlaceContent" name="editPlaceContent" rows="7" placeholder="Full destination story" [(ngModel)]="editModal.data.content"></textarea>
+              </div>
+              <div class="admin-field">
+                <label for="editPlaceContentEs">Destination page - Spanish</label>
+                <textarea id="editPlaceContentEs" name="editPlaceContentEs" rows="7" placeholder="Texto completo del destino" [(ngModel)]="editModal.data.contentEs"></textarea>
               </div>
               <div class="admin-form-row">
                 <div class="admin-field">
@@ -966,6 +1025,24 @@ type AdminCompanyDraft = AdminCompany & {
                 <input type="file" accept="image/*" (change)="handleImageFile($event, 'modal')">
               </label>
               <img class="admin-image-preview wide" *ngIf="editModal.data.image" [src]="editModal.data.image" alt="Destination preview">
+              <div class="admin-form-row admin-image-attribution-fields">
+                <div class="admin-field admin-field-wide">
+                  <label for="editPlaceImageAlt">Image description</label>
+                  <input id="editPlaceImageAlt" name="editPlaceImageAlt" placeholder="Accessible description" [(ngModel)]="editModal.data.imageAlt">
+                </div>
+                <div class="admin-field">
+                  <label for="editPlaceImageCredit">Photographer</label>
+                  <input id="editPlaceImageCredit" name="editPlaceImageCredit" placeholder="Author" [(ngModel)]="editModal.data.imageCredit">
+                </div>
+                <div class="admin-field">
+                  <label for="editPlaceImageLicense">License</label>
+                  <input id="editPlaceImageLicense" name="editPlaceImageLicense" placeholder="CC BY-SA 4.0" [(ngModel)]="editModal.data.imageLicense">
+                </div>
+                <div class="admin-field admin-field-wide">
+                  <label for="editPlaceImageSource">Image source URL</label>
+                  <input id="editPlaceImageSource" name="editPlaceImageSource" type="url" placeholder="https://..." [(ngModel)]="editModal.data.imageSourceUrl">
+                </div>
+              </div>
             </ng-container>
 
             <ng-container *ngSwitchCase="'hero'">
@@ -1236,6 +1313,16 @@ type AdminCompanyDraft = AdminCompany & {
               </div>
               <label class="admin-check"><input type="checkbox" name="editCompanyDefault" [(ngModel)]="editModal.data.isDefault"> Set as the default company shown on the public site</label>
 
+              <p class="admin-form-section-label" style="margin-top:1.5rem">About us page</p>
+              <div class="admin-field">
+                <label for="editCompanyAbout">Company story - English</label>
+                <textarea id="editCompanyAbout" name="editCompanyAbout" rows="8" placeholder="Separate paragraphs with a blank line." [(ngModel)]="editModal.data.aboutUsText"></textarea>
+              </div>
+              <div class="admin-field">
+                <label for="editCompanyAboutEs">Historia de la empresa - Español</label>
+                <textarea id="editCompanyAboutEs" name="editCompanyAboutEs" rows="8" placeholder="Separa los párrafos con una línea en blanco." [(ngModel)]="editModal.data.aboutUsTextEs"></textarea>
+              </div>
+
               <p class="admin-form-section-label" style="margin-top:1.5rem">Contact methods</p>
               <div class="admin-modal-sublist" *ngFor="let phone of editModal.data.phones; let i = index">
                 <div class="admin-form-row">
@@ -1372,7 +1459,7 @@ export class AdminPageComponent implements OnInit {
   serviceRules: ServicePricingRule[] = [];
   carTypes: CarType[] = [];
 
-  newPlace: AdminPlace = { name: '', description: '', image: '', zone: '', pricingZoneId: null, featured: true, active: true };
+  newPlace: AdminPlace = this.emptyPlace();
   newHeroImage: HeroImage = { src: '' };
   newTestimonial: Testimonial = { id: 0, name: '', location: '', route: '', rating: 5, comment: '', active: true };
   newCompany: AdminCompany = this.emptyCompany();
@@ -1508,7 +1595,12 @@ export class AdminPageComponent implements OnInit {
   openEdit(type: ModalType, item: any): void {
     const data = JSON.parse(JSON.stringify(item));
     if (type === 'place') {
-      data.image = item.image || item.images?.[0]?.src || '';
+      const image = item.images?.[0];
+      data.image = item.image || image?.src || '';
+      data.imageAlt = item.imageAlt || image?.alt || '';
+      data.imageCredit = item.imageCredit || image?.credit || '';
+      data.imageLicense = item.imageLicense || image?.license || '';
+      data.imageSourceUrl = item.imageSourceUrl || image?.sourceUrl || '';
     }
     if (type === 'company') {
       data.newPhoneType = 'phone';
@@ -1601,7 +1693,7 @@ export class AdminPageComponent implements OnInit {
   createPlace(): void {
     this.admin.createPlace(this.newPlace).subscribe({
       next: () => {
-        this.newPlace = { name: '', description: '', image: '', zone: '', pricingZoneId: null, featured: true, active: true };
+        this.newPlace = this.emptyPlace();
         this.done('Destination created.');
         this.loadPlaces();
       },
@@ -1917,6 +2009,36 @@ export class AdminPageComponent implements OnInit {
     return { name: '', email: '', tagline: '', address: '', website: '', logo: '', isDefault: !this.companies.length };
   }
 
+  private emptyPlace(): AdminPlace {
+    return {
+      name: '',
+      slug: '',
+      description: '',
+      descriptionEs: '',
+      content: '',
+      contentEs: '',
+      image: '',
+      imageAlt: '',
+      imageCredit: '',
+      imageLicense: '',
+      imageSourceUrl: '',
+      zone: '',
+      pricingZoneId: null,
+      featured: true,
+      active: true
+    };
+  }
+
+  ensureNewPlaceSlug(): void {
+    if (this.newPlace.slug || !this.newPlace.name) return;
+    this.newPlace.slug = this.newPlace.name
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
+  }
+
   private emptyCompanyPhone(): AdminPhone {
     return { type: 'phone', label: '', code: '', number: '', href: '', active: true, sortOrder: 1 };
   }
@@ -2114,7 +2236,17 @@ export class AdminPageComponent implements OnInit {
 
   private loadPlaces(): void {
     this.admin.getPlaces().subscribe({
-      next: (places) => this.places = places.map((place) => ({ ...place, image: place.images?.[0]?.src || place.image || '' })),
+      next: (places) => this.places = places.map((place) => {
+        const image = place.images?.[0];
+        return {
+          ...place,
+          image: image?.src || place.image || '',
+          imageAlt: image?.alt || place.imageAlt || '',
+          imageCredit: image?.credit || place.imageCredit || '',
+          imageLicense: image?.license || place.imageLicense || '',
+          imageSourceUrl: image?.sourceUrl || place.imageSourceUrl || ''
+        };
+      }),
       error: (error) => this.fail(error)
     });
   }

@@ -167,6 +167,10 @@ const AdminMaintenance = {
         address: req.body.address,
         website: req.body.website,
         logo: req.body.logo,
+        aboutUsText: req.body.aboutUsText,
+        aboutUsTextEs: req.body.aboutUsTextEs,
+        cancellationPolicyText: req.body.cancellationPolicyText,
+        cancellationPolicyTextEs: req.body.cancellationPolicyTextEs,
         isDefault: req.body.isDefault === true || req.body.isDefault === 'true'
       })
 
@@ -209,8 +213,11 @@ const AdminMaintenance = {
       company.address = req.body.address
       company.website = req.body.website
       company.logo = req.body.logo
+      if (req.body.aboutUsText !== undefined) company.aboutUsText = req.body.aboutUsText
+      if (req.body.aboutUsTextEs !== undefined) company.aboutUsTextEs = req.body.aboutUsTextEs
       company.isDefault = req.body.isDefault === true || req.body.isDefault === 'true'
       if (req.body.cancellationPolicyText !== undefined) company.cancellationPolicyText = req.body.cancellationPolicyText
+      if (req.body.cancellationPolicyTextEs !== undefined) company.cancellationPolicyTextEs = req.body.cancellationPolicyTextEs
       await company.save()
 
       if (company.isDefault) {

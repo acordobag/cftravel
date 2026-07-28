@@ -55,6 +55,11 @@ router.route('/place')
         Place.findAll(req, res, next);
     });
 
+router.route('/place/:slug')
+    .get(function (req, res, next) {
+        Place.findBySlug(req, res, next);
+    });
+
 router.route('/hero-image')
     .get(function (req, res, next) {
         HeroImage.findAll(req, res, next);

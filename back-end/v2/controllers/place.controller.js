@@ -56,6 +56,21 @@ const Place = {
         }
     },
 
+    findBySlug: async (req, res, next) => {
+        try {
+            const place = await PlaceModel.findOne({
+                where: { slug: req.params.slug, active: true },
+                include: [{ model: Image }]
+            })
+            if (!place) {
+                return res.status(404).json({ message: 'Destination not found.' })
+            }
+            res.status(200).send(place).end()
+        } catch (e) {
+            next(e)
+        }
+    },
+
     findAll: async (req, res, next) => {
         try {
             const where = req.path && req.path.indexOf('/admin/') === 0 ? {} : { active: true }
@@ -81,7 +96,11 @@ const Place = {
             }
 
             place.name = req.body.name
+            place.slug = req.body.slug || null
             place.description = req.body.description
+            place.descriptionEs = req.body.descriptionEs || ''
+            place.content = req.body.content || ''
+            place.contentEs = req.body.contentEs || ''
             place.zone = req.body.zone || ''
             place.airportDistance = req.body.airportDistance == null ? null : Number(req.body.airportDistance)
             place.googlePlaceId = req.body.googlePlaceId || ''
@@ -95,6 +114,10 @@ const Place = {
             if (req.body.image) {
                 const image = place.images && place.images.length ? place.images[0] : await Image.create({ placeId: place.id })
                 image.src = req.body.image
+                image.alt = req.body.imageAlt || ''
+                image.credit = req.body.imageCredit || ''
+                image.license = req.body.imageLicense || ''
+                image.sourceUrl = req.body.imageSourceUrl || ''
                 image.placeId = place.id
                 await image.save()
             }

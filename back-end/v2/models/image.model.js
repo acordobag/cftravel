@@ -5,7 +5,11 @@ const { sequelize, Sequelize } = db
 
 const model = () => {
     const Image = sequelize.define('image', {
-        src: Sequelize.STRING
+        src: Sequelize.STRING,
+        alt: Sequelize.STRING,
+        credit: Sequelize.STRING,
+        license: Sequelize.STRING,
+        sourceUrl: Sequelize.STRING
     })
     return Image
 }

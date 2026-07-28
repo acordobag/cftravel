@@ -8,6 +8,7 @@ import { authGuard, privilegedGuard } from './auth.guard';
 import {
   AboutPageComponent,
   ContactPageComponent,
+  DestinationDetailPageComponent,
   DestinationsPageComponent,
   FleetPageComponent,
   HomePageComponent,
@@ -22,6 +23,7 @@ export const routes: Routes = [
   { path: 'home', component: HomePageComponent },
   { path: 'services', component: ServicesPageComponent },
   { path: 'destinations', component: DestinationsPageComponent },
+  { path: 'destinations/:slug', component: DestinationDetailPageComponent },
   { path: 'fleet', component: FleetPageComponent },
   { path: 'testimonials', component: TestimonialsPageComponent },
   { path: 'reservation', component: ReservationPageComponent },

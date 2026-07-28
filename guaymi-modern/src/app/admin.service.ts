@@ -11,7 +11,11 @@ const API_URL = environment.apiUrl;
 export interface AdminPlace {
   id?: number;
   name: string;
+  slug?: string;
   description: string;
+  descriptionEs?: string;
+  content?: string;
+  contentEs?: string;
   zone?: string;
   airportDistance?: number | null;
   googlePlaceId?: string;
@@ -21,7 +25,19 @@ export interface AdminPlace {
   featured?: boolean;
   active?: boolean;
   image?: string;
-  images?: Array<{ id: number; src: string; placeId: number }>;
+  imageAlt?: string;
+  imageCredit?: string;
+  imageLicense?: string;
+  imageSourceUrl?: string;
+  images?: Array<{
+    id: number;
+    src: string;
+    alt?: string;
+    credit?: string;
+    license?: string;
+    sourceUrl?: string;
+    placeId: number;
+  }>;
 }
 
 export interface HeroImage {
@@ -50,7 +66,10 @@ export interface AdminCompany {
   website?: string;
   logo?: string;
   isDefault?: boolean;
+  aboutUsText?: string;
+  aboutUsTextEs?: string;
   cancellationPolicyText?: string;
+  cancellationPolicyTextEs?: string;
   phones?: AdminPhone[];
 }
 
@@ -109,7 +128,11 @@ export class AdminService {
   createPlace(place: AdminPlace) {
     return this.http.post<AdminPlace>(`${API_URL}/admin/place`, {
       name: place.name,
+      slug: place.slug || '',
       description: place.description,
+      descriptionEs: place.descriptionEs || '',
+      content: place.content || '',
+      contentEs: place.contentEs || '',
       zone: place.zone || '',
       airportDistance: place.airportDistance,
       googlePlaceId: place.googlePlaceId || '',
@@ -118,7 +141,13 @@ export class AdminService {
       pricingZoneId: place.pricingZoneId || null,
       featured: place.featured !== false,
       active: place.active !== false,
-      images: place.image ? [{ src: place.image }] : []
+      images: place.image ? [{
+        src: place.image,
+        alt: place.imageAlt || '',
+        credit: place.imageCredit || '',
+        license: place.imageLicense || '',
+        sourceUrl: place.imageSourceUrl || ''
+      }] : []
     }, this.auth.authOptions());
   }
 
