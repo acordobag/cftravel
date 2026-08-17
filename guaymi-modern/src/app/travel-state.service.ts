@@ -12,6 +12,7 @@ declare const google: any;
 @Injectable({ providedIn: 'root' })
 export class TravelStateService {
   readonly today = new Date().toISOString().slice(0, 10);
+  readonly maxPassengers = 8;
   heroImages = ['assets/images/banner_0.jpg', 'assets/images/banner_1.png'];
   readonly activeHero = signal(0);
   readonly activeTestimonial = signal(0);
@@ -154,7 +155,7 @@ export class TravelStateService {
   }
 
   recalculatePrice(quote = this.quote): void {
-    if (!quote.departing || !quote.destination || quote.departing.id === quote.destination.id) {
+    if (!quote.departing || !quote.destination || quote.departing.id === quote.destination.id || quote.passengers < 1 || quote.passengers > this.maxPassengers) {
       quote.vehicleSurcharge = 0;
       quote.total = 0;
       return;
@@ -336,7 +337,9 @@ export class TravelStateService {
 
   validReservationShuttles(): ShuttleQuote[] {
     const shuttles = this.reservationShuttles().length ? this.reservationShuttles() : [this.quote];
-    return shuttles.filter((quote) => quote.departing && quote.destination && quote.total > 0);
+    return shuttles.filter((quote) =>
+      quote.departing && quote.destination && quote.total > 0 && quote.passengers >= 1 && quote.passengers <= this.maxPassengers
+    );
   }
 
   nextTestimonial(): void {

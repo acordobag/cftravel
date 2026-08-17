@@ -106,6 +106,7 @@ export class PageHeroComponent {
         <label class="field">
           <span>{{ i18n.tx().booking.passengers }}</span>
           <input type="number" name="passengers" min="1" [max]="maxPassengers" [(ngModel)]="activeQuote.passengers" (ngModelChange)="onPassengersChange()" required>
+          <p class="vehicle-warn" *ngIf="passengerWarning">⚠ {{ passengerWarning }}</p>
         </label>
         <label class="field">
           <span>{{ i18n.tx().booking.date }}</span>
@@ -124,7 +125,6 @@ export class PageHeroComponent {
               {{ ct.name }} ({{ i18n.tx().booking.upTo }} {{ ct.capacity }} {{ i18n.tx().booking.pax }}<ng-container *ngIf="ct.extraPassengerCharge > 0">, +\${{ ct.extraPassengerCharge }}/{{ i18n.tx().booking.extraPax }}</ng-container>)
             </option>
           </select>
-          <p class="vehicle-warn" *ngIf="passengerWarning">⚠ {{ passengerWarning }}</p>
         </label>
 
         <div class="field field-wide children-toggle-row">
@@ -186,7 +186,7 @@ export class PageHeroComponent {
       </div>
 
       <div class="booking-actions" *ngIf="!compact">
-        <button type="button" class="primary-action" [disabled]="activeQuote.total <= 0 || activeQuote.isCalculating" (click)="continueBooking()">{{ i18n.tx().booking.continueBtn }}</button>
+        <button type="button" class="primary-action" [disabled]="activeQuote.total <= 0 || activeQuote.isCalculating || !!passengerWarning" (click)="continueBooking()">{{ i18n.tx().booking.continueBtn }}</button>
       </div>
     </section>
   `
@@ -238,11 +238,14 @@ export class BookingCardComponent {
 
   get maxPassengers(): number {
     const ct = this.selectedCarType;
-    return ct ? ct.capacity + ct.maxExtraPassengers : 20;
+    return ct ? Math.min(ct.capacity + ct.maxExtraPassengers, this.state.maxPassengers) : this.state.maxPassengers;
   }
 
   get passengerWarning(): string {
     const ct = this.selectedCarType;
+    if (this.activeQuote.passengers < 1 || this.activeQuote.passengers > this.state.maxPassengers) {
+      return `Maximum ${this.state.maxPassengers} passengers per transfer.`;
+    }
     if (!ct) return '';
     if (this.activeQuote.passengers > ct.capacity + ct.maxExtraPassengers) {
       return `Max ${ct.capacity + ct.maxExtraPassengers} passengers for this vehicle.`;
