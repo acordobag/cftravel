@@ -65,6 +65,9 @@ export interface PricingConfig {
 
 @Injectable({ providedIn: 'root' })
 export class PricingService {
+  private readonly basePassengerCapacity = 4;
+  private readonly defaultExtraPassengerCharge = 20;
+
   readonly pricingConfig = signal<PricingConfig>({
     pricingRules: this.defaultRateRules(),
     pricingZones: [],
@@ -104,10 +107,15 @@ export class PricingService {
 
   vehicleSurcharge(passengers: number, carTypeId: number | null): number {
     const carType = this.getCarType(carTypeId);
-    if (!carType || carType.extraPassengerCharge <= 0) return 0;
-    const extra = Math.max(0, passengers - carType.capacity);
-    const capped = Math.min(extra, carType.maxExtraPassengers);
-    return this.roundMoney(capped * carType.extraPassengerCharge);
+    if (carType) {
+      if (carType.extraPassengerCharge <= 0) return 0;
+      const extra = Math.max(0, passengers - carType.capacity);
+      const capped = Math.min(extra, carType.maxExtraPassengers);
+      return this.roundMoney(capped * carType.extraPassengerCharge);
+    }
+
+    const extra = Math.max(0, Number(passengers || 0) - this.basePassengerCapacity);
+    return this.roundMoney(extra * this.defaultExtraPassengerCharge);
   }
 
   estimate(
