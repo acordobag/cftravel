@@ -166,6 +166,15 @@ export class TravelStateService {
     ) + quote.vehicleSurcharge;
   }
 
+  invalidatePlace(quote: ShuttleQuote, kind: 'departing' | 'destination'): void {
+    quote[kind] = null;
+    quote.routeDistance = 0;
+    quote.repositionDistance = 0;
+    quote.vehicleSurcharge = 0;
+    quote.total = 0;
+    quote.rateError = '';
+  }
+
   selectKnownPlace(quote: ShuttleQuote, kind: 'departing' | 'destination', name: string): void {
     const match = this.places.find((place) => place.name.toLowerCase() === name.trim().toLowerCase());
 

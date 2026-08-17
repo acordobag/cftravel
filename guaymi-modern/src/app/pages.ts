@@ -77,6 +77,7 @@ export class PageHeroComponent {
             name="departing"
             list="departing-options"
             [(ngModel)]="activeQuote.departingSearch"
+            (ngModelChange)="onPlaceInput('departing')"
             (change)="onPlaceChange('departing')"
             autocomplete="off"
             required>
@@ -93,6 +94,7 @@ export class PageHeroComponent {
             name="destination"
             list="destination-options"
             [(ngModel)]="activeQuote.destinationSearch"
+            (ngModelChange)="onPlaceInput('destination')"
             (change)="onPlaceChange('destination')"
             autocomplete="off"
             required>
@@ -215,6 +217,10 @@ export class BookingCardComponent {
       kind === 'departing' ? this.activeQuote.departingSearch : this.activeQuote.destinationSearch
     );
     this.resolvingKind = null;
+  }
+
+  onPlaceInput(kind: 'departing' | 'destination'): void {
+    this.state.invalidatePlace(this.activeQuote, kind);
   }
 
   selectCarType(id: number | null): void {
