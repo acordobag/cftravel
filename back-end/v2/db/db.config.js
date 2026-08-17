@@ -17,9 +17,59 @@ import ServicePricingRule from '../models/service-pricing-rule.model'
 import UserMessage from '../models/user-message.model'
 import BookingPolicy from '../models/booking-policy.model'
 import bcrypt from 'bcryptjs'
-import { standardizedPricingRules } from './pricing-standardization.data'
+import { confirmedFixedRoutes, standardizedPricingRules } from './pricing-standardization.data'
 
 const defaultPricingRules = standardizedPricingRules
+
+const normalizePlaceName = value => String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+
+const matchesAlias = (place, aliases) => {
+    const name = normalizePlaceName(place.name)
+    return aliases.some(alias => name.includes(normalizePlaceName(alias)))
+}
+
+const syncConfirmedFixedRoutes = async () => {
+    const places = await Place.findAll()
+
+    for (const item of confirmedFixedRoutes) {
+        const departing = places.find(place => matchesAlias(place, item.departingAliases))
+        const destination = places.find(place => matchesAlias(place, item.destinationAliases))
+
+        if (!departing || !destination) {
+            console.log(`[Pricing] Fixed route skipped because a place was not found: ${item.label}`)
+            continue
+        }
+
+        let route = await FixedRoutePrice.findOne({
+            where: { departingId: departing.id, destinationId: destination.id }
+        })
+        if (!route) {
+            route = await FixedRoutePrice.findOne({
+                where: { departingId: destination.id, destinationId: departing.id }
+            })
+        }
+        if (!route) {
+            route = await FixedRoutePrice.create({
+                departingId: departing.id,
+                destinationId: destination.id,
+                price: item.price,
+                roundTripPrice: null,
+                label: item.label,
+                notes: 'Customer-confirmed commercial fare.',
+                active: true
+            })
+        }
+
+        route.price = item.price
+        route.label = item.label
+        route.active = true
+        await route.save()
+    }
+}
 
 const defaultServiceRules = [
     { title: 'Fixed route prices win first', description: 'If a route has a fixed price, the customer quote uses that amount instead of the distance formula.', sortOrder: 1 },
@@ -112,6 +162,8 @@ export default async () => {
         if (!pricingCount) {
             await PricingRule.bulkCreate(defaultPricingRules)
         }
+
+        await syncConfirmedFixedRoutes()
 
         let company = await Company.findOne({ where: { isDefault: true } })
         if (!company) {

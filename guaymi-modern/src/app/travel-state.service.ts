@@ -150,6 +150,16 @@ export class TravelStateService {
 
     quote.routeDistance = Math.round(routeDistance);
     quote.repositionDistance = Math.round(repositionDistance);
+    this.recalculatePrice(quote);
+  }
+
+  recalculatePrice(quote = this.quote): void {
+    if (!quote.departing || !quote.destination || quote.departing.id === quote.destination.id) {
+      quote.vehicleSurcharge = 0;
+      quote.total = 0;
+      return;
+    }
+
     quote.vehicleSurcharge = this.pricing.vehicleSurcharge(quote.passengers, quote.carTypeId);
 
     const isRoundTrip = untracked(() => this.reservationShuttles()).some(
@@ -194,13 +204,21 @@ export class TravelStateService {
     const stripDiacritics = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '');
     const normalize = (value: string) => stripDiacritics(value.toLowerCase().trim());
     const candidate = normalize(candidateName || '');
+    const aliasGroups = [
+      ['botanika', 'hotel botanika'],
+      ['andaz', 'hotel andaz'],
+      ['marina flamingo', 'flamingo marina']
+    ];
 
     const byIdOrName = this.places.find((item) => {
       if (googlePlaceId && item.placeId && item.placeId === googlePlaceId) {
         return true;
       }
       const itemName = normalize(item.name);
-      return itemName === candidate || (candidate && (candidate.includes(itemName) || itemName.includes(candidate)));
+      const aliasesMatch = aliasGroups.some((aliases) =>
+        aliases.some((alias) => candidate.includes(alias)) && aliases.some((alias) => itemName.includes(alias))
+      );
+      return itemName === candidate || aliasesMatch || (candidate && (candidate.includes(itemName) || itemName.includes(candidate)));
     });
 
     if (byIdOrName) return byIdOrName;
@@ -215,7 +233,7 @@ export class TravelStateService {
       };
       return this.places.find((item) => {
         if (!item.location) return false;
-        return deg2km(location.lat, location.lng, item.location.lat, item.location.lng) < 15;
+        return deg2km(location.lat, location.lng, item.location.lat, item.location.lng) < 0.5;
       }) || null;
     }
 
@@ -293,19 +311,7 @@ export class TravelStateService {
 
       quote.routeDistance = Math.round(routeDistance);
       quote.repositionDistance = Math.round(repositionDistance);
-      quote.vehicleSurcharge = this.pricing.vehicleSurcharge(quote.passengers, quote.carTypeId);
-      const isRoundTrip = untracked(() => this.reservationShuttles()).some(
-        (s) => s.uid !== quote.uid && s.departing && s.destination && s.departing.id === quote.destination!.id && s.destination.id === quote.departing!.id
-      );
-      quote.total = this.pricing.estimate(
-        quote.routeDistance,
-        quote.repositionDistance,
-        quote.departing.id,
-        quote.destination.id,
-        quote.departing.pricingZoneId,
-        quote.destination.pricingZoneId,
-        isRoundTrip
-      ) + quote.vehicleSurcharge;
+      this.recalculatePrice(quote);
     } catch {
       quote.rateError = 'We could not calculate this route yet. Please check both locations.';
       this.recalculate(quote);

@@ -225,11 +225,11 @@ export class BookingCardComponent {
 
   selectCarType(id: number | null): void {
     this.activeQuote.carTypeId = id;
-    this.state.recalculate(this.activeQuote);
+    this.state.recalculatePrice(this.activeQuote);
   }
 
   onPassengersChange(): void {
-    this.state.recalculate(this.activeQuote);
+    this.state.recalculatePrice(this.activeQuote);
   }
 
   get selectedCarType() {

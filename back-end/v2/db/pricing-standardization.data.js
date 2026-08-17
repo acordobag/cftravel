@@ -79,6 +79,14 @@ export const fixedPriceExceptions = [
   { destinationName: 'Villa Habana Mal Pais', price: 600, label: 'Mal Pais via ferry', notes: 'Ferry timing and peninsula access require confirmation.' }
 ]
 
+export const confirmedFixedRoutes = [
+  { departingAliases: ['paso canoas'], destinationAliases: ['sierpe'], price: 450, label: 'Paso Canoas - Sierpe' },
+  { departingAliases: ['sierpe'], destinationAliases: ['botanika'], price: 350, label: 'Sierpe - Hotel Botanika' },
+  { departingAliases: ['paso canoas'], destinationAliases: ['botanika'], price: 607, label: 'Paso Canoas - Hotel Botanika' },
+  { departingAliases: ['andaz'], destinationAliases: ['hotel presidente'], price: 500, label: 'Hotel Andaz - Hotel Presidente' },
+  { departingAliases: ['hotel presidente'], destinationAliases: ['marina flamingo', 'flamingo marina'], price: 550, label: 'Hotel Presidente - Marina Flamingo' }
+]
+
 export const sourceTariffs = [
   { destinationName: 'Hotel Presidente', expectedPrice: 85 },
   { destinationName: 'Best Western Jaco', expectedPrice: 200 },
